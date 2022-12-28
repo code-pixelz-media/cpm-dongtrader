@@ -1,1 +1,1 @@
-# dongtrader-apis
+Glassfrog and QrTiger API Integrations for Dongtraders.
