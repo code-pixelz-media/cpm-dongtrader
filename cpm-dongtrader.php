@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 
 //Plugin Version
-define( 'DONGTRADER_APIS_VERSION', '1.0.0' );
+define( 'CPM_DONGTRADER_VERSION', '1.0.0' );
 
 
 //Loads All the required files

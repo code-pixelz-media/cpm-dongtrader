@@ -4,4 +4,8 @@
 require_once('cpm-dongtrader-settings.php');
 
 
+//Load plugins custom functions
+require_once('cpm-dongtrader-functions.php');
+
+
 
