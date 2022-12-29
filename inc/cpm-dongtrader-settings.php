@@ -1,5 +1,4 @@
 <?php
-
 class Dongtrader_Apis_Settings
 {
 	/**
@@ -69,11 +68,11 @@ class Dongtrader_Apis_Settings
 				'title' => 'QrTiger Settings',
 				'has_fields' => true,
 			),
-			array(
-				'id' => 'others',
-				'title' => 'Miscalleneous',
-				'has_fields' => false,
-			),
+			// array(
+			// 	'id' => 'others',
+			// 	'title' => 'Miscalleneous',
+			// 	'has_fields' => false,
+			// ),
 		);
 	}
 
@@ -210,7 +209,7 @@ class Dongtrader_Apis_Settings
 	{
 		switch ($section['id']) {
 			// something unique for this case
-			case 'section_1':
+			case 'glassfrog':
 				echo '<p>This section rocks!</p>';
 				break;
 			
@@ -424,3 +423,6 @@ class Dongtrader_Apis_Settings
 	}
 
 }
+
+
+$plugin_settings = new Dongtrader_Apis_Settings();
