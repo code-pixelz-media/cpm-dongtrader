@@ -6,6 +6,7 @@ Description: Plugin Intented For the Integration of API in Dongtrader
 Version: 1.0.0
 Author: Codepixelzmedia
 Author URI: https://codepixelzmedia.com/
+Text Domain: cpm-dongtrader
 */
 
 
@@ -14,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 
-//PLugin Version
+//Plugin Version
 define( 'DONGTRADER_APIS_VERSION', '1.0.0' );
 
 
