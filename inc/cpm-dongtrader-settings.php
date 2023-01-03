@@ -55,7 +55,7 @@ class Dongtrader_Apis_Settings
 	/**
 	 * Defines tabs for the settings page
 	 */
-	public function define_tabs() 
+	public function define_tabs()
 	{
 		$this->tabs = array(
 			array(
@@ -66,6 +66,11 @@ class Dongtrader_Apis_Settings
 			array(
 				'id' => 'qrtiger',
 				'title' => 'QrTiger Settings',
+				'has_fields' => true,
+			),
+			array(
+				'id' => 'crowdsignal',
+				'title' => 'Crowdsignal Settings',
 				'has_fields' => true,
 			),
 			// array(
@@ -79,7 +84,7 @@ class Dongtrader_Apis_Settings
 	/**
 	 * Adds options to the database to store the settings
 	 */
-	public function add_options() 
+	public function add_options()
 	{
 		foreach ($this->tabs as $tab) {
 			// skip if no fields to save
@@ -99,7 +104,7 @@ class Dongtrader_Apis_Settings
 	 * This is the control center. Use hooks to call other methods. Everything
 	 * below this point can be called from a hook.
 	 */
-	public function add_hooks() 
+	public function add_hooks()
 	{
 		add_action('admin_menu', array($this, 'add_settings_page'));
 		add_action('admin_init', array($this, 'register_settings'));
@@ -112,30 +117,37 @@ class Dongtrader_Apis_Settings
 	{
 		add_menu_page(
 			$this->plugin_name // page title
-			, $this->plugin_name // menu title
-			, 'activate_plugins'// capability
-			, $this->plugin_slug // menu slug
-			, array($this, 'render_settings_page') // function
-			, null // icon url
-			, null // position
+			,
+			$this->plugin_name // menu title
+			,
+			'activate_plugins' // capability
+			,
+			$this->plugin_slug // menu slug
+			,
+			array($this, 'render_settings_page') // function
+			,
+			null // icon url
+			,
+			null // position
 		);
 	}
 
 	/**
 	 * Registers settings (one for each tab)
 	 */
-	public function register_settings() 
+	public function register_settings()
 	{
 		foreach ($this->tabs as $tab) {
 			// skip if no fields to save
 			if (empty($tab['has_fields'])) {
-				continue; 
+				continue;
 			}
 
 			// register setting
 			register_setting(
 				$this->options[$tab['id']] // option group
-				, $this->options[$tab['id']] // option name
+				,
+				$this->options[$tab['id']] // option name
 			);
 
 			// add sections
@@ -148,7 +160,7 @@ class Dongtrader_Apis_Settings
 	 * 
 	 * @param string $tab - tab id
 	 */
-	public function add_sections($tab) 
+	public function add_sections($tab)
 	{
 		$sections = array();
 
@@ -165,10 +177,10 @@ class Dongtrader_Apis_Settings
 					// ),
 				);
 				break;
-			
+
 			case 'qrtiger':
 				$sections = array(
-                    array(
+					array(
 						'id' => 'qrtiger-apicredentials',
 						'title' => 'QrTiger API Credentials',
 					),
@@ -176,6 +188,15 @@ class Dongtrader_Apis_Settings
 					// 	'id' => 'section_4',
 					// 	'title' => 'Section 4',
 					// ),
+				);
+				break;
+			case 'crowdsignal':
+				$sections = array(
+					array(
+						'id' => 'crowdsignal-apicredentials',
+						'title' => 'QrTiger API Credentials',
+					),
+
 				);
 				break;
 		}
@@ -187,12 +208,15 @@ class Dongtrader_Apis_Settings
 
 				// add section
 				extract($section);
-			    add_settings_section(
-			    	$id // id
-			    	, $title // title
-			    	, array($this, 'section_text') // callback
-			    	, $page // page
-		    	);
+				add_settings_section(
+					$id // id
+					,
+					$title // title
+					,
+					array($this, 'section_text') // callback
+					,
+					$page // page
+				);
 
 				// add fields to that section
 				$this->add_fields($section);
@@ -205,14 +229,14 @@ class Dongtrader_Apis_Settings
 	 * 
 	 * @param array $section - array of section data automatically provided (includes 'id' and 'title')
 	 */
-	public function section_text($section) 
+	public function section_text($section)
 	{
 		switch ($section['id']) {
-			// something unique for this case
+				// something unique for this case
 			case 'glassfrog':
 				echo '<p>This section rocks!</p>';
 				break;
-			
+
 			default:
 				//printf('<p>Default instructions for %s</p>', $section['title']);
 				break;
@@ -224,52 +248,69 @@ class Dongtrader_Apis_Settings
 	 *
 	 * @param array $section - array of section data defined in add_sections()
 	 */
-	public function add_fields($section) 
+	public function add_fields($section)
 	{
 		$fields = array();
 		$option_name = $section['page'];
-//glassfrog-apicredentials
-//qrtiger-apicredentials
+		//glassfrog-apicredentials
+		//qrtiger-apicredentials
 		switch ($section['id']) {
 			case 'glassfrog-apicredentials':
 				$fields = array(
 					array(
-		    			'id' => 'glassfrog-api-key',
-		    			'title' => 'Glassfrog API Key',
-			    		'type' => 'text',
-			    		'size' => '30',
-			    		'help_text' => 'API key provided by glassfrog',
+						'id' => 'glassfrog-api-key',
+						'title' => 'Glassfrog API Key',
+						'type' => 'text',
+						'size' => '30',
+						'help_text' => 'API key provided by glassfrog',
 					),
 					array(
-		    			'id' => 'api-url',
-		    			'title' => 'Glassfrog API URL',
-			    		'type' => 'text',
-			    		'size' => '30',
-			    		'help_text' => 'API URL',
-					),
-				);
-				break;
-			
-			case 'qrtiger-apicredentials':
-				$fields = array(
-					array(
-		    			'id' => 'qrtiger-api-key',
-		    			'title' => 'QrTiger API Key',
-			    		'type' => 'text',
-			    		'size' => '30',
-			    		'help_text' => 'API key provided by QrTiger',
-					),
-					array(
-		    			'id' => 'qrtiger-api-url',
-		    			'title' => 'QrTiger API URL',
-			    		'type' => 'text',
-			    		'size' => '30',
-			    		'help_text' => 'API URL',
+						'id' => 'api-url',
+						'title' => 'Glassfrog API URL',
+						'type' => 'url',
+						'size' => '30',
+						'help_text' => 'API Root URL',
 					),
 				);
 				break;
 
-					}
+			case 'qrtiger-apicredentials':
+				$fields = array(
+					array(
+						'id' => 'qrtiger-api-key',
+						'title' => 'QrTiger API Key',
+						'type' => 'text',
+						'size' => '30',
+						'help_text' => 'API key provided by QrTiger',
+					),
+					array(
+						'id' => 'qrtiger-api-url',
+						'title' => 'QrTiger API URL',
+						'type' => 'url',
+						'size' => '30',
+						'help_text' => 'API Root URL',
+					),
+				);
+				break;
+			case 'crowdsignal-apicredentials':
+				$fields = array(
+					array(
+						'id' => 'crowdsignal-api-key',
+						'title' => 'Crowdsignal API Key',
+						'type' => 'text',
+						'size' => '30',
+						'help_text' => 'API key provided by Crowdsignal',
+					),
+					array(
+						'id' => 'crowdsignal-api-url',
+						'title' => 'crowdsignal API URL',
+						'type' => 'url',
+						'size' => '30',
+						'help_text' => 'API Root URL',
+					),
+				);
+				break;
+		}
 
 		if (!empty($fields)) {
 			foreach ($fields as &$field) {
@@ -280,11 +321,16 @@ class Dongtrader_Apis_Settings
 				extract($field);
 				add_settings_field(
 					$id // id
-					, $title // title
-					, array($this, 'render_settings_field') // callback
-					, $section['page'] // page
-					, $section['id'] // section
-					, $field // args
+					,
+					$title // title
+					,
+					array($this, 'render_settings_field') // callback
+					,
+					$section['page'] // page
+					,
+					$section['id'] // section
+					,
+					$field // args
 				);
 			}
 		}
@@ -295,7 +341,7 @@ class Dongtrader_Apis_Settings
 	 * 
 	 * @param array $field - array of field data defined in add_fields()
 	 */
-	public function render_settings_field($field) 
+	public function render_settings_field($field)
 	{
 		// get option from database
 		extract($field);
@@ -315,9 +361,17 @@ class Dongtrader_Apis_Settings
 				}
 				break;
 
+			case 'url':
+				printf('<input type="url" name="%s" value="%s" size="%s" />', $field_name, $field_value, $size);
+				if (isset($help_text)) {
+					printf('<span style="font-style: italic; padding-left: 5px;">%s</span>', $help_text);
+				}
+				break;
+
+
 			case 'textarea':
 				printf('<textarea name="%s" id="%s" rows="%d" cols="%d">', $field_name, $field_name, $rows, $cols);
-					echo $field_value;
+				echo $field_value;
 				echo '</textarea>';
 				if (isset($help_text)) {
 					printf('<p style="font-style: italic;">%s</p>', $help_text);
@@ -326,8 +380,8 @@ class Dongtrader_Apis_Settings
 
 			case 'checkbox':
 				printf('<label for="%s">', $field_name);
-					printf('<input type="hidden" name="%s" value="0" />', $field_name); // save even if unchecked
-					printf('<input type="checkbox" name="%s" id="%s" value="1" %s/>', $field_name, $field_name, checked($field_value, 1, false));
+				printf('<input type="hidden" name="%s" value="0" />', $field_name); // save even if unchecked
+				printf('<input type="checkbox" name="%s" id="%s" value="1" %s/>', $field_name, $field_name, checked($field_value, 1, false));
 				printf('<span>%s</span></label>', $label_text);
 				break;
 
@@ -341,9 +395,9 @@ class Dongtrader_Apis_Settings
 					echo '<ul style="list-style-type: none;">';
 					foreach ($choices as $choice) {
 						echo '<li>';
-							echo '<label>';
-								printf('<input type="checkbox" name="%s" value="%s" %s />', $field_name, $choice['value'], checked(in_array($choice['value'], $field_value), 1, false));
-							printf('<span>%s</span></label>', $choice['label_text']);
+						echo '<label>';
+						printf('<input type="checkbox" name="%s" value="%s" %s />', $field_name, $choice['value'], checked(in_array($choice['value'], $field_value), 1, false));
+						printf('<span>%s</span></label>', $choice['label_text']);
 						echo '</li>';
 					}
 					echo '</ul>';
@@ -358,9 +412,9 @@ class Dongtrader_Apis_Settings
 					echo '<ul style="list-style-type: none;">';
 					foreach ($choices as $choice) {
 						echo '<li>';
-							echo '<label>';
-								printf('<input type="radio" name="%s" value="%s" %s />', $field_name, $choice['value'], checked($choice['value'], $field_value, false));
-							printf('<span>%s</span></label>', $choice['label_text']);
+						echo '<label>';
+						printf('<input type="radio" name="%s" value="%s" %s />', $field_name, $choice['value'], checked($choice['value'], $field_value, false));
+						printf('<span>%s</span></label>', $choice['label_text']);
 						echo '</li>';
 					}
 					echo '</ul>';
@@ -385,43 +439,42 @@ class Dongtrader_Apis_Settings
 	/**
 	 * Outputs the HTML for the settings page
 	 */
-	public function render_settings_page() 
+	public function render_settings_page()
 	{
 		// default to first tab
 		$active_tab = (!empty($_GET['tab'])) ? $_GET['tab'] : $this->tabs[0]['id'];
 
 		// page contents
 		echo '<div class="wrap">';
-			// heading
-			echo '<div class="col-plugin-icon icon32"></div>';
-			printf('<h2>%s</h2>', $this->plugin_name);
-			// tabs
-			echo '<h2 class="nav-tab-wrapper">';
-				foreach ($this->tabs as $tab) {
-					$tab_class = ($tab['id'] == $active_tab) ? ' nav-tab-active' : '';
-					printf('<a href="?page=%s&tab=%s" class="nav-tab%s">%s</a>', $this->plugin_slug, $tab['id'], $tab_class, $tab['title']);
-				}
-			echo '</h2>';
-			// tab contents
-			switch ($active_tab) {
+		// heading
+		echo '<div class="col-plugin-icon icon32"></div>';
+		printf('<h2>%s</h2>', $this->plugin_name);
+		// tabs
+		echo '<h2 class="nav-tab-wrapper">';
+		foreach ($this->tabs as $tab) {
+			$tab_class = ($tab['id'] == $active_tab) ? ' nav-tab-active' : '';
+			printf('<a href="?page=%s&tab=%s" class="nav-tab%s">%s</a>', $this->plugin_slug, $tab['id'], $tab_class, $tab['title']);
+		}
+		echo '</h2>';
+		// tab contents
+		switch ($active_tab) {
 				// special cases
-				case 'instructions':
-					echo '<p>Instructions go here. This tab has no fields.</p>';
-					break;
-				
+			case 'instructions':
+				echo '<p>Instructions go here. This tab has no fields.</p>';
+				break;
+
 				// output the settings form
-				default:
-					settings_errors();
-					echo '<form action="options.php" method="post">';
-						settings_fields($this->options[$active_tab]);
-				        do_settings_sections($this->options[$active_tab]);
-						submit_button();
-					echo '</form>';
-					break;
-			}
+			default:
+				settings_errors();
+				echo '<form action="options.php" method="post">';
+				settings_fields($this->options[$active_tab]);
+				do_settings_sections($this->options[$active_tab]);
+				submit_button();
+				echo '</form>';
+				break;
+		}
 		echo '</div>';
 	}
-
 }
 
 
