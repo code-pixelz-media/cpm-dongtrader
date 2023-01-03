@@ -20,4 +20,4 @@ define('CPM_DONGTRADER_VERSION', '1.0.0');
 
 
 //Loads All the required files
-require_once('inc/cpm-dontrader-loader.php');
+require_once('inc/cpm-dongtrader-loader.php');
