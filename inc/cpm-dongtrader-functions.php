@@ -96,6 +96,6 @@ function testing_guy()
 {
     $rep = dongtraders_qrtiger_request('GET');
     echo '<pre>';
-    var_dump($rep->data->qrImage);
+    //var_dump($rep->data->qrImage);
     echo '</pre>';
 }
