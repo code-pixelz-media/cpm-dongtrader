@@ -130,7 +130,7 @@ function glassfrog_api_request($endpoint = '', $bodyParams = array(), $method = 
     $options = [
         'body'        => $method == "POST" ? $body : '',
         'headers'     => [
-            'Authorization' => 'Bearer ' . $glassfrog_api_key,
+            'X-Auth-Token' => $glassfrog_api_key,
             'Content-Type' => 'application/json',
         ],
         'timeout'     => 30,

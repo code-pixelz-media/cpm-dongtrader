@@ -13,8 +13,6 @@ Text Domain: cpm-dongtrader
 if (!defined('ABSPATH')) {
 	exit;
 }
-
-
 //Plugin Version
 define('CPM_DONGTRADER_VERSION', '1.0.0');
 
