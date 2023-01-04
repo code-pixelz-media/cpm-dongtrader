@@ -10,4 +10,4 @@ require_once('cpm-dongtrader-functions.php');
 
 //Load woocommerce settings
 
-require_once('woo-commerce-functions.php');
+// require_once('woo-commerce-functions.php');
