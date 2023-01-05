@@ -19,7 +19,7 @@ function dongtrader_qr_endpoint()
     add_rewrite_endpoint('generate-qr', EP_PAGES);
 }
 // content for the new page in My Account, woocommerce_account_{ENDPOINT NAME}_endpoint
-add_action('woocommerce_account_log-history_endpoint', 'misha_my_account_endpoint_content');
+add_action('woocommerce_account_generate-qr', 'misha_my_account_endpoint_content');
 function misha_my_account_endpoint_content()
 {
 
