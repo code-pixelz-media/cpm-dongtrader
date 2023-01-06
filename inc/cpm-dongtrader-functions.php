@@ -181,49 +181,23 @@ function dongtrader_generate_qr2()
         $qrtiger_api_call = qrtiger_api_request('/api/campaign/', $qrtiger_array, 'POST');
 
         if ($qrtiger_api_call) {
-
             $notify_to_js['apistatus'] = true;
-
-            $prev_user_qr_meta = get_user_meta($dong_user_id, 'dong_user_qr_data', true);
-            $prev_qrs = !empty($prev_user_qr_meta) ? $prev_user_qr_meta : array();
-            if (!in_array($prev_qrs, $prev_user_qr_meta)) array_push($prev_stories, $dong_user_id);
-
-            $dong_qr_image_url = $qrtiger_api_call->data->qrImage;
-            $dong_qr_id       = $qrtiger_api_call->data->qrId;
-            $created_at       = $qrtiger_api_call->data->createdAt;
-            $updated_at       = $qrtiger_api_call->data->updatedAt;
-
-
-
-
-            // $dong_data_array = [
-            //     $dong_qr_id => [
-            //         'created_by' => $dong_user_id,
-            //         'qr_image_url' => $dong_qr_image_url,
-            //         'created_at' => $created_at,
-            //         'updated_at' => $qrtiger_api_call->data->updatedAt,
-            //         'qr_id'  => $dong_qr_id
-            //     ]
-            // ];
-
-            // $new_array = array_push($dong_data_array, $dong_data_array_2);
-
-            $prev_user_qr_meta = get_user_meta($dong_user_id, 'dong_user_qr_data');
-            $prev_value_check  = !empty($prev_user_qr_meta) ? true : false;
-
-            $dong_data_array = array(
+            $current_dong_qr_array = array(
                 'created_by'    => $dong_user_id,
-                'qr_image_url'  => $dong_qr_image_url,
+                'qr_image_url'  => $qrtiger_api_call->data->qrImage,
                 'created_at'    => $qrtiger_api_call->data->createdAt,
                 'updated_at'    => $qrtiger_api_call->data->updatedAt,
-                'qr_id'         => $dong_qr_id
+                'qr_id'         => $qrtiger_api_call->data->qrId
             );
+
+            $old_dong_qr_array = get_user_meta($dong_user_id, 'dong_user_qr_vals', true);
+            $prev_value_check  = !empty($old_dong_qr_array) ? true : false;
+
             if ($prev_value_check) {
-                $saved_data = $prev_user_qr_meta;
-                array_push($saved_data, $dong_data_array);
-                update_user_meta($dong_user_id, 'dong_user_qr_data', $saved_data);
+                array_push($old_dong_qr_array, $current_dong_qr_array);
+                update_user_meta($dong_user_id, 'dong_user_qr_vals', $old_dong_qr_array);
             } else {
-                update_user_meta($dong_user_id, 'dong_user_qr_data', $dong_data_array);
+                update_user_meta($dong_user_id, 'dong_user_qr_vals', [$current_dong_qr_array]);
             }
         }
     }
@@ -231,4 +205,16 @@ function dongtrader_generate_qr2()
     echo wp_json_encode($notify_to_js);
 
     wp_die();
+}
+
+
+
+function addArrayToMultidimensionalArray($array, $newArray)
+{
+    if (empty($array)) {
+        $array[] = $newArray;
+    } else {
+        array_push($array, $newArray);
+    }
+    return $array;
 }

@@ -1,6 +1,4 @@
 <?php
-
-
 /* Woocommerce hooks to add fields to my acount page */
 /* Always Update Permalink after adding a new endpoint */
 add_filter('woocommerce_account_menu_items', 'cpm_dong_generateqr', 40);
@@ -26,11 +24,13 @@ function cpm_dong_my_account_endpoint_content()
 {
 
     $user_id =  get_current_user_id();
-    $user_meta_qrs =  get_user_meta($user_id, 'dong_user_qr_data', true);
+    $user_meta_qrs = get_user_meta($user_id, 'dong_user_qr_vals', true);
+
+    //var_dump($user_meta_qrs);
 ?>
     <div class='qrtiger-tabs-content'>
-        <?php dong_get_tables_for_qr($user_meta_qrs);
-        ?>
+        <?php dong_get_tables_for_qr($user_meta_qrs); ?>
+        <?php echo !empty($user_meta_qrs) ? '' : '<p>' . __('Qr Codes Not Generated Yet') . '</p>';  ?>
         <button class="dong-modal-toggle" data-target="openModal1">Add New QR</button>
     </div>
 
@@ -40,48 +40,31 @@ function cpm_dong_my_account_endpoint_content()
 
 function dong_get_tables_for_qr($qr_datas)
 {
-
     if (!empty($qr_datas)) {
 
-        // var_dump($qr_datas);
     ?>
         <div class="tabl-contents">
-
             <table>
                 <tr>
-                    <th>S.N.</th>
-                    <th>Qr Image URL</th>
-                    <th>Qr Id</th>
-                    <th>QR Image</th>
+                    <th><?php _e('S.N.', 'cpm-dongtrader') ?></th>
+                    <th><?php _e('QR Id.', 'cpm-dongtrader') ?></th>
+                    <th><?php _e('QR Image.', 'cpm-dongtrader') ?></th>
                 </tr>
                 <?php
-                foreach ($qr_datas as $key => $data) { ?>
+                foreach ($qr_datas as $key => $data) {
+                ?>
                     <tr>
                         <td><?php echo ++$key; ?></td>
-                        <td><?php echo $data['qr_image_url']; ?></td>
                         <td><?php echo $data['qr_id']; ?></td>
                         <td><img src="<?php echo $data['qr_image_url']; ?>" alt="<?php echo $data['qr_image_url']; ?>" height="50" width="50" srcset=""></td>
                     </tr>
+
                 <?php
                 }
                 ?>
-                <!-- <tr>
-                    <td>Alfreds Futterkiste</td>
-                    <td>Maria Anders</td>
-                    <td>Germany</td>
-                </tr>
-                <tr>
-                    <td>Centro comercial Moctezuma</td>
-                    <td>Francisco Chang</td>
-                    <td>Mexico</td>
-                </tr> -->
             </table>
         </div>
-
-
     <?php
-    } else {
-        echo "QR code not found yet !";
     }
 }
 
