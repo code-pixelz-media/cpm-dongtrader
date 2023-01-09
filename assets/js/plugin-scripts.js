@@ -12,6 +12,7 @@
 
         $('.dong-modal-toggle').on('click', function (dt) {
             dt.preventDefault();
+            $('#openModal1').css('display','');
             var targetId = this.getAttribute("data-target");
             var target = document.getElementById(targetId);
             target.style.opacity = 1;
@@ -65,10 +66,12 @@
                 var msgClass = resp.dataStatus ? `success-msg` : `error-msg`;
                 var msgText = resp.dataStatus ? `QR code generated successfully` : `All fields are required`;
                 var responseHtml = `<div class="${msgClass}"><i class="${iconClass}"></i>${msgText}</div>`;
+               /*  if ajax respone sucess */
                 if (resp.dataStatus && resp.apistatus) {
                     $('.dong-notify-msg').append(responseHtml).fadeOut(2000, 'swing');
+                    $('#openModal1').fadeOut(2500, 'swing');
                 
-                } else if (resp.dataStatus && !resp.dataStatus) {
+                } else if (resp.dataStatus && !resp.apistatus) {
                 var notifyHtml =  `<div class="error-msg"><i class="fa fa-times-circle"></i>Api Error! Please Try Again</div>`;
                 $('.dong-notify-msg').append(notifyHtml).fadeOut(2000, 'swing');
                 } else {
