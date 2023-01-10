@@ -204,17 +204,6 @@ function dongtrader_generate_qr2()
 
     echo wp_json_encode($notify_to_js);
 
+
     wp_die();
-}
-
-
-
-function addArrayToMultidimensionalArray($array, $newArray)
-{
-    if (empty($array)) {
-        $array[] = $newArray;
-    } else {
-        array_push($array, $newArray);
-    }
-    return $array;
 }

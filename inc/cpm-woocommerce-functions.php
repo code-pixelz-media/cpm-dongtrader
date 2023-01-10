@@ -49,6 +49,7 @@ function dong_get_tables_for_qr($qr_datas)
                     <th><?php _e('S.N.', 'cpm-dongtrader') ?></th>
                     <th><?php _e('QR Id.', 'cpm-dongtrader') ?></th>
                     <th><?php _e('QR Image.', 'cpm-dongtrader') ?></th>
+                    <th><?php _e('QR URL.', 'cpm-dongtrader') ?></th>
                 </tr>
                 <?php
                 foreach ($qr_datas as $key => $data) {
@@ -57,12 +58,25 @@ function dong_get_tables_for_qr($qr_datas)
                         <td><?php echo ++$key; ?></td>
                         <td><?php echo $data['qr_id']; ?></td>
                         <td><img src="<?php echo $data['qr_image_url']; ?>" alt="<?php echo $data['qr_image_url']; ?>" height="50" width="50" srcset=""></td>
+                        <td><?php echo "<p style='display:none;' id='" . $data['qr_id'] . "'>" . $data['qr_image_url'] . "</p>"; ?>
+                            <button onclick="dong_traders_url_copy('#<?php echo $data['qr_id']; ?>')">Copy QR URL</button>
+                        </td>
                     </tr>
 
                 <?php
                 }
                 ?>
             </table>
+            <script>
+                /* js for copy paste qr generated url */
+                function dong_traders_url_copy(element) {
+                    var $temp = jQuery("<input>");
+                    jQuery("body").append($temp);
+                    $temp.val(jQuery(element).text()).select();
+                    document.execCommand("copy");
+                    $temp.remove();
+                }
+            </script>
         </div>
     <?php
     }

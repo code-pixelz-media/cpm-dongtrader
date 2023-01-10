@@ -11,3 +11,8 @@ require_once('cpm-dongtrader-functions.php');
 //Load woocommerce settings
 
 require_once('cpm-woocommerce-functions.php');
+
+
+//Load generate qr fields for woocommerce
+
+require_once('cpm-dongtrader-meta-box.php');
