@@ -104,6 +104,7 @@
     position: relative;
     display: inline-block;
     background-color: #606061;
+    z-index: 100;
 }
 
 .qr-pic:hover .copy {

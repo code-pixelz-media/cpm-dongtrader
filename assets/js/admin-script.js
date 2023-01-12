@@ -33,10 +33,32 @@
         $('#tabs-wrap').tabs();
     }); 
 
+    function js_spinner(show,button) {
+        var spinner = `<i style="display:none" class="fa fa-spinner fa-spin custom-load"></i>`;
+        if (show) {
+            button.text('Generating');
+            button.append(spinner);
+        } else {
+             button.text('Generat');
+        }
+         
+    }
+    function animate_button(show) {
+        if (show) {
+            $('.real-button').css('display', 'none');
+             $('.anim-button').css('display', '');
+        } else {
+            $('.real-button').css('display', '');
+             $('.anim-button').css('display', 'none');
+        }
+    }
 /* When The Form is submitted from Qr Code tabs in settings sections */
     $(document).on("submit", ".qrtiger-form", function (ev) {
         ev.preventDefault();
-        
+
+       
+        animate_button(true);
+        // $('.custom-load').css('display', '');
         $(".dong-notify-msg").empty().fadeIn("fast");
         $(".form-loader").css("display", "block");
         var qRsize = $(".qrtiger-size").val(),
@@ -77,6 +99,7 @@
             if (resp.dataStatus && resp.apistatus) {
                 $(".dong-notify-msg").append(responseHtml).fadeOut(2000, "swing");
                 $("#openModal1").fadeOut(2500, "swing");
+                animate_button(false);
                 window.location.reload();
             }
         /*  if api response is bad and ajax response data is valid */
@@ -84,13 +107,16 @@
             {
                 var notifyHtml = `<div class="error-msg"><i class="fa fa-times-circle"></i>Api Error! Please Try Again</div>`;
                 $(".dong-notify-msg").append(notifyHtml).fadeOut(2000, "swing");
+                animate_button(false);
             }
         /*  if everything gone wrong */
             else
             {
                 $(".dong-notify-msg").append(responseHtml).fadeOut(2000, "swing");
+                animate_button(false);
             }
-        $(".form-loader").css("display", "none");
+          animate_button(false);
+        
     });
   }
     
@@ -99,22 +125,22 @@
         var el = $(this).closest('div.qr-pic');
         var qr_id = $(this).attr('data-qrid'), qr_index = $(this).attr('data-index');
         
-        $.post(dongScript.ajaxUrl, { action: "dongtrader_delete_qr", type: "JSON",qrID : qr_id , qrIndex:qr_index , }, function (resp) {
+        $.post(dongScript.ajaxUrl, { action: "dongtrader_delete_qr", type: "JSON", qrID: qr_id, qrIndex: qr_index, }, function (resp) {
             var obj = JSON.parse(resp);
             if (obj.success) {
                 el.remove();
-                
             }
         });
        
-    })
+    });
     $('.qr-pic .copy').on('click', function (d) {
         d.preventDefault();
         var linkCopy = $(this).attr('data-url');
         if (navigator.clipboard.writeText(linkCopy)) {
             alert('Qr Code Link Copied To Clipboard');
-        }   
-    })
+        }
+    });
+    
 
 })(jQuery);
 

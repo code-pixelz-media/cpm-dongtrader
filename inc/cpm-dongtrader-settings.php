@@ -100,8 +100,12 @@ $dong_qr_array = get_option('dong_user_qr_values');
 						</div>
 
 						<div class="form-group">
-							<input type="submit" class="cpm-btn submit qrtiger-form-submit" value="<?php _e('Generate', 'cpm-dongtrader') ?>">
-							<span class="form-loader" style="display: none;"><img src="<?php echo plugins_url() . '/cpm-dongtrader/img/loader.gif' ?>"></span>
+							<button type="submit" class="cpm-btn submit qrtiger-form-submit real-button">
+								Generate
+							</button>
+							<button style="display: none;" type="submit" class="cpm-btn submit qrtiger-form-submit anim-button">
+								Generating <i class="fa fa-spinner fa-spin custom-load"></i>
+							</button>
 						</div>
 					</form>
 				</div>
