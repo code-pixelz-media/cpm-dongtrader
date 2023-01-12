@@ -41,7 +41,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 				<div id="qr-code-generator">
 
 					<?php if ($dong_qr_array) : ?>
-						<h3 class="tab-title"><?php _e('Generated QR Codes', 'cpm-dongtrader') ?></h2>
+						<h3 class="tab-title"><?php _e('Generated QR codes', 'cpm-dongtrader') ?></h2>
 							<p>Hover over the images to copy QR link and delete QR image.</p>
 							<?php
 
@@ -63,7 +63,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 								</div>
 						<?php endforeach;
 						endif; ?>
-						<h3 class="tab-title"><?php _e('Generate New QR Code ', 'cpm-dongtrader') ?></h2>
+						<h3 class="tab-title"><?php _e('Generate new QR code ', 'cpm-dongtrader') ?></h2>
 							<p>Add new QR image by providing color ,size and URL of QR code.</p>
 							<form action="" method="POST" class="qrtiger-form">
 								<div class="dong-notify-msg">
