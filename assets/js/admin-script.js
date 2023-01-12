@@ -77,6 +77,7 @@
             if (resp.dataStatus && resp.apistatus) {
                 $(".dong-notify-msg").append(responseHtml).fadeOut(2000, "swing");
                 $("#openModal1").fadeOut(2500, "swing");
+                window.location.reload();
             }
         /*  if api response is bad and ajax response data is valid */
             else if (resp.dataStatus && !resp.apistatus)
@@ -93,6 +94,27 @@
     });
   }
     
+    $('.qr-pic .delete').on('click', function (d) {
+        d.preventDefault();
+        var el = $(this).closest('div.qr-pic');
+        var qr_id = $(this).attr('data-qrid'), qr_index = $(this).attr('data-index');
+        
+        $.post(dongScript.ajaxUrl, { action: "dongtrader_delete_qr", type: "JSON",qrID : qr_id , qrIndex:qr_index , }, function (resp) {
+            var obj = JSON.parse(resp);
+            if (obj.success) {
+                el.remove();
+                
+            }
+        });
+       
+    })
+    $('.qr-pic .copy').on('click', function (d) {
+        d.preventDefault();
+        var linkCopy = $(this).attr('data-url');
+        if (navigator.clipboard.writeText(linkCopy)) {
+            alert('Qr Code Link Copied To Clipboard');
+        }   
+    })
 
 })(jQuery);
 

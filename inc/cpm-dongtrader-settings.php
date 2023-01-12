@@ -1,5 +1,6 @@
 <?php
 if (!defined('ABSPATH')) exit;
+$dong_qr_array = get_option('dong_user_qr_values');
 
 
 ?>
@@ -30,7 +31,7 @@ if (!defined('ABSPATH')) exit;
 
 			<ul class="tab-menu" id="dongtrader-tabs">
 				<li class="nav-tab" id="first"><a href="#qr-code-generator" class="dashicons-before dashicons-editor-alignleft"><?php _e('QR Code', 'dongtraders'); ?></a></li>
-				<li class="nav-tab" id="second"><a href="#qr-lists" class="dashicons-before dashicons-admin-tools"><?php _e('QR Lists', 'dongtraders'); ?></a></li>
+
 				<li class="nav-tab" id="third"><a href="#api-integration" class="dashicons-before dashicons-admin-generic"><?php _e('Integration API', 'dongtraders'); ?></a></li>
 				<li class="nav-tab" id="fourth"><a href="#advanced" class="dashicons-before dashicons-admin-settings"><?php _e('Advanced', 'dongtraders'); ?></a></li>
 				<li class="nav-tab" id="fifth"><a href="#extra" class="dashicons-before dashicons-admin-tools"><?php _e('Extras', 'dongtraders'); ?></a></li>
@@ -38,8 +39,30 @@ if (!defined('ABSPATH')) exit;
 
 			<div class="tab-content">
 				<div id="qr-code-generator">
-					<h2 class="tab-title"><?php _e('Generate QR Code', 'cpm-dongtrader') ?></h2>
-					<p><?php _e('Preview and generate your Quick Response code ', 'cpm-dongtrader'); ?></p>
+
+					<?php if ($dong_qr_array) : ?>
+						<h2 class="tab-title"><?php _e('Generated QR Codes', 'cpm-dongtrader') ?></h2>
+						<?php
+
+						foreach ($dong_qr_array as $key => $value) :
+
+						?>
+							<div class="qr-pic">
+								<img width=" 200" height="200" src="<?= $value['qr_image_url']; ?>">
+								<div class="copy" data-url="<?= $value['qr_image_url']; ?>">
+									<a href="#">
+										<i class="fa-solid fa-copy"></i>
+									</a>
+								</div>
+								<div class="delete" data-index="<?= $key ?>" data-qrid="<?= $value['qr_id'] ?>">
+									<a href="#">
+										<i class="fa-solid fa-trash"></i>
+									</a>
+								</div>
+							</div>
+					<?php endforeach;
+					endif; ?>
+					<h2 class="tab-title"><?php _e('Generate New QR Code ', 'cpm-dongtrader') ?></h2>
 					<form action="" method="POST" class="qrtiger-form">
 						<div class="dong-notify-msg">
 							<!-- 
@@ -81,47 +104,6 @@ if (!defined('ABSPATH')) exit;
 							<span class="form-loader" style="display: none;"><img src="<?php echo plugins_url() . '/cpm-dongtrader/img/loader.gif' ?>"></span>
 						</div>
 					</form>
-				</div>
-				<div id="qr-lists">
-					<p><?php _e('Please Reload Tab To View Recent QR Codes', 'cpm-dongtrader'); ?></p>
-					<?php
-					$dong_qr_array = get_option('dong_user_qr_values');
-					if ($dong_qr_array) :
-					?>
-						<table>
-							<tr>
-								<th><?php _e('S.N.', 'cpm-dongtrader') ?></th>
-								<th><?php _e('QR Id.', 'cpm-dongtrader') ?></th>
-								<th><?php _e('QR Image.', 'cpm-dongtrader') ?></th>
-								<th><?php _e('QR URL.', 'cpm-dongtrader') ?></th>
-							</tr>
-							<?php
-							foreach ($dong_qr_array as $key => $data) {
-							?>
-								<tr>
-									<td><?php echo ++$key; ?></td>
-									<td><?php echo $data['qr_id']; ?></td>
-									<td><img src="<?php echo $data['qr_image_url']; ?>" alt="<?php echo $data['qr_image_url']; ?>" height="50" width="50" srcset=""></td>
-									<td><?php echo "<p style='display:none;' id='" . $data['qr_id'] . "'>" . $data['qr_image_url'] . "</p>"; ?>
-										<button onclick="dong_traders_url_copys('#<?php echo $data['qr_id']; ?>')">Copy QR URL</button>
-									</td>
-									<td><?php _e('Delete', 'cpm-dongtrader') ?></td>
-								</tr>
-
-							<?php
-							}
-							?>
-						</table>
-						<script>
-							function dong_traders_url_copys(element) {
-								var $temp = jQuery("<input>");
-								jQuery("body").append($temp);
-								$temp.val(jQuery(element).text()).select();
-								document.execCommand("copy");
-								$temp.remove();
-							}
-						</script>
-					<?php endif; ?>
 				</div>
 				<div id="api-integration">
 					<h2 class="tab-title">Set Your API keys</h2>

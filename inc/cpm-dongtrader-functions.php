@@ -211,3 +211,26 @@ function dongtrader_generate_qr2()
 
     wp_die();
 }
+
+//dongtrader_delete_qr
+
+add_action('wp_ajax_dongtrader_delete_qr', 'dongtrader_delete_qr');
+
+function dongtrader_delete_qr()
+{
+
+
+    $index          = esc_attr($_POST['qrIndex']);
+    $dong_qr_array  = get_option('dong_user_qr_values');
+    $resp_array     = array('success' => false, 'd' => $dong_qr_array, 'i' => $index);
+
+    if ($dong_qr_array && !empty($index) || $index == '0') {
+
+        unset($dong_qr_array[$index]);
+        $new_arrray = $dong_qr_array;
+        update_option('dong_user_qr_values', $new_arrray);
+        $resp_array['success'] = true;
+    }
+    echo wp_json_encode($resp_array);
+    wp_die();
+}
