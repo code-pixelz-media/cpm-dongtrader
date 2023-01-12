@@ -33,9 +33,9 @@ function dongtrader_get_api_cred($apiname)
 function qrtiger_api_request($endpoint = '', $bodyParams = array(), $method = "GET")
 {
     /* Get the API credentials from the database. */
-    $qrtiger_creds = dongtrader_get_api_cred('qrtiger');
+    $qrtiger_creds = get_option('dongtraders_api_settings_fields');
     /* Check if the API credentials are empty or not. */
-    $checkFields = !empty($qrtiger_creds['qrtiger-api-url']) && !empty($qrtiger_creds['qrtiger-api-key']) ? true : false;
+    $checkFields = !empty($qrtiger_creds['qrtiger-api-key']) && !empty($qrtiger_creds['qrtiger-api-url']) ? true : false;
     /* Check if the API credentials are empty or not. */
     if (!$checkFields) return;
     /* Get the API URL from the database. */
@@ -160,19 +160,22 @@ function dongtrader_generate_qr2()
 {
     $qr_size =  sanitize_text_field($_POST['qrsize']);
     $qr_url  =  sanitize_url($_POST['qrurl']);
-    $qr_text =  sanitize_text_field($_POST['qrtext']);
+    $qr_color =  sanitize_text_field($_POST['qrcolor']);
     $dong_user_id = get_current_user_id();
-    $response = !empty($qr_size) && !empty($qr_url) && !empty(trim($qr_text)) ? true : false;
+    $response = !empty($qr_size) && !empty($qr_url) && !empty(trim($qr_color)) ? true : false;
     $notify_to_js = array(
         'dataStatus' => $response,
         'user' => $dong_user_id,
-        'apistatus' => false
+        'apistatus' => false,
     );
     if ($response) {
+        //either background color or qr elements color can be set
         $qrtiger_array = [
             "qr" => [
                 "size" => $qr_size,
-                "text" => $qr_text
+                "colorDark" => $qr_color,
+                "backgroundColor" => '',
+                "transparentBkg" => false,
             ],
             "qrUrl" => $qr_url,
             "qrType" => "qr2",
@@ -190,14 +193,15 @@ function dongtrader_generate_qr2()
                 'qr_id'         => $qrtiger_api_call->data->qrId
             );
 
-            $old_dong_qr_array = get_user_meta($dong_user_id, 'dong_user_qr_vals', true);
+            $old_dong_qr_array = get_option('dong_user_qr_values');
             $prev_value_check  = !empty($old_dong_qr_array) ? true : false;
-
             if ($prev_value_check) {
                 array_push($old_dong_qr_array, $current_dong_qr_array);
-                update_user_meta($dong_user_id, 'dong_user_qr_vals', $old_dong_qr_array);
+                // update_user_meta($dong_user_id, 'dong_user_qr_values', $old_dong_qr_array);
+                update_option('dong_user_qr_values', $old_dong_qr_array);
             } else {
-                update_user_meta($dong_user_id, 'dong_user_qr_vals', [$current_dong_qr_array]);
+                // update_user_meta($dong_user_id, 'dong_user_qr_values', [$current_dong_qr_array]);
+                update_option('dong_user_qr_values', [$current_dong_qr_array]);
             }
         }
     }

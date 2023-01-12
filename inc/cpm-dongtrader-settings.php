@@ -28,27 +28,108 @@ if (!defined('ABSPATH')) exit;
 	<div class="body-wrap">
 		<div id="tabs-wrap" class="tabs-wrap">
 
-			<ul class="tab-menu">
-				<li class="nav-tab"><a href="#qr-code-generator" class="dashicons-before dashicons-editor-alignleft"><?php _e('QR Code', 'dongtraders'); ?></a></li>
-				<li class="nav-tab"><a href="#api-integration" class="dashicons-before dashicons-admin-generic"><?php _e('Integration API', 'dongtraders'); ?></a></li>
-				<li class="nav-tab"><a href="#advanced" class="dashicons-before dashicons-admin-settings"><?php _e('Advanced', 'dongtraders'); ?></a></li>
-				<li class="nav-tab"><a href="#extra" class="dashicons-before dashicons-admin-tools"><?php _e('Extras', 'dongtraders'); ?></a></li>
+			<ul class="tab-menu" id="dongtrader-tabs">
+				<li class="nav-tab" id="first"><a href="#qr-code-generator" class="dashicons-before dashicons-editor-alignleft"><?php _e('QR Code', 'dongtraders'); ?></a></li>
+				<li class="nav-tab" id="second"><a href="#qr-lists" class="dashicons-before dashicons-admin-tools"><?php _e('QR Lists', 'dongtraders'); ?></a></li>
+				<li class="nav-tab" id="third"><a href="#api-integration" class="dashicons-before dashicons-admin-generic"><?php _e('Integration API', 'dongtraders'); ?></a></li>
+				<li class="nav-tab" id="fourth"><a href="#advanced" class="dashicons-before dashicons-admin-settings"><?php _e('Advanced', 'dongtraders'); ?></a></li>
+				<li class="nav-tab" id="fifth"><a href="#extra" class="dashicons-before dashicons-admin-tools"><?php _e('Extras', 'dongtraders'); ?></a></li>
 			</ul>
 
 			<div class="tab-content">
 				<div id="qr-code-generator">
-					<h2 class="tab-title">General Title</h2>
-					<p>This is a ramdom settings form.Lorem ipsum dolor sit amet, consectetur adipisicing elit. Debitis rem facere doloribus delectus, reiciendis ipsum itaque placeat, eveniet perferendis vel molestiae impedit magnam. Sapiente, distinctio. Laboriosam accusamus odio architecto minus.</p>
+					<h2 class="tab-title"><?php _e('Generate QR Code', 'cpm-dongtrader') ?></h2>
+					<p><?php _e('Preview and generate your Quick Response code ', 'cpm-dongtrader'); ?></p>
+					<form action="" method="POST" class="qrtiger-form">
+						<div class="dong-notify-msg">
+							<!-- 
+								purple(planning) rgb(153,0,153) 
+								budget(orange) rgb(241 104 60),
+								media(red) rgb(204,0,0),
+								distribution(green) rgb(0,153,0),
+								membership(blue) rgb(0,0,204)
+							-->
+						</div>
+						<div class="form-group">
+							<label for=""><?php _e('QR Size', 'cpm-dongtrader') ?></label>
+							<div class="form-control-wrap">
+								<input name="qrtiger-size" class="form-control qrtiger-size" type="number" placeholder="<?php _e('Actual size of QR Code', 'cpm-dongtrader') ?>" onfocus="this.placeholder=''" onblur="this.placeholder='<?php _e('Actual size of QR Code', 'cpm-dongtrader') ?>'" required value="500">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for=""><?php _e('Select Color', 'cpm-dongtrader') ?></label>
+							<div class="form-control-wrap">
+								<select name="qrtiger-color" id="" class="form-control qrtiger-color" required>
+									<option value=""><?php _e('Default', 'cpm-dongtrader') ?></option>
+									<option value="rgb(153,0,153)"><?php _e('Planning(Purple)', 'cpm-dongtrader') ?></option>
+									<option value="rgb(241,104,60)"><?php _e('Budget(Orange)', 'cpm-dongtrader') ?></option>
+									<option value="rgb(204,0,0)"><?php _e('Media(Red)', 'cpm-dongtrader') ?></option>
+									<option value="rgb(0,153,0)"><?php _e('Distribution(Green)', 'cpm-dongtrader') ?></option>
+									<option value="rgb(0,0,204)"><?php _e('Membership(Blue)', 'cpm-dongtrader') ?></option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for=""><?php _e('QR URL', 'cpm-dongtrader') ?></label>
+							<div class="form-control-wrap">
+								<input name="qrtiger-url" class="form-control qrtiger-url" type="url" placeholder="<?php _e('Url to redirect after scanning qr code', 'cpm-dongtrader') ?>" onfocus="this.placeholder=''" onblur="this.placeholder='<?php _e('Url to redirect after scanning qr code', 'cpm-dongtrader') ?>'" required>
+							</div>
+						</div>
 
+						<div class="form-group">
+							<input type="submit" class="cpm-btn submit qrtiger-form-submit" value="<?php _e('Generate', 'cpm-dongtrader') ?>">
+							<span class="form-loader" style="display: none;"><img src="<?php echo plugins_url() . '/cpm-dongtrader/img/loader.gif' ?>"></span>
+						</div>
+					</form>
 				</div>
+				<div id="qr-lists">
+					<p><?php _e('Please Reload Tab To View Recent QR Codes', 'cpm-dongtrader'); ?></p>
+					<?php
+					$dong_qr_array = get_option('dong_user_qr_values');
+					if ($dong_qr_array) :
+					?>
+						<table>
+							<tr>
+								<th><?php _e('S.N.', 'cpm-dongtrader') ?></th>
+								<th><?php _e('QR Id.', 'cpm-dongtrader') ?></th>
+								<th><?php _e('QR Image.', 'cpm-dongtrader') ?></th>
+								<th><?php _e('QR URL.', 'cpm-dongtrader') ?></th>
+							</tr>
+							<?php
+							foreach ($dong_qr_array as $key => $data) {
+							?>
+								<tr>
+									<td><?php echo ++$key; ?></td>
+									<td><?php echo $data['qr_id']; ?></td>
+									<td><img src="<?php echo $data['qr_image_url']; ?>" alt="<?php echo $data['qr_image_url']; ?>" height="50" width="50" srcset=""></td>
+									<td><?php echo "<p style='display:none;' id='" . $data['qr_id'] . "'>" . $data['qr_image_url'] . "</p>"; ?>
+										<button onclick="dong_traders_url_copys('#<?php echo $data['qr_id']; ?>')">Copy QR URL</button>
+									</td>
+									<td><?php _e('Delete', 'cpm-dongtrader') ?></td>
+								</tr>
 
+							<?php
+							}
+							?>
+						</table>
+						<script>
+							function dong_traders_url_copys(element) {
+								var $temp = jQuery("<input>");
+								jQuery("body").append($temp);
+								$temp.val(jQuery(element).text()).select();
+								document.execCommand("copy");
+								$temp.remove();
+							}
+						</script>
+					<?php endif; ?>
+				</div>
 				<div id="api-integration">
 					<h2 class="tab-title">Set Your API keys</h2>
 					<p>This is for tab for options. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui voluptates odit distinctio perferendis porro aliquam beatae iure laudantium veniam voluptas vero similique ratione mollitia, rerum inventore saepe impedit eveniet necessitatibus!Lorem ipsum dolor sit amet, </p>
 					<hr>
 
 					<?php $dongtraders_api_setting_data = get_option('dongtraders_api_settings_fields'); ?>
-					<form action="options.php" method="POST" enctype="multipart/form-data">
+					<form action="options.php" method="POST" enctype="multipart/form-data" id="save-settings">
 						<?php
 						settings_errors();
 
@@ -98,8 +179,8 @@ if (!defined('ABSPATH')) exit;
 							</div>
 						</div>
 
-						<div class="form-group">
-							<input type="submit" class="cpm-btn submit" name="submit" value="Save changes">
+						<div class="form-group settings-submit">
+							<input type="submit" class="cpm-btn submit save-settings-dash" name="submit" value="Save changes">
 						</div>
 					</form>
 				</div>

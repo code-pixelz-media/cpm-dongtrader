@@ -82,7 +82,7 @@ function dong_get_tables_for_qr($qr_datas)
     }
 }
 
-add_action('wp_footer', 'dongtrader_modal_html');
+//add_action('wp_footer', 'dongtrader_modal_html');
 
 function dongtrader_modal_html()
 {
@@ -158,3 +158,17 @@ function cpm_dong_my_membership_endpoint_content()
 <?php
 }
 /* show memebership data on woocommerce tab  ends*/
+
+
+add_action('wp_footer', 'test_guy');
+
+function  test_guy()
+{
+
+    //$meta = get_user_
+    //delete_user_meta('2', 'dong_user_qr_vals');
+    // $api_utils = get_option('dongtraders_api_settings_fields');
+
+
+    // var_dump($api_utils);
+}
