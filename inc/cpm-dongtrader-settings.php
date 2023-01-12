@@ -41,73 +41,75 @@ $dong_qr_array = get_option('dong_user_qr_values');
 				<div id="qr-code-generator">
 
 					<?php if ($dong_qr_array) : ?>
-						<h2 class="tab-title"><?php _e('Generated QR Codes', 'cpm-dongtrader') ?></h2>
-						<?php
+						<h3 class="tab-title"><?php _e('Generated QR Codes', 'cpm-dongtrader') ?></h2>
+							<p>Hover over the images to copy QR link and delete QR image.</p>
+							<?php
 
-						foreach ($dong_qr_array as $key => $value) :
+							foreach ($dong_qr_array as $key => $value) :
 
-						?>
-							<div class="qr-pic">
-								<img width=" 200" height="200" src="<?= $value['qr_image_url']; ?>">
-								<div class="copy" data-url="<?= $value['qr_image_url']; ?>">
-									<a href="#">
-										<i class="fa-solid fa-copy"></i>
-									</a>
+							?>
+								<div class="qr-pic">
+									<img width=" 200" height="200" src="<?= $value['qr_image_url']; ?>">
+									<div class="copy" data-url="<?= $value['qr_image_url']; ?>">
+										<a href="#">
+											<i class="fa-solid fa-copy"></i>
+										</a>
+									</div>
+									<div class="delete" data-index="<?= $key ?>" data-qrid="<?= $value['qr_id'] ?>">
+										<a href="#">
+											<i class="fa-solid fa-trash"></i>
+										</a>
+									</div>
 								</div>
-								<div class="delete" data-index="<?= $key ?>" data-qrid="<?= $value['qr_id'] ?>">
-									<a href="#">
-										<i class="fa-solid fa-trash"></i>
-									</a>
-								</div>
-							</div>
-					<?php endforeach;
-					endif; ?>
-					<h2 class="tab-title"><?php _e('Generate New QR Code ', 'cpm-dongtrader') ?></h2>
-					<form action="" method="POST" class="qrtiger-form">
-						<div class="dong-notify-msg">
-							<!-- 
+						<?php endforeach;
+						endif; ?>
+						<h3 class="tab-title"><?php _e('Generate New QR Code ', 'cpm-dongtrader') ?></h2>
+							<p>Add new QR image by providing color ,size and URL of QR code.</p>
+							<form action="" method="POST" class="qrtiger-form">
+								<div class="dong-notify-msg">
+									<!-- 
 								purple(planning) rgb(153,0,153) 
 								budget(orange) rgb(241 104 60),
 								media(red) rgb(204,0,0),
 								distribution(green) rgb(0,153,0),
 								membership(blue) rgb(0,0,204)
 							-->
-						</div>
-						<div class="form-group">
-							<label for=""><?php _e('QR Size', 'cpm-dongtrader') ?></label>
-							<div class="form-control-wrap">
-								<input name="qrtiger-size" class="form-control qrtiger-size" type="number" placeholder="<?php _e('Actual size of QR Code', 'cpm-dongtrader') ?>" onfocus="this.placeholder=''" onblur="this.placeholder='<?php _e('Actual size of QR Code', 'cpm-dongtrader') ?>'" required value="500">
-							</div>
-						</div>
-						<div class="form-group">
-							<label for=""><?php _e('Select Color', 'cpm-dongtrader') ?></label>
-							<div class="form-control-wrap">
-								<select name="qrtiger-color" id="" class="form-control qrtiger-color" required>
-									<option value=""><?php _e('Default', 'cpm-dongtrader') ?></option>
-									<option value="rgb(153,0,153)"><?php _e('Planning(Purple)', 'cpm-dongtrader') ?></option>
-									<option value="rgb(241,104,60)"><?php _e('Budget(Orange)', 'cpm-dongtrader') ?></option>
-									<option value="rgb(204,0,0)"><?php _e('Media(Red)', 'cpm-dongtrader') ?></option>
-									<option value="rgb(0,153,0)"><?php _e('Distribution(Green)', 'cpm-dongtrader') ?></option>
-									<option value="rgb(0,0,204)"><?php _e('Membership(Blue)', 'cpm-dongtrader') ?></option>
-								</select>
-							</div>
-						</div>
-						<div class="form-group">
-							<label for=""><?php _e('QR URL', 'cpm-dongtrader') ?></label>
-							<div class="form-control-wrap">
-								<input name="qrtiger-url" class="form-control qrtiger-url" type="url" placeholder="<?php _e('Url to redirect after scanning qr code', 'cpm-dongtrader') ?>" onfocus="this.placeholder=''" onblur="this.placeholder='<?php _e('Url to redirect after scanning qr code', 'cpm-dongtrader') ?>'" required>
-							</div>
-						</div>
+								</div>
+								<div class="form-group">
+									<label for=""><?php _e('QR Size', 'cpm-dongtrader') ?></label>
+									<div class="form-control-wrap">
+										<input name="qrtiger-size" class="form-control qrtiger-size" type="number" placeholder="<?php _e('Actual size of QR Code', 'cpm-dongtrader') ?>" onfocus="this.placeholder=''" onblur="this.placeholder='<?php _e('Actual size of QR Code', 'cpm-dongtrader') ?>'" required value="500">
+									</div>
+								</div>
+								<div class="form-group">
+									<label for=""><?php _e('Select Color', 'cpm-dongtrader') ?></label>
+									<div class="form-control-wrap">
+										<select name="qrtiger-color" id="" class="form-control qrtiger-color" required>
+											<option value=""><?php _e('Default', 'cpm-dongtrader') ?></option>
+											<option value="rgb(153,0,153)"><?php _e('Planning(Purple)', 'cpm-dongtrader') ?></option>
+											<option value="rgb(241,104,60)"><?php _e('Budget(Orange)', 'cpm-dongtrader') ?></option>
+											<option value="rgb(204,0,0)"><?php _e('Media(Red)', 'cpm-dongtrader') ?></option>
+											<option value="rgb(0,153,0)"><?php _e('Distribution(Green)', 'cpm-dongtrader') ?></option>
+											<option value="rgb(0,0,204)"><?php _e('Membership(Blue)', 'cpm-dongtrader') ?></option>
+										</select>
+									</div>
+								</div>
+								<div class="form-group">
+									<label for=""><?php _e('QR URL', 'cpm-dongtrader') ?></label>
+									<div class="form-control-wrap">
+										<input name="qrtiger-url" class="form-control qrtiger-url" type="url" placeholder="<?php _e('Url to redirect after scanning qr code', 'cpm-dongtrader') ?>" onfocus="this.placeholder=''" onblur="this.placeholder='<?php _e('Url to redirect after scanning qr code', 'cpm-dongtrader') ?>'" required>
+									</div>
+								</div>
 
-						<div class="form-group">
-							<button type="submit" class="cpm-btn submit qrtiger-form-submit real-button">
-								Generate
-							</button>
-							<button style="display: none;" type="submit" class="cpm-btn submit qrtiger-form-submit anim-button">
-								Generating <i class="fa fa-spinner fa-spin custom-load"></i>
-							</button>
-						</div>
-					</form>
+								<div class="form-group">
+									<button type="submit" class="cpm-btn submit qrtiger-form-submit real-button">
+										Generate
+									</button>
+									<button style="display: none;" type="submit" class="cpm-btn submit qrtiger-form-submit anim-button">
+										Generating <i class="fa fa-spinner fa-spin custom-load"></i>
+									</button>
+								</div>
+							</form>
 				</div>
 				<div id="api-integration">
 					<h2 class="tab-title">Set Your API keys</h2>

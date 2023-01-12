@@ -121,7 +121,10 @@
     position: absolute;
     right: 50%;
     top: 50%;
+    font-size: 25px;
     display: none;
+    color: #D8000C;
+   
 }
 
 .delete {
@@ -130,6 +133,8 @@
     position: absolute;
     right: 40%;
     top: 50%;
+    font-size: 25px;
+    color: #D8000C;
     display: none;
 }
 
