@@ -91,7 +91,7 @@
         /*  Setting the value of the variable `msgText` to `QR code generated successfully` if the value of
         `resp.dataStatus` is true, and `All fields are required` if the value of `resp.dataStatus` is false. */
             var msgText = resp.dataStatus
-            ? `QR code generated successfully.Please Check In Qr Lists Tab`
+            ? `QR code generated successfully.`
             : `All fields are required`;
         /*  Response Html Message Combined to display the response status as error or valid*/
             var responseHtml = `<div class="${msgClass}"><i class="${iconClass}"></i>${msgText}</div>`;
