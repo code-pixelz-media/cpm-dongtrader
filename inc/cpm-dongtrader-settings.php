@@ -1,8 +1,6 @@
 <?php
 if (!defined('ABSPATH')) exit;
 $dong_qr_array = get_option('dong_user_qr_values');
-
-
 ?>
 
 <div class="cpm-plugin-wrap">
@@ -31,92 +29,73 @@ $dong_qr_array = get_option('dong_user_qr_values');
 
 			<ul class="tab-menu" id="dongtrader-tabs">
 				<li class="nav-tab" id="first"><a href="#qr-code-generator" class="dashicons-before dashicons-editor-alignleft"><?php _e('QR Code', 'dongtraders'); ?></a></li>
-
+				<?php if (!empty($dong_qr_array)) : ?>
+					<li class="nav-tab" id="second"><a href="#qr-lists" class="dashicons-before dashicons-admin-generic"><?php _e('QR Lists', 'dongtraders'); ?></a></li>
+				<?php endif; ?>
 				<li class="nav-tab" id="third"><a href="#api-integration" class="dashicons-before dashicons-admin-generic"><?php _e('Integration API', 'dongtraders'); ?></a></li>
+
 				<li class="nav-tab" id="fourth"><a href="#advanced" class="dashicons-before dashicons-admin-settings"><?php _e('Advanced', 'dongtraders'); ?></a></li>
 				<li class="nav-tab" id="fifth"><a href="#extra" class="dashicons-before dashicons-admin-tools"><?php _e('Extras', 'dongtraders'); ?></a></li>
 			</ul>
 
 			<div class="tab-content">
 				<div id="qr-code-generator">
+					<h3 class=" tab-title"><?php _e('Generate new QR code ', 'cpm-dongtrader') ?></h2>
+						<p>Add new QR image by providing color ,size and URL of QR code.</p>
+						<form action="" method="POST" class="qrtiger-form">
+							<div class="dong-notify-msg">
+								<!-- 
+										purple(planning) rgb(153,0,153) 
+										budget(orange) rgb(241 104 60),
+										media(red) rgb(204,0,0),
+										distribution(green) rgb(0,153,0),
+										membership(blue) rgb(0,0,204)
+										-->
+							</div>
+							<div class="form-group">
+								<label for=""><?php _e('QR Size', 'cpm-dongtrader') ?></label>
+								<div class="form-control-wrap">
+									<input name="qrtiger-size" class="form-control qrtiger-size" type="number" placeholder="<?php _e('Actual size of QR Code', 'cpm-dongtrader') ?>" onfocus="this.placeholder=''" onblur="this.placeholder='<?php _e('Actual size of QR Code', 'cpm-dongtrader') ?>'" required value="500">
+								</div>
+							</div>
+							<div class="form-group">
+								<label for=""><?php _e('Select Color', 'cpm-dongtrader') ?></label>
+								<div class="form-control-wrap">
+									<select name="qrtiger-color" id="" class="form-control qrtiger-color" required>
+										<option value=""><?php _e('Default', 'cpm-dongtrader') ?></option>
+										<option value="rgb(153,0,153)"><?php _e('Planning(Purple)', 'cpm-dongtrader') ?></option>
+										<option value="rgb(241,104,60)"><?php _e('Budget(Orange)', 'cpm-dongtrader') ?></option>
+										<option value="rgb(204,0,0)"><?php _e('Media(Red)', 'cpm-dongtrader') ?></option>
+										<option value="rgb(0,153,0)"><?php _e('Distribution(Green)', 'cpm-dongtrader') ?></option>
+										<option value="rgb(0,0,204)"><?php _e('Membership(Blue)', 'cpm-dongtrader') ?></option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for=""><?php _e('QR URL', 'cpm-dongtrader') ?></label>
+								<div class="form-control-wrap">
+									<input name="qrtiger-url" class="form-control qrtiger-url" type="url" placeholder="<?php _e('Url to redirect after scanning qr code', 'cpm-dongtrader') ?>" onfocus="this.placeholder=''" onblur="this.placeholder='<?php _e('Url to redirect after scanning qr code', 'cpm-dongtrader') ?>'" required>
+								</div>
+							</div>
 
-					<?php if ($dong_qr_array) : ?>
-						<h3 class="tab-title"><?php _e('Generated QR codes', 'cpm-dongtrader') ?></h2>
-							<p>Hover over the images to copy QR link and delete QR image.</p>
-							<?php
-
-							foreach ($dong_qr_array as $key => $value) :
-
-							?>
-								<div class="qr-pic">
-									<img width=" 200" height="200" src="<?= $value['qr_image_url']; ?>">
-									<div class="copy" data-url="<?= $value['qr_image_url']; ?>">
-										<a href="#">
-											<i class="fa-solid fa-copy"></i>
-										</a>
-									</div>
-									<div class="delete" data-index="<?= $key ?>" data-qrid="<?= $value['qr_id'] ?>">
-										<a href="#">
-											<i class="fa-solid fa-trash"></i>
-										</a>
-									</div>
-								</div>
-						<?php endforeach;
-						endif; ?>
-						<h3 class="tab-title"><?php _e('Generate new QR code ', 'cpm-dongtrader') ?></h2>
-							<p>Add new QR image by providing color ,size and URL of QR code.</p>
-							<form action="" method="POST" class="qrtiger-form">
-								<div class="dong-notify-msg">
-									<!-- 
-								purple(planning) rgb(153,0,153) 
-								budget(orange) rgb(241 104 60),
-								media(red) rgb(204,0,0),
-								distribution(green) rgb(0,153,0),
-								membership(blue) rgb(0,0,204)
-							-->
-								</div>
-								<div class="form-group">
-									<label for=""><?php _e('QR Size', 'cpm-dongtrader') ?></label>
-									<div class="form-control-wrap">
-										<input name="qrtiger-size" class="form-control qrtiger-size" type="number" placeholder="<?php _e('Actual size of QR Code', 'cpm-dongtrader') ?>" onfocus="this.placeholder=''" onblur="this.placeholder='<?php _e('Actual size of QR Code', 'cpm-dongtrader') ?>'" required value="500">
-									</div>
-								</div>
-								<div class="form-group">
-									<label for=""><?php _e('Select Color', 'cpm-dongtrader') ?></label>
-									<div class="form-control-wrap">
-										<select name="qrtiger-color" id="" class="form-control qrtiger-color" required>
-											<option value=""><?php _e('Default', 'cpm-dongtrader') ?></option>
-											<option value="rgb(153,0,153)"><?php _e('Planning(Purple)', 'cpm-dongtrader') ?></option>
-											<option value="rgb(241,104,60)"><?php _e('Budget(Orange)', 'cpm-dongtrader') ?></option>
-											<option value="rgb(204,0,0)"><?php _e('Media(Red)', 'cpm-dongtrader') ?></option>
-											<option value="rgb(0,153,0)"><?php _e('Distribution(Green)', 'cpm-dongtrader') ?></option>
-											<option value="rgb(0,0,204)"><?php _e('Membership(Blue)', 'cpm-dongtrader') ?></option>
-										</select>
-									</div>
-								</div>
-								<div class="form-group">
-									<label for=""><?php _e('QR URL', 'cpm-dongtrader') ?></label>
-									<div class="form-control-wrap">
-										<input name="qrtiger-url" class="form-control qrtiger-url" type="url" placeholder="<?php _e('Url to redirect after scanning qr code', 'cpm-dongtrader') ?>" onfocus="this.placeholder=''" onblur="this.placeholder='<?php _e('Url to redirect after scanning qr code', 'cpm-dongtrader') ?>'" required>
-									</div>
-								</div>
-
-								<div class="form-group">
-									<button type="submit" class="cpm-btn submit qrtiger-form-submit real-button">
-										Generate
-									</button>
-									<button style="display: none;" type="submit" class="cpm-btn submit qrtiger-form-submit anim-button">
-										Generating <i class="fa fa-spinner fa-spin custom-load"></i>
-									</button>
-								</div>
-							</form>
+							<div class="form-group">
+								<button type="submit" class="cpm-btn submit qrtiger-form-submit real-button">
+									Generate
+								</button>
+								<button style="display: none;" type="submit" class="cpm-btn submit qrtiger-form-submit anim-button">
+									Generating <i class="fa fa-spinner fa-spin custom-load"></i>
+								</button>
+							</div>
+						</form>
 				</div>
+
 				<div id="api-integration">
 					<h2 class="tab-title">Set Your API keys</h2>
 					<p>This is for tab for options. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui voluptates odit distinctio perferendis porro aliquam beatae iure laudantium veniam voluptas vero similique ratione mollitia, rerum inventore saepe impedit eveniet necessitatibus!Lorem ipsum dolor sit amet, </p>
 					<hr>
 
-					<?php $dongtraders_api_setting_data = get_option('dongtraders_api_settings_fields'); ?>
+					<?php $dongtraders_api_setting_data = get_option('dongtraders_api_settings_fields');
+					?>
 					<form action="options.php" method="POST" enctype="multipart/form-data" id="save-settings">
 						<?php
 						settings_errors();
@@ -172,6 +151,42 @@ $dong_qr_array = get_option('dong_user_qr_values');
 						</div>
 					</form>
 				</div>
+				<?php if (!empty($dong_qr_array)) : ?>
+					<div id="qr-lists">
+						<?php if ($dong_qr_array) : ?>
+							<h3 class="tab-title"><?php _e('Generated QR codes', 'cpm-dongtrader') ?></h2>
+								<div class="cpm-table-wrap" style="overflow: hidden;">
+									<table id="qr-all-list">
+										<thead>
+											<tr>
+												<th>S.N</th>
+												<th>QR ID</th>
+												<th>QR Image</th>
+												<th>QR URL</th>
+												<th>Remove</th>
+
+											</tr>
+										</thead>
+										<tbody>
+											<?php $i = 1;
+											foreach ($dong_qr_array as $key => $value) :
+
+											?>
+												<tr>
+													<td><?= $i ?></td>
+													<td><?php echo $value['qr_id'] ?></td>
+													<td><img src="<?php echo $value['qr_image_url']; ?>" width="50" height="50"></td>
+													<td><button class="cpm-btn url-copy" data-url="<?= $value['qr_image_url']; ?>">Copy</button></td>
+													<td><button class="cpm-btn qr-delete" data-index="<?= $key ?>">Delete</button></td>
+												</tr>
+											<?php $i++;
+											endforeach; ?>
+										</tbody>
+									</table>
+								</div>
+							<?php endif; ?>
+					</div>
+				<?php endif; ?>
 				<div id="advanced">
 					<h2 class="tab-title">Advanced Title</h2>
 					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Totam, rem dolores earum temporibus nihil consequatur vero perspiciatis accusantium architecto, impedit, aliquam natus. Sequi ad harum tempore, fugit iusto illo nihil.Lorem ipsum dolor sit amet, consectetur adipisicing elit. Totam, rem dolores earum temporibus nihil consequatur vero perspiciatis accusantium architecto, impedit, aliquam natus. Sequi ad harum tempore, fugit iusto illo nihil</p>

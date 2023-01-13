@@ -33,16 +33,7 @@
         $('#tabs-wrap').tabs();
     }); 
 
-    function js_spinner(show,button) {
-        var spinner = `<i style="display:none" class="fa fa-spinner fa-spin custom-load"></i>`;
-        if (show) {
-            button.text('Generating');
-            button.append(spinner);
-        } else {
-             button.text('Generat');
-        }
-         
-    }
+
     function animate_button(show) {
         if (show) {
             $('.real-button').css('display', 'none');
@@ -100,6 +91,7 @@
                 $(".dong-notify-msg").append(responseHtml).fadeOut(2000, "swing");
                 $("#openModal1").fadeOut(2500, "swing");
                 animate_button(false);
+                sessionStorage.setItem('lastid', 'second');
                 window.location.reload();
             }
         /*  if api response is bad and ajax response data is valid */
@@ -120,26 +112,36 @@
     });
   }
     
-    $('.qr-pic .delete').on('click', function (d) {
+    $('.url-copy').on('click', function () {
+        var urlcp = $(this).attr('data-url');
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val(urlcp).select();
+        if (document.execCommand("copy") && $temp.remove()) alert('QR URL copied to clipboard')
+    });
+    
+    $('.qr-delete').on('click', function (d) {
         d.preventDefault();
-        var el = $(this).closest('div.qr-pic');
-        var qr_id = $(this).attr('data-qrid'), qr_index = $(this).attr('data-index');
-        
-        $.post(dongScript.ajaxUrl, { action: "dongtrader_delete_qr", type: "JSON", qrID: qr_id, qrIndex: qr_index, }, function (resp) {
+        var rowCount = $('#qr-all-list>tbody>tr').length , table=$('#qr-all-list');
+        var el = $(this).closest('tr');
+        var qr_index = $(this).attr('data-index');
+        $(this).text('Deleting...');
+        $.post(dongScript.ajaxUrl, { action: "dongtrader_delete_qr", type: "JSON",  qrIndex: qr_index, }, function (resp) {
             var obj = JSON.parse(resp);
             if (obj.success) {
-                el.remove();
+                if (rowCount > 1) {
+                    el.fadeOut(1000, 'swing').remove();
+                } else {
+                    window.location.reload();
+                }
+                
             }
+        $(this).text('Delete');
         });
        
     });
-    $('.qr-pic .copy').on('click', function (d) {
-        d.preventDefault();
-        var linkCopy = $(this).attr('data-url');
-        if (navigator.clipboard.writeText(linkCopy)) {
-            alert('Qr Code Link Copied To Clipboard');
-        }
-    });
+
+
     
 
 })(jQuery);
