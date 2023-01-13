@@ -36,7 +36,7 @@ function dongtrader_scripts()
 	wp_enqueue_script('dongtrader-scripts', plugin_dir_url(__FILE__) . 'assets/js/plugin-scripts.js', array('jquery'), '1.0.0', true);
 	wp_enqueue_script('dongtrader-admin-scripts', plugin_dir_url(__FILE__) . 'assets/js/admin-script.js', array('jquery'), '1.0.0', true);
 	wp_enqueue_script('dongtrader-admin-select-scripts', plugin_dir_url(__FILE__) . 'assets/js/select2.min.js', array('jquery'), '1.0.0', true);
-	wp_add_inline_script('dongtrader-scripts', 'const dongScript = ' . json_encode(array(
+	wp_add_inline_script('dongtrader-admin-scripts', 'const dongScript = ' . json_encode(array(
 		'ajaxUrl' => admin_url('admin-ajax.php'),
 	)), 'before');
 }
@@ -73,3 +73,7 @@ function dongtraders_api_register_settings()
 }
 
 add_action('admin_init', 'dongtraders_api_register_settings');
+
+
+
+// update_user_meta(2, 'dong_user_qr_vals', '');

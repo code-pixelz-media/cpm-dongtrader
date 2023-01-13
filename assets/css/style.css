@@ -96,3 +96,47 @@
     color: #D8000C;
     background-color: #FFBABA;
 }
+.qr-pic {
+    position: relative;
+    display: inline-block;
+}
+.qr-pic:hover{
+    position: relative;
+    display: inline-block;
+    background-color: #606061;
+    z-index: 100;
+}
+
+.qr-pic:hover .copy {
+    display: block;
+}
+
+.qr-pic:hover .delete {
+    display: block;
+}
+
+.copy {
+    padding-top: 7px;
+    padding-right: 7px;
+    position: absolute;
+    right: 50%;
+    top: 50%;
+    display: none;
+}
+
+.delete {
+    padding-top: 7px;
+    padding-right: 7px;
+    position: absolute;
+    right: 40%;
+    top: 50%;
+    display: none;
+}
+
+.copy a {
+    color: #000;
+}
+
+.delete a {
+    color: #000;
+}
