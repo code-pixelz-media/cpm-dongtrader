@@ -42,21 +42,24 @@ function dongtrader_scripts()
 }
 add_action('admin_enqueue_scripts', 'dongtrader_scripts');
 
+/* Enqueuing the stylesheet for the plugin for frontend pages */
 function dongtrader_styles()
 {
-	wp_enqueue_style('dongtrader-styles', plugin_dir_url(__FILE__) . 'assets/css/style.css', array(), false, 'all');
+	wp_enqueue_style('dongtrader-frontend-styles', plugin_dir_url(__FILE__) . 'assets/css/dongtraders-style.css', array(), false, 'all');
+	wp_enqueue_script('dongtrader-public-scripts', plugin_dir_url(__FILE__) . 'assets/js/dongtraders-public.js', array('jquery'), '', true);
 }
-//add_action('wp_enqueue_scripts', 'dongtrader_styles');
+add_action('wp_enqueue_scripts', 'dongtrader_styles');
 
 
 
 add_action('admin_menu', 'register_my_custom_menu_page');
+/* Adding a menu item to the admin menu. */
 function register_my_custom_menu_page()
 {
-	// add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $icon_url, $position );
 	add_menu_page(__('DongTraders Generate QR', 'dongtraders'), 'DongTraders Generate QR', 'manage_options', 'dongtrader_api_settings', 'dongtraders_add_setting_page', 'dashicons-welcome-widgets-menus', 90);
 }
 
+/* Adding a menu item to the admin menu. */
 function dongtraders_add_setting_page()
 {
 	require plugin_dir_path(__FILE__) . 'inc/cpm-dongtrader-settings.php';

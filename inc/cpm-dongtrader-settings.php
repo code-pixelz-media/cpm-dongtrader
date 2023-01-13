@@ -47,15 +47,15 @@ if (!defined('ABSPATH')) exit;
 					<p>This is for tab for options. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui voluptates odit distinctio perferendis porro aliquam beatae iure laudantium veniam voluptas vero similique ratione mollitia, rerum inventore saepe impedit eveniet necessitatibus!Lorem ipsum dolor sit amet, </p>
 					<hr>
 
-					<?php $dongtraders_api_setting_data = get_option('dongtraders_api_settings_fields'); ?>
+					<?php
+
+					settings_errors();
+
+					settings_fields('dongtraders_api_setting_page');
+
+					$dongtraders_api_setting_data = get_option('dongtraders_api_settings_fields');
+					?>
 					<form action="options.php" method="POST" enctype="multipart/form-data">
-						<?php
-						settings_errors();
-
-						settings_fields('dongtraders_api_setting_page');
-
-
-						?>
 						<h3>QrTiger API Credentials</h3>
 						<div class="form-group">
 							<label for="">QrTiger API Key</label>
