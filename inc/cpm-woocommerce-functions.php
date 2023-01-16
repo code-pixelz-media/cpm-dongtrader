@@ -83,72 +83,52 @@ function cpm_dong_my_membership_vcard_endpoint_content()
 /**
  * Automatically add product to cart on visit
  */
-//add_action('template_redirect', 'add_product_to_cart');
-function add_product_to_cart()
-{
-    if (!is_admin()) {
-        $product_id = 1525; //replace with your own product id
-        $found = false;
-        //check if product already in cart
-        if (sizeof(WC()->cart->get_cart()) > 0) {
-            foreach (WC()->cart->get_cart() as $cart_item_key => $values) {
-                $_product = $values['data'];
-                if ($_product->get_id() == $product_id)
-                    $found = true;
-            }
-            // if product not found, add it
-            if (!$found)
-                WC()->cart->add_to_cart($product_id);
-        } else {
-            // if no products in cart, add it
-            WC()->cart->add_to_cart($product_id);
-        }
-    }
-}
+
 
 add_action('template_redirect', 'dongtraders_product_link_with_membership_goes_checkoutpage');
 function dongtraders_product_link_with_membership_goes_checkoutpage()
 {
     if (class_exists('WooCommerce')) {
         if (is_product()) {
+
+            global $product;
+            $product_id = $product->get_id();
             WC()->cart->empty_cart();
-            if (!is_admin()) {
-                global $product;
-                $product_id = $product->get_id();
-                $found = false;
-                //check if product already in cart
-                if (sizeof(WC()->cart->get_cart()) > 0) {
-                    foreach (WC()->cart->get_cart() as $cart_item_key => $values) {
-                        $_product = $values['data'];
-                        if ($_product->get_id() == $product_id)
-                            $found = true;
-                    }
-                    // if product not found, add it
-                    if (!$found)
-                        WC()->cart->add_to_cart($product_id);
-                    wp_redirect(home_url('/checkout/'));
-                } else {
-                    // if no products in cart, add it
+            if (!empty(($_GET['add']))) {
+                $check_add_product = $_GET['add'];
+                if ($check_add_product == '1') {
                     WC()->cart->add_to_cart($product_id);
                     wp_redirect(home_url('/checkout/'));
                 }
+                exit();
             }
-
-
-            exit();
         }
     }
     return;
 }
 
 
-// add_action('woocommerce_after_shop_loop_item', 'bbloomer_user_logged_in_product_already_bought', 30);
 
-// function bbloomer_user_logged_in_product_already_bought()
-// {
-//     global $product;
-//     if (!is_user_logged_in()) return;
-//     if (wc_customer_bought_product('', get_current_user_id(), $product->get_id())) {
-//         echo '<div>You purchased this in the past. Buy again?</div>';
-//     }
-// }
+// remove_action('woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart');
+// remove_action(
+//     'woocommerce_single_product_summary',
+//     'woocommerce_template_single_add_to_cart'
+// );
+add_action('woocommerce_after_shop_loop_item', 'dongtraders_check_user_bought_product_already_bought', 30);
+add_action('woocommerce_before_add_to_cart_quantity', 'dongtraders_check_user_bought_product_already_bought', 30);
+
+function dongtraders_check_user_bought_product_already_bought()
+{
+    global $product;
+    if (!is_user_logged_in()) return;
+    if (wc_customer_bought_product('', get_current_user_id(), $product->get_id())) {
+        $accountpage = get_permalink(wc_get_page_id('myaccount'));
+        echo '<div>Your Account is already register As Membership. Please Visit <a href="' . $accountpage . '">Account page</a></div>';
+        echo '<style>
+    .quantity, .cart .single_add_to_cart_button, .ajax_add_to_cart {
+        display: none !important;
+    }
+    
+</style>';
+    }
+}
