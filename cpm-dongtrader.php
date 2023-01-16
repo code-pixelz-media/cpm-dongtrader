@@ -52,9 +52,9 @@ add_action('wp_enqueue_scripts', 'dongtrader_styles');
 
 
 
-add_action('admin_menu', 'register_my_custom_menu_page');
+add_action('admin_menu', 'register_dongtraders_setting_menu_page');
 /* Adding a menu item to the admin menu. */
-function register_my_custom_menu_page()
+function register_dongtraders_setting_menu_page()
 {
 	add_menu_page(__('DongTraders Generate QR', 'dongtraders'), 'DongTraders Generate QR', 'manage_options', 'dongtrader_api_settings', 'dongtraders_add_setting_page', 'dashicons-welcome-widgets-menus', 90);
 }

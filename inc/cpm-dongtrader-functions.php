@@ -45,23 +45,6 @@ function qrtiger_api_request($endpoint = '', $bodyParams = array(), $method = "G
     /* Concatenating the API root URL with the endpoint. */
     $build_url = $qrtiger_api_root_url . $endpoint;
     /* A default array. */
-    // $qrtiger_defaults = [
-    //     "qr" => [
-    //         "size" => 500,
-    //         "colorDark" => "rgb(5,64,128)",
-    //         "logo" => "",
-    //         "eye_outer" => "eyeOuter2",
-    //         "eye_inner" => "eyeInner1",
-    //         "qrData" => "pattern0",
-    //         "backgroundColor" => "rgb(255,255,255)",
-    //         "transparentBkg" => false,
-    //         "qrCategory" => "url",
-    //         "text" => "https://www.qrcode-tiger.com.com/"
-    //     ],
-    //     "qrUrl" => "https://www.qrcode-tiger.com.com",
-    //     "qrType" => "qr2",
-    //     "qrCategory" => "url"
-    // ];
 
     /* Taking the default array and merging it with the  array. */
     //$body = wp_json_encode(wp_parse_args($qrtiger_defaults, $bodyParams));
@@ -88,9 +71,37 @@ function qrtiger_api_request($endpoint = '', $bodyParams = array(), $method = "G
     /* Checking if the response body is not empty and then decoding the response body. */
     $response_object     = $response_body ? json_decode($response_body) : false;
 
-    return $response_object;
+    $resp = $response_object->status != 403 ? $response_object : false;
+
+    return $resp;
 }
 
+//add_action('wp_footer', 'test_g');
+
+function test_g()
+{
+    $qrtiger_defaults = [
+        "qr" => [
+            "size" => 500,
+            "colorDark" => "rgb(5,64,128)",
+            "logo" => "",
+            "eye_outer" => "eyeOuter2",
+            "eye_inner" => "eyeInner1",
+            "qrData" => "pattern0",
+            "backgroundColor" => "rgb(255,255,255)",
+            "transparentBkg" => false,
+            "qrCategory" => "url",
+            "text" => "https://www.qrcode-tiger.com.com/"
+        ],
+        "qrUrl" => "https://www.qrcode-tiger.com.com",
+        "qrType" => "qr2",
+        "qrCategory" => "url"
+    ];
+
+    $POST = qrtiger_api_request('/api/campaign/', $qrtiger_defaults, 'POST');
+
+    var_dump($POST);
+}
 
 function glassfrog_api_request($endpoint = '', $bodyParams = array(), $method = "GET")
 {
@@ -151,6 +162,8 @@ function glassfrog_api_request($endpoint = '', $bodyParams = array(), $method = 
     return $response_object;
 }
 
+
+
 /*This function is used to make ajax call on woocommerce my account page. 
  *It calls qrtiger api and fetches qrcodes data
  */
@@ -190,7 +203,7 @@ function dongtrader_generate_qr2()
                 'qr_image_url'  => $qrtiger_api_call->data->qrImage,
                 'created_at'    => $qrtiger_api_call->data->createdAt,
                 'updated_at'    => $qrtiger_api_call->data->updatedAt,
-                'qr_id'         => $qrtiger_api_call->data->qrId
+                'qr_id'         => $qrtiger_api_call->data->qrId,
             );
 
             $old_dong_qr_array = get_option('dong_user_qr_values');
@@ -198,7 +211,7 @@ function dongtrader_generate_qr2()
             if ($prev_value_check) {
                 array_push($old_dong_qr_array, $current_dong_qr_array);
                 // update_user_meta($dong_user_id, 'dong_user_qr_values', $old_dong_qr_array);
-                update_option('dong_user_qr_values', $old_dong_qr_array);
+                update_option('dong_user_qr_values', array_reverse($old_dong_qr_array));
             } else {
                 // update_user_meta($dong_user_id, 'dong_user_qr_values', [$current_dong_qr_array]);
                 update_option('dong_user_qr_values', [$current_dong_qr_array]);
