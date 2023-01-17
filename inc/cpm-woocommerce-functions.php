@@ -90,15 +90,21 @@ function dongtraders_product_link_with_membership_goes_checkoutpage()
 {
     if (class_exists('WooCommerce')) {
         if (is_product()) {
-
+            WC()->cart->empty_cart();
             global $product;
             $product_id = $product->get_id();
-            WC()->cart->empty_cart();
             if (!empty(($_GET['add']))) {
                 $check_add_product = $_GET['add'];
                 if ($check_add_product == '1') {
-                    WC()->cart->add_to_cart($product_id);
-                    wp_redirect(home_url('/checkout/'));
+                    /*  check if user already bought product */
+                    if (wc_customer_bought_product('', get_current_user_id(), $product->get_id())) {
+                        // if (!empty(dongtraders_get_membership_link_product($product->get_id()))) {
+                        $product_page = get_permalink($product->get_id());
+                        wp_redirect($product_page);
+                    } else {
+                        WC()->cart->add_to_cart($product_id);
+                        wp_redirect(home_url('/checkout/'));
+                    }
                 }
                 exit();
             }
@@ -109,11 +115,7 @@ function dongtraders_product_link_with_membership_goes_checkoutpage()
 
 
 
-// remove_action('woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart');
-// remove_action(
-//     'woocommerce_single_product_summary',
-//     'woocommerce_template_single_add_to_cart'
-// );
+// add_action('woocommerce_before_checkout_form', 'dongtraders_check_user_bought_product_already_bought', 12);
 add_action('woocommerce_after_shop_loop_item', 'dongtraders_check_user_bought_product_already_bought', 30);
 add_action('woocommerce_before_add_to_cart_quantity', 'dongtraders_check_user_bought_product_already_bought', 30);
 
@@ -121,14 +123,38 @@ function dongtraders_check_user_bought_product_already_bought()
 {
     global $product;
     if (!is_user_logged_in()) return;
-    if (wc_customer_bought_product('', get_current_user_id(), $product->get_id())) {
+    if (!empty(dongtraders_get_membership_link_product($product->get_id()))) {
         $accountpage = get_permalink(wc_get_page_id('myaccount'));
         echo '<div>Your Account is already register As Membership. Please Visit <a href="' . $accountpage . '">Account page</a></div>';
         echo '<style>
     .quantity, .cart .single_add_to_cart_button, .ajax_add_to_cart {
         display: none !important;
     }
+    table.variations {
+    display: none;
+}
     
 </style>';
     }
+}
+
+
+/* Checking if the user is logged in and has a membership level. */
+function dongtraders_check_user_membership_level()
+{
+    if (is_user_logged_in() && function_exists('pmpro_hasMembershipLevel') && pmpro_hasMembershipLevel()) {
+        global $current_user;
+        $current_user->membership_level = pmpro_getMembershipLevelForUser($current_user->ID);
+        $get_membership_level = $current_user->membership_level;
+        return $get_membership_level->name;
+    }
+}
+
+
+
+/* Getting the membership level of the product. */
+function dongtraders_get_membership_link_product($product_id)
+{
+    $get_product_member_level =  get_post_meta($product_id, '_membership_product_level', true);
+    return $get_product_member_level;
 }
