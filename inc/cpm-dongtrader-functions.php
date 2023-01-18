@@ -76,33 +76,9 @@ function qrtiger_api_request($endpoint = '', $bodyParams = array(), $method = "G
     return $resp;
 }
 
-//add_action('wp_footer', 'test_g');
 
-function test_g()
-{
-    $qrtiger_defaults = [
-        "qr" => [
-            "size" => 500,
-            "colorDark" => "rgb(5,64,128)",
-            "logo" => "",
-            "eye_outer" => "eyeOuter2",
-            "eye_inner" => "eyeInner1",
-            "qrData" => "pattern0",
-            "backgroundColor" => "rgb(255,255,255)",
-            "transparentBkg" => false,
-            "qrCategory" => "url",
-            "text" => "https://www.qrcode-tiger.com.com/"
-        ],
-        "qrUrl" => "https://www.qrcode-tiger.com.com",
-        "qrType" => "qr2",
-        "qrCategory" => "url"
-    ];
 
-    $POST = qrtiger_api_request('/api/campaign/', $qrtiger_defaults, 'POST');
-
-    var_dump($POST);
-}
-
+/* A function that is used to make the Glassfrog API requests. */
 function glassfrog_api_request($endpoint = '', $bodyParams = array(), $method = "GET")
 {
     /* Get the API credentials from the database. */
