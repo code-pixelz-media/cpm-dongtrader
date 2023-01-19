@@ -156,11 +156,8 @@ if (!function_exists('cpm_dongtraders_product_qr_generator_ajax')) {
 if (!function_exists('cpm_dongtraders_product_qr_generator_direct_checkout_fields')) {
 	function cpm_dongtraders_product_qr_generator_direct_checkout_fields()
 	{
-		$product_id = get_the_ID();
-		$get_product_member_level =  get_post_meta($product_id, '_membership_product_level', true);
-		if (!empty($get_product_member_level)) {
-			add_meta_box('dongtraders_qr_generator_direct_checkout_meta_fields', 'Product QR code [Direct Checkout]', 'dongtraders_qr_generator_field_direct_checkout_callback', 'product', 'side', 'default');
-		}
+
+		add_meta_box('dongtraders_qr_generator_direct_checkout_meta_fields', 'Product QR code [Direct Checkout]', 'dongtraders_qr_generator_field_direct_checkout_callback', 'product', 'side', 'default');
 	}
 	add_action('add_meta_boxes', 'cpm_dongtraders_product_qr_generator_direct_checkout_fields');
 }

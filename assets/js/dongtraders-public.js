@@ -8,7 +8,8 @@ function dong_traders_url_copy(element) {
 }
 
 (function ($) {
-  $(function () {
+  $(document).ready(function () {
+    jQuery("#checkbox-control-0").prop("checked", true);
     //initialize tab on backend
     $(document).on("click", ".update_card", function (ev) {
       $(".qr-tiger-vcard-code-generator").css("display", "block");
