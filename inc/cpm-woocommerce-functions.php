@@ -96,16 +96,15 @@ function dongtraders_product_link_with_membership_goes_checkoutpage()
             if (!empty(($_GET['add']))) {
                 $check_add_product = $_GET['add'];
                 if ($check_add_product == '1') {
-                    /*  check if user already bought product */
-                    //if (wc_customer_bought_product($customer_email, get_current_user_id(), $product->get_id()) == true) {
-                    if (dongtraders_has_bought_product_items($product->get_id()) == true) {
-                        // if (!empty(dongtraders_get_membership_link_product($product->get_id()))) {
+                    $has_already_bought_product = dongtraders_has_bought_product_items($product->get_id());
+                    $checkout_url = wc_get_checkout_url();
+                    if ($has_already_bought_product) {
                         $product_page = get_permalink($product_id);
                         wp_redirect($product_page);
                         exit();
                     } else {
                         WC()->cart->add_to_cart($product_id);
-                        wp_redirect(home_url('/checkout/'));
+                        wp_redirect($checkout_url);
                         exit();
                     }
                 }
@@ -166,14 +165,24 @@ function dongtraders_has_bought_product_items($product_id)
 {
     global $woocommerce;
     $user_id = get_current_user_id();
-    $current_user = wp_get_current_user();
-    $customer_email = $current_user->email;
-    $ex = false;
+    if (0 == $user_id) return false;
 
+    // $current_user = wp_get_current_user();
+    // $customer_email = $current_user->email;
 
-    if (wc_customer_bought_product($customer_email, $user_id, $product_id)) {
-        $ex = true;
+    $customer_orders = get_posts(array(
+        'numberposts' => -1,
+        'meta_key'    => '_customer_user',
+        'meta_value'  => $user_id,
+        'post_type'   => wc_get_order_types(),
+        'post_status' => array_keys(wc_get_is_paid_statuses())
+    ));
+
+    $get_product_member_level =  get_post_meta($product_id, '_membership_product_level', true);
+
+    if (count($customer_orders) > 1 && (bool)$get_product_member_level) {
+        return true;
+    } else {
+        return false;
     }
-
-    return $ex;
 }
