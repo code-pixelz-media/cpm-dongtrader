@@ -421,34 +421,30 @@ if (!function_exists('dongtraders_qr_generator_field_variation_product_callback'
 					"qrCategory" => "url"
 				];
 
-				$qrtiger_api_call = true; // qrtiger_api_request('/api/campaign/', $qrtiger_array, 'POST');
+				$qrtiger_api_call =  qrtiger_api_request('/api/campaign/', $qrtiger_array, 'POST');
 
 				if ($qrtiger_api_call) {
 
-					// $current_dong_qr_array = array(
-					// 	'qr_image_url'  => $qrtiger_api_call->data->qrImage,
-					// 	'created_at'    => $qrtiger_api_call->data->createdAt,
-					// 	'updated_at'    => $qrtiger_api_call->data->updatedAt,
-					// 	'qr_id'         => $qrtiger_api_call->data->qrId,
-					// );
 					$current_dong_qr_array = array(
-						'qr_image_url'  => 'https://qrtiger.com/qr/OXX3.png',
-						'created_at'    => 'date',
-						'updated_at'    => 'date',
-						'qr_id'         => $i,
+						'qr_image_url'  => $qrtiger_api_call->data->qrImage,
+						'created_at'    => $qrtiger_api_call->data->createdAt,
+						'updated_at'    => $qrtiger_api_call->data->updatedAt,
+						'qr_id'         => $qrtiger_api_call->data->qrId,
 					);
+					// $current_dong_qr_array = array(
+					// 	'qr_image_url'  => 'https://qrtiger.com/qr/OXX3.png',
+					// 	'created_at'    => 'date',
+					// 	'updated_at'    => 'date',
+					// 	'qr_id'         => $i,
+					// );
 					update_post_meta($qrPid, '_variation_qr_datas', $current_dong_qr_array);
 					update_post_meta($productId, 'variation_data_checks', 'ok');
-
-
-
-
-					// $html .= '<div id="' . $qrtiger_api_call->data->qrId . '" class="qr-component">
-					// <img src="' . $qrtiger_api_call->data->qrImage . '" alt="" width="200" height="200">
-					// <button data-url= "' . $qrtiger_api_call->data->qrImage . '" class="button button-primary button-large url-copy" >Copy QR URL</button></div>';
-					$html .= '<div id="' . $s . '" class="qr-component">
-				<img src="https://qrtiger.com/qr/OXX3.png" alt="" width="200" height="200">
-				<button class="button button-primary button-large url-copy" data-url="https://www.facebook.com" >Copy QR URL</button></div>';
+					$html .= '<div id="' . $qrtiger_api_call->data->qrId . '" class="qr-component">
+					<img src="' . $qrtiger_api_call->data->qrImage . '" alt="" width="200" height="200">
+					<button data-url= "' . $qrtiger_api_call->data->qrImage . '" class="button button-primary button-large url-copy" >Copy QR URL</button></div>';
+					// 	$html .= '<div id="' . $s . '" class="qr-component">
+					// <img src="https://qrtiger.com/qr/OXX3.png" alt="" width="200" height="200">
+					// <button class="button button-primary button-large url-copy" data-url="https://www.facebook.com" >Copy QR URL</button></div>';
 				} else {
 					array_push(
 						$check,
