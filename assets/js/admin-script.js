@@ -108,7 +108,8 @@
     });
   }
 
-  $(".url-copy").on("click", function () {
+  $(document).on("click", '.url-copy', function (cp) {
+    cp.preventDefault();
     var urlcp = $(this).attr("data-url");
     var $temp = $("<input>");
     $("body").append($temp);
@@ -140,4 +141,36 @@
       }
     );
   });
+
+// Scenario changed a bit for meta fields
+
+  // function multiple_qr_generator(button) {
+
+  //   button.on('click', function (esg) {
+  //     esg.preventDefault();
+  //     var id = $(this).attr('data-id'),
+  //       evtAction = $(this).attr('data-initiator')
+  //       inPut = $(this).next('input');
+  //       init_ajax_request({
+  //         action: 'dongtrader_meta_qr_generator',
+  //         type: 'JSON',
+  //         productID: id,
+  //         intiator : evtAction
+  //       },inPut) 
+  //   });
+    
+    
+  // }
+
+  // function init_ajax_request(datas,inPut) {
+  //   $.post(dongScript.ajaxUrl, datas, function (mData) {
+  //     var jsonData = JSON.parse(mData);
+  //     if (jsonData.success) {
+  //       inPut.val(mData);
+  //    }
+  //   });
+  // }
+
+  // multiple_qr_generator($('.generate-product-qr'));
+
 })(jQuery);

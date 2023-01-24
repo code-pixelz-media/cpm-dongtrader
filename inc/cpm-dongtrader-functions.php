@@ -223,3 +223,64 @@ function dongtrader_delete_qr()
     echo wp_json_encode($resp_array);
     wp_die();
 }
+
+//Simple function to make api calls with parameters as an array
+
+function dongtrader_api_call()
+{
+}
+
+add_action('wp_ajax_dongtrader_meta_qr_generator', 'dongtrader_meta_qr_generator');
+
+function dongtrader_meta_qr_generator()
+{
+
+    $intiator = esc_attr($_POST['intiator']);
+    $product_id = sanitize_text_field($_POST['productID']);
+    $product_url = wc_get_product($product_id);
+    $resp = array(
+        'success' => false,
+        'initiator' => $intiator,
+        'product'   => $product_id
+    );
+
+    //default array
+    $qrtiger_array = [
+        "qr" => [
+            "size" => "500",
+            "colorDark" => "rgb(5, 64, 128)",
+            "transparentBkg" => false,
+        ],
+        "qrUrl" => '',
+        "qrType" => "qr2",
+        "qrCategory" => "url"
+    ];
+    switch ($intiator) {
+        case '_product_qr_codes':
+            $product_url = $product_url->get_permalink();
+            $qrtiger_array['qr']['colorDark'] = "rgb(5, 64, 128)";
+            $qrtiger_array['qrUrl'] = $product_url;
+            $resp['success'] = true;
+            break;
+
+        case '_product-qr-direct-checkouts':
+            $checkoutUrl = 'checkout--url';
+            $qrtiger_array['qr']['colorDark'] = "rgb(5, 64, 128)";
+            $qrtiger_array['qrUrl'] = $checkoutUrl;
+            $resp['success'] = true;
+            break;
+
+        case '_product-qr-variable':
+            $resp['success'] = true;
+
+            break;
+
+        default:
+            $resp['success'] = false;
+    }
+
+    //$qrtiger_api_call = qrtiger_api_request('/api/campaign/', $qrtiger_array, 'POST');
+
+    echo wp_json_encode($resp);
+    exit;
+}
