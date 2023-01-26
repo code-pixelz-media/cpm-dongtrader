@@ -112,7 +112,7 @@ class Dongtrader_qr_metas
 					echo '</div>';				
 				}
 			}else{
-				echo '<button data-variable="'.$str_variations.'" data-initiator= "' . esc_attr($datas['slug']) . '" data-id="' . esc_attr($productNum) . '" class="' . esc_attr($datas['buttonClass']) . ' button button-primary button-large">Generate Product QR</button>';
+				echo '<button data-variable="'.$str_variations.'" data-initiator= "' . esc_attr($datas['slug']) . '" data-id="' . esc_attr($productNum) . '" class="' . esc_attr($datas['buttonClass']) . ' button button-primary button-large">Generate Variable Product QR</button>';
 			}
 
 
