@@ -99,17 +99,22 @@ class Dongtrader_qr_metas
 		echo '<div id= "" class= "qr-containers-dong-' . $datas['slug'] . '">';
 		// get meta according to the slug form top array
 		if($datas['variable']){
-			foreach($decoded_json as $d){
-				$html_decoder = htmlspecialchars_decode($d);
-				$json_decodes = json_decode($html_decoder, true);
-				echo '<div class = "qr-components-dongs">';
-					if(!empty($json_decodes)){
-						echo '<img src="' . $json_decodes['qr_image_url'] . '' . '" alt="" width="200" height="200">';
-				//copy url button
-						echo '<button data-url="'.$json_decodes['qr_image_url'] . '" class="button-primary button-large url-copy" >Copy QR URL</button>';
-					}
-				echo '</div>';				
+			if(!empty($decoded_json)){
+				foreach($decoded_json as $d){
+					$html_decoder = htmlspecialchars_decode($d);
+					$json_decodes = json_decode($html_decoder, true);
+					echo '<div class = "qr-components-dongs">';
+						if(!empty($json_decodes)){
+							echo '<img src="' . $json_decodes['qr_image_url'] . '' . '" alt="" width="200" height="200">';
+					//copy url button
+							echo '<button data-url="'.$json_decodes['qr_image_url'] . '" class="button-primary button-large url-copy" >Copy QR URL</button>';
+						}
+					echo '</div>';				
+				}
+			}else{
+				echo '<button data-variable="'.$str_variations.'" data-initiator= "' . esc_attr($datas['slug']) . '" data-id="' . esc_attr($productNum) . '" class="' . esc_attr($datas['buttonClass']) . ' button button-primary button-large">Generate Product QR</button>';
 			}
+
 
 		}else{
 			echo '<div class = "qr-components-dongs">';
