@@ -60,8 +60,8 @@ class Dongtrader_qr_metas
 				$g['title'],
 				array($this, $g['callback']),
 				'product',
-				'advanced',
-				'high'
+				'side',
+				'low'
 
 			);
 		}
@@ -99,7 +99,6 @@ class Dongtrader_qr_metas
 		echo '<div id= "" class= "qr-containers-dong-' . $datas['slug'] . '">';
 		// get meta according to the slug form top array
 		if($datas['variable']){
-
 			foreach($decoded_json as $d){
 				$html_decoder = htmlspecialchars_decode($d);
 				$json_decodes = json_decode($html_decoder, true);
