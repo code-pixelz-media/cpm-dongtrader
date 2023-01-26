@@ -142,35 +142,46 @@
     );
   });
 
-// Scenario changed a bit for meta fields
+//Scenario changed a bit for meta fields
 
-  // function multiple_qr_generator(button) {
+  function multiple_qr_generator(button) {
 
-  //   button.on('click', function (esg) {
-  //     esg.preventDefault();
-  //     var id = $(this).attr('data-id'),
-  //       evtAction = $(this).attr('data-initiator')
-  //       inPut = $(this).next('input');
-  //       init_ajax_request({
-  //         action: 'dongtrader_meta_qr_generator',
-  //         type: 'JSON',
-  //         productID: id,
-  //         intiator : evtAction
-  //       },inPut) 
-  //   });
+    button.on('click', function (esg) {
+      esg.preventDefault();
+      button.text('Generating...');
+      console.log('hito');
+      var postId = $(this).attr('data-productid'),
+        evtAction = $(this).attr('data-initiator')
+        inPut = $(this).next('input'),
+        mainContainer = $('.qr-containers-dong-'+evtAction),
+        variations  = $(this).attr('data-variable');
+      init_ajax_request({
+        action: 'dongtrader_meta_qr_generator',
+        productnums: postId,
+        variations : variations,
+        intiator: evtAction
+      }, inPut,mainContainer,$(this));
+    });
     
     
-  // }
+  }
 
-  // function init_ajax_request(datas,inPut) {
-  //   $.post(dongScript.ajaxUrl, datas, function (mData) {
-  //     var jsonData = JSON.parse(mData);
-  //     if (jsonData.success) {
-  //       inPut.val(mData);
-  //    }
-  //   });
-  // }
-
-  // multiple_qr_generator($('.generate-product-qr'));
+  function init_ajax_request(datas,inPut,mainContainer,button) {
+    $.post(dongScript.ajaxUrl, datas, function (mData) {
+      console.log(mData);
+      var jsonData = JSON.parse(mData);
+     
+      if (jsonData.success) {
+        mainContainer.empty();
+        mainContainer.append(jsonData.template);
+        inPut.val(mData);
+     }
+     button.text('Generate Product QR');
+    });
+  }
+  multiple_qr_generator($('.generate-product-qr'));
+  multiple_qr_generator($('.generate-product-qr-direct-checkout'));
+  multiple_qr_generator($('.generate-product-variable-qr-code'));
+  //generate-product-qr .generate-product-qr-direct-checkout .generate-product-variable-qr-code
 
 })(jQuery);
