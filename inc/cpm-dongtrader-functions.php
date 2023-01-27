@@ -382,13 +382,13 @@ function dongtrader_meta_qr_generator()
 }
 
 
-add_action('wp_footer', 'testguy');
+// add_action('wp_footer', 'testguy');
 
-function testguy()
-{
-    $variations =new WC_Product_Variation(1308);
+// function testguy()
+// {
+//     $variations =new WC_Product_Variation(1308);
 
 
 
-    var_dump($variations);
-}
+//     var_dump($variations);
+// }

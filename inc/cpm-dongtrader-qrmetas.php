@@ -94,8 +94,6 @@ class Dongtrader_qr_metas
 		$variations = $product->get_available_variations();
 		$variations_id = wp_list_pluck($variations, 'variation_id');
 		$str_variations = implode(",", $variations_id);
-
-		
 		echo '<div id= "" class= "qr-containers-dong-' . $datas['slug'] . '">';
 		// get meta according to the slug form top array
 		if($datas['variable']){
@@ -108,13 +106,14 @@ class Dongtrader_qr_metas
 							echo '<img src="' . $json_decodes['qr_image_url'] . '' . '" alt="" width="200" height="200">';
 					//copy url button
 							echo '<button data-url="'.$json_decodes['qr_image_url'] . '" class="button-primary button-large url-copy" >Copy QR URL</button>';
+							//echo '<button data-url="'.$json_decodes['qr_image_url'] . '" class="button-primary button-large url-copy" >Copy QR URL</button>';
 						}
-					echo '</div>';				
+					echo '</div>';
 				}
 			}else{
 				echo '<button data-variable="'.$str_variations.'" data-initiator= "' . esc_attr($datas['slug']) . '" data-id="' . esc_attr($productNum) . '" class="' . esc_attr($datas['buttonClass']) . ' button button-primary button-large">Generate Variable Product QR</button>';
 			}
-
+		
 
 		}else{
 			echo '<div class = "qr-components-dongs">';
@@ -123,6 +122,8 @@ class Dongtrader_qr_metas
 				echo '<img src="' . $decoded_json['qr_image_url'] . '' . '" alt="" width="200" height="200">';
 				//copy url button
 				echo '<button data-url="'.$decoded_json['qr_image_url'] . '" class="button-primary button-large url-copy" >Copy QR URL</button>';
+
+				//echo '<button data-remove="'.$productNum.'" class="button-primary button-large">Delete</button>';
 			else :
 				if($datas['variable']){
 					echo '<button data-variable="'.$str_variations.'" data-initiator= "' . esc_attr($datas['slug']) . '" data-id="' . esc_attr($productNum) . '" class="' . esc_attr($datas['buttonClass']) . ' button button-primary button-large">Generate Product QR</button>';
@@ -130,9 +131,6 @@ class Dongtrader_qr_metas
 					echo '<button data-variable= "false" data-initiator= "' . esc_attr($datas['slug']) . '" data-id="' . esc_attr($productNum) . '" class="' . esc_attr($datas['buttonClass']) . ' button button-primary button-large">Generate Product QR</button>';
 				}
 				// $this->generate_qr_generator_button($datas['slug'], $productNum, $datas['buttonClass']);
-				
-				
-
 			endif;
 			echo '<input data-id="' . esc_attr($productNum) . '" type="hidden" name ="' . esc_attr($datas['slug']) . '" value="' . esc_attr($qr_datas) . '">';
 			echo '</div>';
@@ -155,10 +153,8 @@ class Dongtrader_qr_metas
 	{
 		$product = wc_get_product($post->ID);
 		$productType =  $product->get_type();
-
 		$this->render_generator_button_with_image($this->generators[2], $post->ID);
-		// 	}
-		// }
+		
 	}
 
 	public function filterArrayByKeys(array $input, array $column_keys)
@@ -175,30 +171,6 @@ class Dongtrader_qr_metas
 
 	public function save_metabox($post_id, $post)
 	{
-		// Add nonce for security and authentication.
-		$nonce_name   = $_POST['car_nonce'];
-		$nonce_action = 'car_nonce_action';
-
-		// Check if a nonce is set.
-		// if (!isset($nonce_name))
-		// 	return;
-
-		// Check if a nonce is valid.
-		// if (!wp_verify_nonce($nonce_name, $nonce_action))
-		// 	return;
-
-		// // Check if the user has permissions to save data.
-		// if (!current_user_can('edit_post', $post_id))
-		// 	return;
-
-		// // Check if it's not an autosave.
-		// if (wp_is_post_autosave($post_id))
-		// 	return;
-
-		// // Check if it's not a revision.
-		// if (wp_is_post_revision($post_id))
-		// 	return;
-
 		// // Sanitize user input.
 		$product_qr_code = isset($_POST['_product_qr_codes']) ? esc_attr($_POST['_product_qr_codes']) : '';
 		update_post_meta($post_id, '_product_qr_codes', $product_qr_code);
@@ -206,17 +178,7 @@ class Dongtrader_qr_metas
 		update_post_meta($post_id, '_product-qr-direct-checkouts', $direct_checkout_code);
 		$variable_qr_code = !empty($_POST['_product-qr-variabled']) ? esc_attr(json_encode($_POST['_product-qr-variabled'])): '';
 		update_post_meta($post_id,'_product-qr-variabled',	$variable_qr_code);
-		// $car_new_mileage = isset($_POST['car_mileage']) ? sanitize_text_field($_POST['car_mileage']) : '';
-		// $car_new_cruise_control = isset($_POST['car_cruise_control']) ? 'checked' : '';
-		// $car_new_power_windows = isset($_POST['car_power_windows']) ? 'checked' : '';
-		// $car_new_sunroof = isset($_POST['car_sunroof']) ? 'checked' : '';
-
-		// // Update the meta field in the database.
-
-		// update_post_meta($post_id, 'car_mileage', $car_new_mileage);
-		// update_post_meta($post_id, 'car_cruise_control', $car_new_cruise_control);
-		// update_post_meta($post_id, 'car_power_windows', $car_new_power_windows);
-		// update_post_meta($post_id, 'car_sunroof', $car_new_sunroof);
+		
 	}
 }
 new Dongtrader_qr_metas;
