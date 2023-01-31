@@ -394,19 +394,3 @@ function dongtrader_delete_qr_fields() {
     wp_die();
 }
 
-add_action('wp_footer', 'test_guy');
-function test_guy(){
-
-    $productnum= '1308';
-    $product        = wc_get_product($productnum);
-    $checkout       = site_url('/checkout/?add-to-cart=' . $productnum); // https://yoursite.com/checkout/?add-to-cart={productID}
-    $product_url    = get_permalink($productnum);
-
-    // $current_data= dongtrader_ajax_helper('rgb(5, 64, 128)',$product_url);
-
-    // var_dump($current_products_data);
-
-
-
-var_dump($product_url);
-}
