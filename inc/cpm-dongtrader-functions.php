@@ -255,7 +255,7 @@ function dongtrader_variable_color_to_rgb_color($color)
 }
 
 
-function dongtrader_ajax_test_helper(){
+function dongtrader_ajax_test_helper($color='', $url='' , $size=''){
 
 
     return array(
@@ -269,7 +269,7 @@ function dongtrader_ajax_test_helper(){
 
 function dongtrader_ajax_helper($color , $url , $size='500'){
     
-    $current_dong_qr_array = false;
+    $current_dong_qr_array = true;
     $qrtiger_array = [
         "qr" => [
             "size" => $size,
@@ -290,6 +290,9 @@ function dongtrader_ajax_helper($color , $url , $size='500'){
             "qr_id"         => $qrtiger_api_call->data->qrId,
         );
 
+    }else{
+
+        $current_dong_qr_array = false;
     }
 
     return $current_dong_qr_array;
@@ -301,80 +304,71 @@ add_action('wp_ajax_dongtrader_meta_qr_generator', 'dongtrader_meta_qr_generator
 function dongtrader_meta_qr_generator()
 {
 
-    $intiator = esc_attr($_POST['intiator']);
-    $productnum = $_POST['productnums'];
-    $product = wc_get_product($productnum);
-    $checkout = site_url('/checkout/?add-to-cart=' . $productnum); // https://yoursite.com/checkout/?add-to-cart={productID}
-    $product_url = get_permalink($productnum);
+    $intiator       = esc_attr($_POST['intiator']);
+    $productnum     = $_POST['productnums'];
+    $product        = wc_get_product($productnum);
+    $checkout       = site_url('/checkout/?add-to-cart=' . $productnum); 
+    $product_url    = get_permalink($productnum);
     $resp = array(
-        'success' => false,
+        'success' => 'false',
         'initiator' => $intiator,
         'template' => ''
     );
-
+ 
+//for products qr code
     if($intiator == '_product_qr_codes'){
-        $current_data= dongtrader_ajax_test_helper();
+    
+        $current_data = dongtrader_ajax_helper('rgb(51, 51, 255)',$checkout);
         if(!empty($current_data)){
-            update_post_meta($productnum, '_product_qr_codes', wp_json_encode($current_data));
             $update_data = json_encode($current_data);
+            update_post_meta($productnum, '_product_qr_codes', $update_data);
             $resp['success'] = true;
-            $resp['template'] = '<div id="" class="qr-components-dongs">
+            $resp['template'] = '<div id="" class="dong-qr-components">
             <img src="'.$current_data['qr_image_url'].'" alt="" width="200" height="200">
             <button data-url= "'.$current_data['qr_image_url'].'" class="button button-primary button-large url-copy" >Copy QR URL</button>
             <input type= "hidden" data-id="' . esc_attr($productnum) . '"  name ="_product_qr_codes" value="'.esc_attr($update_data).'">
-            </div>';
-           
-            // $resp['template']= '<div id="" class="qr-components-dongs">
-            //     <img src="'.$current_data['qr_image_url'].'" alt="" width="200" height="200">
-            //     <button data-url= "'.$current_data['qr_image_url'].'" class="button button-primary button-large url-copy" >Copy QR URL</button>
-            //     <input type= "hidden" data-id="' . esc_attr($productnum) . '"  name ="_product_qr_codes" value="'.esc_attr($update_data).'"></div>';
+            <button data-meta="_product_qr_codes" data-remove="'.$productnum . '" class="button-primary button-large qr-remover" style="" >Remove</button></div>';
+            
+         
         }
-
+//for direct checkout
     }elseif($intiator == '_product-qr-direct-checkouts'){
-        $current_data = dongtrader_ajax_helper('rgb(5, 64, 128)',$checkout );
-
+        //call api helper function
+        $current_data = dongtrader_ajax_helper('rgb(0, 255, 191)',$checkout);
         if(!empty($current_data)){
             $update_data = json_encode($current_data);
             update_post_meta($productnum, '_product-qr-direct-checkouts',$update_data);
             $resp['success'] = true;
-
-            // $resp['html'] = '<div id="' . $qrtiger_api_call->data->qrId . '" class="qr-components-dongs">
-            // <img src="' . $qrtiger_api_call->data->qrImage . '" alt="" width="200" height="200">
-            // <button data-url= "' . $qrtiger_api_call->data->qrImage . '" class="button button-primary button-large url-copy" >Copy QR URL</button></div>';
-
-            $resp['template']= '<div id="" class="qr-components-dongs">
+            $resp['template']= '<div id="" class="dong-qr-components">
             <img src="'.$current_data['qr_image_url'].'" alt="" width="200" height="200">
             <button data-url= "'.$current_data['qr_image_url'].'" class="button button-primary button-large url-copy" >Copy QR URL</button>
-            <input type= "hidden" data-id="' . esc_attr($productnum) . '"  name ="_product-qr-direct-checkouts" value="'.esc_attr($update_data).'"></div>';
+            <input type= "hidden" data-id="' . esc_attr($productnum) . '"  name ="_product-qr-direct-checkouts" value="'.esc_attr($update_data).'">
+            <button data-meta="_product_qr_codes" data-remove="'.$productnum . '" class="button-primary button-large qr-remover" style="" >Remove</button></div>';
         }
+//for variable products
     }elseif($intiator == '_product-qr-variabled'){
-        $variations =  $_POST['variations'];
-        $variations_array = explode(',',$variations);
-        $all_elms = array();
-        $html = '';
-        foreach ($variations_array as $key => $v_id) {
-            $get_url = get_permalink($v_id);
+        $variations =  esc_attr($_POST['variations']);
+        $loop = esc_attr($_POST['loop']);
+        $html= '';
+        if(!empty($variations)){
+            $get_url = get_permalink($variations);
             $query = parse_url($get_url, PHP_URL_QUERY);
             parse_str($query, $queryArray);
             $get_color = $queryArray['attribute_color'];
+            $html = '';
             $current__array = dongtrader_ajax_helper(dongtrader_variable_color_to_rgb_color($get_color),$get_url);
             if($current__array){
-                array_push($all_elms,$current__array);
-                //$html .=   = '<div id="' . $qrtiger_api_call->data->qrId . '" class="qr-components-dongs">
-                // <img src="' . $qrtiger_api_call->data->qrImage . '" alt="" width="200" height="200">
-                // <button data-url= "' . $qrtiger_api_call->data->qrImage . '" class="button button-primary button-large url-copy" >Copy QR URL</button></div>';
                 $update_data = json_encode($current__array);
-                $html .= '<div  class="qr-components-dongs">
-                <img src="'.$current__array['qr_image_url'].'" alt="" width="200" height="200">
+                update_post_meta($variations, 'variable_product_qr_data', esc_attr($update_data));
+                $html .= '<div class="dong-qr-components '.  $variations.'" >
+                <img src="'.$current__array['qr_image_url'].'" alt="" width="100" height="100">
                 <button data-url= "'.$current__array['qr_image_url'].'" class="button button-primary button-large url-copy" >Copy QR URL</button>
-                <input type="hidden" data-id="' . $productnum . '"  name ="_product-qr-variabled[]" value="'.esc_attr($update_data).'"></div>';
+                <input type="hidden" data-id="' . $productnum . '"  name ="variable_product_qr_data['.$loop.']" value="'.esc_attr($update_data).'">
+                <button data-meta="variable_product_qr_data" data-remove="'.$productnum . '" class="button-primary button-large qr-remover" style="" >Remove</button></div>';
             }
-
+            $resp['success'] = true;
+            $resp['template'] =$html;
         }
-        $items = json_encode($all_elms);
-        update_post_meta($productnum, '_product-qr-direct-checkouts',$items);
-        $resp['success'] = true;
-        $resp['template'] = $html;
     }
  
     echo json_encode($resp);
@@ -382,13 +376,37 @@ function dongtrader_meta_qr_generator()
 }
 
 
-// add_action('wp_footer', 'testguy');
+add_action( 'wp_ajax_dongtrader_delete_qr_fields', 'dongtrader_delete_qr_fields' );
+function dongtrader_delete_qr_fields() {
+    $variation_id = esc_attr($_POST['itemID']);
+    $variation_meta_key = esc_attr($_POST['metakey']);
+    $ajax_values = array( 'resp' => false,'html' => false);
+    if(!empty($variation_id) && !empty($variation_meta_key)){
 
-// function testguy()
-// {
-//     $variations =new WC_Product_Variation(1308);
+        $status =  delete_post_meta( $variation_id,  $variation_meta_key);
+        if($status) {
+            $ajax_values['status'] = true;
+            $ajax_values['html'] = true;
+        }
+   
+    }
+    wp_send_json($ajax_values);
+    wp_die();
+}
+
+add_action('wp_footer', 'test_guy');
+function test_guy(){
+
+    $productnum= '1308';
+    $product        = wc_get_product($productnum);
+    $checkout       = site_url('/checkout/?add-to-cart=' . $productnum); // https://yoursite.com/checkout/?add-to-cart={productID}
+    $product_url    = get_permalink($productnum);
+
+    // $current_data= dongtrader_ajax_helper('rgb(5, 64, 128)',$product_url);
+
+    // var_dump($current_products_data);
 
 
 
-//     var_dump($variations);
-// }
+var_dump($product_url);
+}

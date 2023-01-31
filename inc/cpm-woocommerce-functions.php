@@ -27,7 +27,7 @@ function cpm_dong_my_membership_vcard_endpoint_content()
 {
 
     // of course you can print dynamic content here, one of the most useful functions here is get_current_user_id()
-?>
+    ?>
     <div class='qr-tiger-vcard-code-generator'>
         <h2><?php _e('My Vcard ', 'cpm-dongtrader') ?></h2>
         <form action="" method="post">
@@ -76,14 +76,9 @@ function cpm_dong_my_membership_vcard_endpoint_content()
     }
 }
 
-
-
-
-
 /**
  * Automatically add product to cart on visit
  */
-
 
 add_action('template_redirect', 'dongtraders_product_link_with_membership_goes_checkoutpage');
 function dongtraders_product_link_with_membership_goes_checkoutpage()
@@ -128,14 +123,14 @@ function dongtraders_check_user_bought_product_already_bought()
         $accountpage = get_permalink(wc_get_page_id('myaccount'));
         echo '<div>Your Account is already register As Membership. Please Visit <a href="' . $accountpage . '">Account page</a></div>';
         echo '<style>
-    .quantity, .cart .single_add_to_cart_button, .ajax_add_to_cart {
-        display: none !important;
-    }
-    table.variations {
-    display: none;
-}
+        .quantity, .cart .single_add_to_cart_button, .ajax_add_to_cart {
+            display: none !important;
+        }
+        table.variations {
+        display: none;
+        }
     
-</style>';
+        </style>';
     }
 }
 
@@ -186,3 +181,4 @@ function dongtraders_has_bought_product_items($product_id)
         return false;
     }
 }
+

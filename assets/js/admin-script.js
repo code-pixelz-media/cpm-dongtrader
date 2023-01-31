@@ -1,4 +1,4 @@
-(function ($) {
+jQuery(document).ready(function($){
   /*Retreives Data From session storage */
   let data = sessionStorage.getItem("lastid");
   /* Checks The Last Tab clicked from session storage and makes the same tab active from session storage */
@@ -108,7 +108,7 @@
     });
   }
 
-  $(document).on("click", '.url-copy', function (cp) {
+  $(document).on("click", ".url-copy", function (cp) {
     cp.preventDefault();
     var urlcp = $(this).attr("data-url");
     var $temp = $("<input>");
@@ -116,72 +116,97 @@
     $temp.val(urlcp).select();
     if (document.execCommand("copy") && $temp.remove())
       alert("QR URL copied to clipboard");
-  });
+  }); 
 
-  $(".qr-delete").on("click", function (d) {
-    d.preventDefault();
-    var rowCount = $("#qr-all-list>tbody>tr").length,
-      table = $("#qr-all-list");
-    var el = $(this).closest("tr");
-    var qr_index = $(this).attr("data-index");
-    $(this).text("Deleting...");
-    $.post(
-      dongScript.ajaxUrl,
-      { action: "dongtrader_delete_qr", type: "JSON", qrIndex: qr_index },
-      function (resp) {
-        var obj = JSON.parse(resp);
-        if (obj.success) {
-          if (rowCount > 1) {
-            el.fadeOut(1000, "swing").remove();
-          } else {
-            window.location.reload();
-          }
-        }
-        $(this).text("Delete");
-      }
-    );
-  });
-
-//Scenario changed a bit for meta fields
-
-  function multiple_qr_generator(button) {
-
-    button.on('click', function (esg) {
-      esg.preventDefault();
-      button.text('Generating...');
-      console.log('hito');
-      var postId = $(this).attr('data-productid'),
-        evtAction = $(this).attr('data-initiator')
-        inPut = $(this).next('input'),
-        mainContainer = $('.qr-containers-dong-'+evtAction),
-        variations  = $(this).attr('data-variable');
-      init_ajax_request({
-        action: 'dongtrader_meta_qr_generator',
-        productnums: postId,
-        variations : variations,
-        intiator: evtAction
-      }, inPut,mainContainer,$(this));
+  $(document).on("click", ".qr-remover", function (rm) {
+    rm.preventDefault();
+    var itemId = $(this).attr('data-remove');
+    var metaKey = $(this).attr('data-meta');
+    console.log(metaKey);
+    var cloned = $(this).parent().clone();
+    var container = $(this).parent();
+    var save = $('.save-variation-changes');
+    var loop = $(this).attr('data-index');
+    var button = `<button data-index="${loop}" data-variable="true" data-initiator="_product-qr-variabled" data-id="${itemId}" class=" button button-primary button-large generate-variable-qr">Generate Product QR</button><input data-id="${itemId}" type="hidden" name="variable_product_qr_data" id="variable_product_qr_data[${loop}]" value="">`
+    $('#variable_description' + loop).trigger('change');
+    $.post(dongScript.ajaxUrl, { action : 'dongtrader_delete_qr_fields', itemID : itemId , metakey:metaKey }, function (mData) {
+      container.empty();
+      save.trigger('click');
     });
-    
-    
+     
+  }); 
+
+
+
+  function qr_generator(button) {
+    button.on('click', function (e) {
+      e.preventDefault();
+      button.text('Generating...')
+      var postId = $(this).attr("data-productid"),
+        evtAction = $(this).attr("data-initiator");
+        inPut = $(this).next("input"),
+        mainContainer =$(this).parent(".dong-qr-components"),
+        variations = $(this).attr(".data-variable"); 
+      
+        initiate_ajax_request(
+          {
+
+            action: "dongtrader_meta_qr_generator",
+            productnums: postId,
+            variations: variations,
+            intiator: evtAction,
+          },
+          inPut,
+          mainContainer,
+          $(this)
+        );
+      
+      
+    });
   }
 
-  function init_ajax_request(datas,inPut,mainContainer,button) {
+
+  function initiate_ajax_request(datas, inPut, mainContainer, button) {
     $.post(dongScript.ajaxUrl, datas, function (mData) {
       console.log(mData);
       var jsonData = JSON.parse(mData);
-     
       if (jsonData.success) {
         mainContainer.empty();
         mainContainer.append(jsonData.template);
         inPut.val(mData);
-     }
-     button.text('Generate Product QR');
+        button.text('Generate Product QR');
+      }
+      //button.text("Generate Product QR");
     });
   }
-  multiple_qr_generator($('.generate-product-qr'));
-  multiple_qr_generator($('.generate-product-qr-direct-checkout'));
-  multiple_qr_generator($('.generate-product-variable-qr-code'));
-  //generate-product-qr .generate-product-qr-direct-checkout .generate-product-variable-qr-code
+  qr_generator($(".generate-product-qr"));
+  qr_generator($(".generate-product-qr-direct-checkout"));
+  //Scenario changed a bit for meta fields
 
-})(jQuery);
+    $('#woocommerce-product-data').on('woocommerce_variations_loaded', function (event) {
+        $('.generate-variable-qr').on('click', function (e) {
+              e.preventDefault();
+              var loop = $(this).attr('data-index');
+              var postId = $(this).attr("data-productid"),
+              evtAction = $(this).attr("data-initiator"),
+              inPut = $(this).next("input"),
+              mainContainer =$('#dong-qr-components'+loop),
+                variations = $(this).attr("data-id");
+              $('#variable_description' + loop).trigger('change');
+              initiate_ajax_request(
+                {
+                  action: "dongtrader_meta_qr_generator",
+                  productnums: postId,
+                  variations: variations,
+                  intiator: evtAction,
+                  loop : loop,
+                },
+                inPut,
+                mainContainer,
+                $(this)
+              );
+         // window.location.reload();
+        });
+
+    });
+});
