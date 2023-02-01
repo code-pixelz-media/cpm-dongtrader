@@ -360,11 +360,22 @@ function dongtrader_meta_qr_generator()
             if($current__array){
                 $update_data = json_encode($current__array);
                 update_post_meta($variations, 'variable_product_qr_data', esc_attr($update_data));
-                $html .= '<div class="dong-qr-components '.  $variations.'" >
-                <img src="'.$current__array['qr_image_url'].'" alt="" width="100" height="100">
-                <button data-url= "'.$current__array['qr_image_url'].'" class="button button-primary button-large url-copy" >Copy QR URL</button>
-                <input type="hidden" data-id="' . $productnum . '"  name ="variable_product_qr_data['.$loop.']" value="'.esc_attr($update_data).'">
-                <button data-meta="variable_product_qr_data" data-remove="'.$productnum . '" class="button-primary button-large qr-remover" style="" >Remove</button></div>';
+                $html .= '<div id="dong-qr-components'.$loop.'" class="dong-qr-components dong-qr-components-var">';
+                $html.= '<div class="qr-img-container-var">';
+				//qr image
+				$html.= '<img src="' . $current__array['qr_image_url'] . '' . '" alt="" width="100" height="100">';
+				$html.= '</div>';
+				//url copp
+				$html.= '<div class="qr-urlbtn-container-var">';
+				$html.= '<button data-url="'.$current__array['qr_image_url'] . '" class="button-primary button-large url-copy" >Copy QR URL</button>';
+				//remover
+				$html.= '<button data-index="'.$loop.'" id="variable_product_qr_data'.$loop.'" data-meta="variable_product_qr_data" data-remove="'.$variations. '" class="button-primary button-large qr-remover"  style="margin-left:10px" >Remove</button>';
+				$html.= '</div>';
+				//hidden field
+				$html.= '<input data-id="' . esc_attr($productnum) . '" type="hidden" name ="variable_product_qr_data" value="' . esc_attr($update_data) . '">';
+                $html .= '</div>';
+                
+
             }
             $resp['success'] = true;
             $resp['template'] =$html;
@@ -375,20 +386,19 @@ function dongtrader_meta_qr_generator()
     exit;
 }
 
-
+// Remove functionality for qr codes
 add_action( 'wp_ajax_dongtrader_delete_qr_fields', 'dongtrader_delete_qr_fields' );
 function dongtrader_delete_qr_fields() {
     $variation_id = esc_attr($_POST['itemID']);
     $variation_meta_key = esc_attr($_POST['metakey']);
     $ajax_values = array( 'resp' => false,'html' => false);
     if(!empty($variation_id) && !empty($variation_meta_key)){
-
-        $status =  delete_post_meta( $variation_id,  $variation_meta_key);
+        $status = delete_post_meta( $variation_id,  $variation_meta_key);
         if($status) {
             $ajax_values['status'] = true;
             $ajax_values['html'] = true;
         }
-   
+
     }
     wp_send_json($ajax_values);
     wp_die();

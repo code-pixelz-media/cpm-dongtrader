@@ -120,19 +120,20 @@ jQuery(document).ready(function($){
 
   $(document).on("click", ".qr-remover", function (rm) {
     rm.preventDefault();
-    var itemId = $(this).attr('data-remove');
-    var metaKey = $(this).attr('data-meta');
-    console.log(metaKey);
-    var cloned = $(this).parent().clone();
+   
+    var itemId    = $(this).attr('data-remove');
+    var metaKey   = $(this).attr('data-meta');
     var container = $(this).parent();
-    var save = $('.save-variation-changes');
     var loop = $(this).attr('data-index');
-    var button = `<button data-index="${loop}" data-variable="true" data-initiator="_product-qr-variabled" data-id="${itemId}" class=" button button-primary button-large generate-variable-qr">Generate Product QR</button><input data-id="${itemId}" type="hidden" name="variable_product_qr_data" id="variable_product_qr_data[${loop}]" value="">`
-    $('#variable_description' + loop).trigger('change');
+    var chageEvt = $('#variable_description' + loop);
+    $(this).text('Removing...');
+    var save = $('.save-variation-changes');
     $.post(dongScript.ajaxUrl, { action : 'dongtrader_delete_qr_fields', itemID : itemId , metakey:metaKey }, function (mData) {
       container.empty();
+      chageEvt.trigger('change');
       save.trigger('click');
     });
+    $(this).text('Remove');
      
   }); 
 
@@ -141,10 +142,9 @@ jQuery(document).ready(function($){
   function qr_generator(button) {
     button.on('click', function (e) {
       e.preventDefault();
-      button.text('Generating...')
       var postId = $(this).attr("data-productid"),
         evtAction = $(this).attr("data-initiator");
-        inPut = $(this).next("input"),
+        inPut     = $(this).next("input"),
         mainContainer =$(this).parent(".dong-qr-components"),
         variations = $(this).attr(".data-variable"); 
       
@@ -167,10 +167,11 @@ jQuery(document).ready(function($){
 
 
   function initiate_ajax_request(datas, inPut, mainContainer, button) {
+   
     $.post(dongScript.ajaxUrl, datas, function (mData) {
-      console.log(mData);
       var jsonData = JSON.parse(mData);
       if (jsonData.success) {
+        button.text("Generating...")
         mainContainer.empty();
         mainContainer.append(jsonData.template);
         inPut.val(mData);
@@ -191,8 +192,9 @@ jQuery(document).ready(function($){
               evtAction = $(this).attr("data-initiator"),
               inPut = $(this).next("input"),
               mainContainer =$('#dong-qr-components'+loop),
-                variations = $(this).attr("data-id");
+              variations = $(this).attr("data-id");
               $('#variable_description' + loop).trigger('change');
+              $(this).text('Generating...')
               initiate_ajax_request(
                 {
                   action: "dongtrader_meta_qr_generator",
@@ -205,7 +207,7 @@ jQuery(document).ready(function($){
                 mainContainer,
                 $(this)
               );
-         // window.location.reload();
+         
         });
 
     });

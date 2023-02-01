@@ -63,15 +63,21 @@ class Dongtrader_qr_metas
 		$qr_datas 	= get_post_meta($variation->ID, 'variable_product_qr_data', true);
 		$html_decode 	= htmlspecialchars_decode($qr_datas);
 		$decoded_json 	= json_decode($html_decode,true);
-		echo '<div id="dong-qr-components'.$loop.'" class="dong-qr-components">';
+		echo '<div id="dong-qr-components'.$loop.'" class="dong-qr-components dong-qr-components-var">';
 	
 		if(!empty($qr_datas)){
+				echo '<div class="qr-img-container-var">';
 				//qr image
 				echo '<img src="' . $decoded_json['qr_image_url'] . '' . '" alt="" width="100" height="100">';
+
+				echo '</div>';
 				//url copy
+
+				echo '<div class="qr-urlbtn-container-var">';
 				echo '<button data-url="'.$decoded_json['qr_image_url'] . '" class="button-primary button-large url-copy" >Copy QR URL</button>';
 				//remover
-				echo '<button data-index="'.$loop.'" id="variable_product_qr_data'.$loop.'" data-meta="variable_product_qr_data" data-remove="'.$variation->ID . '" class="button-primary button-large qr-remover" style="margin-left:10px" >Remove</button>';
+				echo '<button data-index="'.$loop.'" id="variable_product_qr_data'.$loop.'" data-meta="variable_product_qr_data" data-remove="'.$variation->ID . '" class="button-primary button-large qr-remover"  style="margin-left:10px" >Remove</button>';
+				echo '</div>';
 				//hiiden field
 				echo '<input data-id="' . esc_attr($product_id) . '" type="hidden" name ="variable_product_qr_data" value="' . esc_attr($qr_datas) . '">';
 		}else{
@@ -109,11 +115,15 @@ class Dongtrader_qr_metas
 		$html_decode 	= htmlspecialchars_decode($qr_datas);
 		$decoded_json 	= json_decode($html_decode,true);
 		$product 		= wc_get_product($productNum);
-		echo '<div class="dong-qr-components">';
+		echo '<div class="dong-qr-components dong-qr-components-single">';
 			if(!empty($decoded_json)){
+				echo '<div class="qr-img-container-single">';
 				echo '<img src="' . $decoded_json['qr_image_url'] . '' . '" alt="" width="200" height="200">';
+				echo '</div>';
+				echo '<div class="qr-urlbtn-container-single">';
 				echo '<button data-url="'.$decoded_json['qr_image_url'] . '" class="button-primary button-large url-copy" >Copy QR URL</button>';
 				echo '<button data-meta="'.$datas['slug'].'" data-remove="'.$productNum . '" class="button-primary button-large qr-remover" style="margin-left:10px" >Remove</button>';
+				echo '</div>';
 				echo '<input data-id="' . esc_attr($productNum) . '" type="hidden" name ="' . esc_attr($datas['slug']) . '" value="' . esc_attr($qr_datas) . '">';
 			}else{
 				echo '<button data-variable= "false" data-initiator= "' . esc_attr($datas['slug']) . '" data-id="' . esc_attr($productNum) . '" class="' . esc_attr($datas['buttonClass']) . ' button button-primary button-large">Generate Product QR</button>';

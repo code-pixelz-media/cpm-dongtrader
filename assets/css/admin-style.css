@@ -1442,4 +1442,18 @@ span.select2-search.select2-search--inline,
     margin-left: 0;
   }
 }
-
+/* CPM Styles*/
+.dong-qr-components-var {
+    display: inline-flex;
+    vertical-align: middle;
+}
+.qr-img-container-var {
+    float: left;
+    margin-right: 10px;
+}
+.qr-urlbtn-container-var {
+  float: left;
+  display: flex;
+  vertical-align: middle;
+  align-items: center;
+}
