@@ -64,15 +64,12 @@ class Dongtrader_qr_metas
 		$html_decode 	= htmlspecialchars_decode($qr_datas);
 		$decoded_json 	= json_decode($html_decode,true);
 		echo '<div id="dong-qr-components'.$loop.'" class="dong-qr-components dong-qr-components-var">';
-	
 		if(!empty($qr_datas)){
 				echo '<div class="qr-img-container-var">';
 				//qr image
 				echo '<img src="' . $decoded_json['qr_image_url'] . '' . '" alt="" width="100" height="100">';
-
 				echo '</div>';
 				//url copy
-
 				echo '<div class="qr-urlbtn-container-var">';
 				echo '<button data-url="'.$decoded_json['qr_image_url'] . '" class="button-primary button-large url-copy" >Copy QR URL</button>';
 				//remover

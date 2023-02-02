@@ -169,6 +169,7 @@ jQuery(document).ready(function ($) {
 
   function initiate_ajax_request(datas, inPut, mainContainer, button) {
     $.post(dongScript.ajaxUrl, datas, function (mData) {
+      console.log(mData);
       var jsonData = JSON.parse(mData);
       if (jsonData.success) {
         mainContainer.empty();

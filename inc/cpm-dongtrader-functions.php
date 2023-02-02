@@ -267,7 +267,7 @@ function dongtrader_ajax_test_helper($color='', $url='' , $size=''){
 
 }
 
-function dongtrader_ajax_helper($color , $url , $size='500'){
+function dongtrader_ajax_helper($color,$url,$size='500'){
     
     $current_dong_qr_array = true;
     $qrtiger_array = [
@@ -310,17 +310,16 @@ function dongtrader_meta_qr_generator()
     $checkout       = site_url('/checkout/?add-to-cart=' . $productnum); 
     $product_url    = get_permalink($productnum);
     $resp = array(
-        'success' => 'false',
+        'success' => false,
         'template' => ''
     );
  
 //for products qr code
     if($intiator == '_product_qr_codes'){
     
-        $current_data = dongtrader_ajax_helper('rgb(0, 255, 191)',$product_url);
+        $current_data = dongtrader_ajax_helper('rgb(0, 255, 191)',$checkout);
         if(!empty($current_data)){
             $update_data = json_encode($current_data);
-           
             $resp['success'] = true;
             $resp['template'] = '<div id="" class="dong-qr-components">
             <img src="'.$current_data['qr_image_url'].'" alt="" width="200" height="200">
