@@ -143,7 +143,7 @@ jQuery(document).ready(function ($) {
     button.on("click", function (e) {
       e.preventDefault();
       button.text("Generating...");
-      var postId = $(this).attr("data-productid");
+      var postId = $(this).attr("data-id");
       var evtAction = $(this).attr("data-initiator");
       var inPut = $(this).next("input");
       var mainContainer = $(this).parent(".dong-qr-components");
@@ -169,8 +169,9 @@ jQuery(document).ready(function ($) {
 
   function initiate_ajax_request(datas, inPut, mainContainer, button) {
     $.post(dongScript.ajaxUrl, datas, function (mData) {
-      console.log(mData);
+      //console.log(mData);
       var jsonData = JSON.parse(mData);
+      console.table(jsonData);
       if (jsonData.success) {
         mainContainer.empty();
         mainContainer.append(jsonData.template);

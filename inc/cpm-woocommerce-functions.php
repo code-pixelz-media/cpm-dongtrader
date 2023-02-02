@@ -87,12 +87,13 @@ function dongtraders_product_link_with_membership_goes_checkoutpage()
         if (is_product()) {
             WC()->cart->empty_cart();
             global $product;
+            $checkout_url = wc_get_checkout_url();
             $product_id = $product->get_id();
             if (!empty(($_GET['add']))) {
                 $check_add_product = $_GET['add'];
                 if ($check_add_product == '1') {
                     $has_already_bought_product = dongtraders_has_bought_product_items($product->get_id());
-                    $checkout_url = wc_get_checkout_url();
+                    
                     if ($has_already_bought_product) {
                         $product_page = get_permalink($product_id);
                         wp_redirect($product_page);

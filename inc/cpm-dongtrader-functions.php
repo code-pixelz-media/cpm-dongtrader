@@ -309,15 +309,18 @@ function dongtrader_meta_qr_generator()
     $product        = wc_get_product($productnum);
     $checkout       = site_url('/checkout/?add-to-cart=' . $productnum); 
     $product_url    = get_permalink($productnum);
+
+    //add your datas here
     $resp = array(
         'success' => false,
-        'template' => ''
+        'template' => '',
+        'pid' => $_POST['productnums'],
     );
  
 //for products qr code
     if($intiator == '_product_qr_codes'){
     
-        $current_data = dongtrader_ajax_helper('rgb(0, 255, 191)',$checkout);
+        $current_data = dongtrader_ajax_helper('rgb(0, 255, 191)',$product_url);
         if(!empty($current_data)){
             $update_data = json_encode($current_data);
             $resp['success'] = true;
