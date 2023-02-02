@@ -305,7 +305,7 @@ function dongtrader_meta_qr_generator()
 {
 
     $intiator       = esc_attr($_POST['intiator']);
-    $productnum     = $_POST['productnums'];
+    $productnum     = esc_attr($_POST['productnums']);
     $product        = wc_get_product($productnum);
     $checkout       = site_url('/checkout/?add-to-cart=' . $productnum); 
     $product_url    = get_permalink($productnum);
@@ -321,15 +321,15 @@ function dongtrader_meta_qr_generator()
         $current_data = dongtrader_ajax_helper('rgb(51, 51, 255)',$product_url);
         if(!empty($current_data)){
             $update_data = json_encode($current_data);
-            update_post_meta($productnum, '_product_qr_codes', $update_data);
+           
             $resp['success'] = true;
             $resp['template'] = '<div id="" class="dong-qr-components">
             <img src="'.$current_data['qr_image_url'].'" alt="" width="200" height="200">
             <button data-url= "'.$current_data['qr_image_url'].'" class="button button-primary button-large url-copy" >Copy QR URL</button>
             <input type= "hidden" data-id="' . esc_attr($productnum) . '"  name ="_product_qr_codes" value="'.esc_attr($update_data).'">
             <button data-meta="_product_qr_codes" data-remove="'.$productnum . '" class="button-primary button-large qr-remover" style="" >Remove</button></div>';
+            update_post_meta($productnum, '_product_qr_codes', $update_data);
             
-         
         }
 //for direct checkout
     }elseif($intiator == '_product-qr-direct-checkouts'){

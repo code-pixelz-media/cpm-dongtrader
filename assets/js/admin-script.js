@@ -130,7 +130,6 @@ jQuery(document).ready(function ($) {
     var save = !checkLocation ? $('.save-variation-changes') : false;
 
     $.post(dongScript.ajaxUrl, { action: 'dongtrader_delete_qr_fields', itemID: itemId, metakey: metaKey }, function (mData) {
-      
       container.empty();
       if(changeEvt) changeEvt.trigger('change');
       if (save) save.trigger('click');
@@ -144,11 +143,11 @@ jQuery(document).ready(function ($) {
     button.on("click", function (e) {
       e.preventDefault();
       button.text("Generating...");
-      var postId = $(this).attr("data-productid"),
-        evtAction = $(this).attr("data-initiator");
-      (inPut = $(this).next("input")),
-        (mainContainer = $(this).parent(".dong-qr-components")),
-        (variations = $(this).attr(".data-variable"));
+      var postId = $(this).attr("data-productid");
+      var evtAction = $(this).attr("data-initiator");
+      var inPut = $(this).next("input");
+      var mainContainer = $(this).parent(".dong-qr-components");
+      var variations = $(this).attr(".data-variable");
 
       console.log(mainContainer);
       initiate_ajax_request(
@@ -177,7 +176,7 @@ jQuery(document).ready(function ($) {
         inPut.val(mData);
         button.text("Generate Product QR");
       }
-      //button.text("Generate Product QR");
+      
     });
   }
 
