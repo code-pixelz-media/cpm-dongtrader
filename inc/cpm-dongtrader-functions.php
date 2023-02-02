@@ -318,7 +318,7 @@ function dongtrader_meta_qr_generator()
 //for products qr code
     if($intiator == '_product_qr_codes'){
     
-        $current_data = dongtrader_ajax_helper('rgb(51, 51, 255)',$checkout);
+        $current_data = dongtrader_ajax_helper('rgb(51, 51, 255)',$product_url);
         if(!empty($current_data)){
             $update_data = json_encode($current_data);
             update_post_meta($productnum, '_product_qr_codes', $update_data);

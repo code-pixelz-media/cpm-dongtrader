@@ -117,13 +117,16 @@ class Dongtrader_qr_metas
 		$product 		= wc_get_product($productNum);
 		echo '<div class="dong-qr-components dong-qr-components-single">';
 			if(!empty($decoded_json)){
+
 				echo '<div class="qr-img-container-single">';
 				echo '<img src="' . $decoded_json['qr_image_url'] . '' . '" alt="" width="200" height="200">';
 				echo '</div>';
+
 				echo '<div class="qr-urlbtn-container-single">';
 				echo '<button data-url="'.$decoded_json['qr_image_url'] . '" class="button-primary button-large url-copy" >Copy QR URL</button>';
 				echo '<button data-meta="'.$datas['slug'].'" data-remove="'.$productNum . '" class="button-primary button-large qr-remover" style="margin-left:10px" >Remove</button>';
 				echo '</div>';
+				
 				echo '<input data-id="' . esc_attr($productNum) . '" type="hidden" name ="' . esc_attr($datas['slug']) . '" value="' . esc_attr($qr_datas) . '">';
 			}else{
 				echo '<button data-variable= "false" data-initiator= "' . esc_attr($datas['slug']) . '" data-id="' . esc_attr($productNum) . '" class="' . esc_attr($datas['buttonClass']) . ' button button-primary button-large">Generate Product QR</button>';
