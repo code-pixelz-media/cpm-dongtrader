@@ -311,14 +311,13 @@ function dongtrader_meta_qr_generator()
     $product_url    = get_permalink($productnum);
     $resp = array(
         'success' => 'false',
-        'initiator' => $intiator,
         'template' => ''
     );
  
 //for products qr code
     if($intiator == '_product_qr_codes'){
     
-        $current_data = dongtrader_ajax_helper('rgb(51, 51, 255)',$product_url);
+        $current_data = dongtrader_ajax_helper('rgb(0, 255, 191)',$product_url);
         if(!empty($current_data)){
             $update_data = json_encode($current_data);
            
@@ -383,7 +382,7 @@ function dongtrader_meta_qr_generator()
     }
  
     echo json_encode($resp);
-    exit;
+    wp_die();
 }
 
 // Remove functionality for qr codes

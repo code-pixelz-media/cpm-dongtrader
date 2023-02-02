@@ -78,7 +78,7 @@ class Dongtrader_qr_metas
 				//remover
 				echo '<button data-index="'.$loop.'" id="variable_product_qr_data'.$loop.'" data-meta="variable_product_qr_data" data-remove="'.$variation->ID . '" class="button-primary button-large qr-remover"  style="margin-left:10px" >Remove</button>';
 				echo '</div>';
-				//hiiden field
+				//hidden field
 				echo '<input data-id="' . esc_attr($product_id) . '" type="hidden" name ="variable_product_qr_data" value="' . esc_attr($qr_datas) . '">';
 		}else{
 
@@ -126,7 +126,7 @@ class Dongtrader_qr_metas
 				echo '<button data-url="'.$decoded_json['qr_image_url'] . '" class="button-primary button-large url-copy" >Copy QR URL</button>';
 				echo '<button data-meta="'.$datas['slug'].'" data-remove="'.$productNum . '" class="button-primary button-large qr-remover" style="margin-left:10px" >Remove</button>';
 				echo '</div>';
-				
+
 				echo '<input data-id="' . esc_attr($productNum) . '" type="hidden" name ="' . esc_attr($datas['slug']) . '" value="' . esc_attr($qr_datas) . '">';
 			}else{
 				echo '<button data-variable= "false" data-initiator= "' . esc_attr($datas['slug']) . '" data-id="' . esc_attr($productNum) . '" class="' . esc_attr($datas['buttonClass']) . ' button button-primary button-large">Generate Product QR</button>';
