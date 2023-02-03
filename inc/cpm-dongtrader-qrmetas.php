@@ -92,8 +92,11 @@ class Dongtrader_qr_metas
 
 		$req_fields = $this->filterArrayByKeys($this->generators, ['slug', 'title', 'callback']);
 		foreach ($req_fields as $k => $g) {
-			$product = wc_get_product(get_the_ID());
-		if (!$product->is_type('variable')) {
+			$p_check = get_post_type(get_the_ID());
+
+		if($p_check == 'product'){
+			$product_check = wc_get_product(get_the_ID());
+		if (!$product_check->is_type('variable')) {
 			add_meta_box(
 				$g['slug'],
 				$g['title'],
@@ -104,6 +107,8 @@ class Dongtrader_qr_metas
 
 			);
 		}
+		}
+
 	}
 	}
 
