@@ -105,6 +105,14 @@ function dongtraders_product_link_with_membership_goes_checkoutpage()
                     }
                 }
             }
+        //For varaitions direct check out
+                $check_add_varition_product = $_GET['varid'];
+                if (!empty($check_add_varition_product)) {
+                    WC()->cart->add_to_cart($check_add_varition_product);
+                                wp_redirect($checkout_url);
+                                exit();
+
+                }
         }
     }
     return;
@@ -182,4 +190,7 @@ function dongtraders_has_bought_product_items($product_id)
         return false;
     }
 }
+
+
+
 

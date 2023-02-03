@@ -307,20 +307,22 @@ function dongtrader_meta_qr_generator()
     $intiator       = esc_attr($_POST['intiator']);
     $productnum     = esc_attr($_POST['productnums']);
     $product        = wc_get_product($productnum);
-    $checkout       = site_url('/checkout/?add-to-cart=' . $productnum); 
     $product_url    = get_permalink($productnum);
+    $check_out_Url =  get_permalink($productnum) . '?add=1';
 
     //add your datas here
     $resp = array(
         'success' => false,
         'template' => '',
-        'pid' => $_POST['productnums'],
+        'pid' => $productnum,
+        'initiator' => $intiator,
+        "purl" => $product_url
     );
  
 //for products qr code
     if($intiator == '_product_qr_codes'){
     
-        $current_data = dongtrader_ajax_helper('rgb(0, 255, 191)',$product_url);
+        $current_data = dongtrader_ajax_helper('rgb(87, 3, 48)',$product_url);
         if(!empty($current_data)){
             $update_data = json_encode($current_data);
             $resp['success'] = true;
@@ -329,13 +331,14 @@ function dongtrader_meta_qr_generator()
             <button data-url= "'.$current_data['qr_image_url'].'" class="button button-primary button-large url-copy" >Copy QR URL</button>
             <input type= "hidden" data-id="' . esc_attr($productnum) . '"  name ="_product_qr_codes" value="'.esc_attr($update_data).'">
             <button data-meta="_product_qr_codes" data-remove="'.$productnum . '" class="button-primary button-large qr-remover" style="" >Remove</button></div>';
+
             update_post_meta($productnum, '_product_qr_codes', $update_data);
             
         }
 //for direct checkout
     }elseif($intiator == '_product-qr-direct-checkouts'){
         //call api helper function
-        $current_data = dongtrader_ajax_helper('rgb(0, 255, 191)',$checkout);
+        $current_data = dongtrader_ajax_helper('rgb(0, 102, 204)',$check_out_Url);
         if(!empty($current_data)){
             $update_data = json_encode($current_data);
             update_post_meta($productnum, '_product-qr-direct-checkouts',$update_data);
@@ -352,16 +355,18 @@ function dongtrader_meta_qr_generator()
         $loop = esc_attr($_POST['loop']);
         $html= '';
         if(!empty($variations)){
-            $get_url = get_permalink($variations);
-            $query = parse_url($get_url, PHP_URL_QUERY);
-            parse_str($query, $queryArray);
-            $get_color = $queryArray['attribute_color'];
-            $html = '';
-            $current__array = dongtrader_ajax_helper(dongtrader_variable_color_to_rgb_color($get_color),$get_url);
+            
+            $get_url     = get_permalink($variations);
+            $query       = parse_url($get_url, PHP_URL_QUERY);
+            $get_color   = $query['attribute_color'];
+            $html        = '';
+            $modfied_url = $get_url .'&varid='.$variations;
+            $attr_color       = get_post_meta($variations , 'attribute_color' ,true);
+            $current__array = dongtrader_ajax_helper(dongtrader_variable_color_to_rgb_color($attr_color),$modfied_url); 
             if($current__array){
                 $update_data = json_encode($current__array);
                 update_post_meta($variations, 'variable_product_qr_data', esc_attr($update_data));
-                $html .= '<div id="dong-qr-components'.$loop.'" class="dong-qr-components dong-qr-components-var">';
+                $html .= '<div data-color="'.$get_color.'" id="dong-qr-components'.$loop.'" class="dong-qr-components dong-qr-components-var">';
                 $html.= '<div class="qr-img-container-var">';
 				//qr image
 				$html.= '<img src="' . $current__array['qr_image_url'] . '' . '" alt="" width="100" height="100">';
@@ -376,7 +381,6 @@ function dongtrader_meta_qr_generator()
 				$html.= '<input data-id="' . esc_attr($productnum) . '" type="hidden" name ="variable_product_qr_data" value="' . esc_attr($update_data) . '">';
                 $html .= '</div>';
                 
-
             }
             $resp['success'] = true;
             $resp['template'] =$html;
@@ -405,3 +409,26 @@ function dongtrader_delete_qr_fields() {
     wp_die();
 }
 
+// add_action('wp_footer','test_guy');
+
+// function test_guy(){
+
+//     $variations = '1319';
+//     $variationsm =  get_post_meta($variations , 'attribute_color', true);
+//     var_dump($variationsm);
+//     // $variation_product = new WC_Product_Variation($variations);
+//     // $product_vari_name =  $variation_product->get_name();
+
+//     // var_dump($product_vari_name);
+//     // $get_url     = get_permalink($variations);
+//     // $query       = parse_url($get_url, PHP_URL_QUERY);
+//     //var_dump($query);
+//    // $get_color   = $query['attribute_color'];
+//     // $html        = '';
+//     // $modfied_url = $get_url .'&varid='.$variations;
+
+
+
+//     //var_dump($get_color);
+
+// }

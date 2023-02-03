@@ -92,6 +92,8 @@ class Dongtrader_qr_metas
 
 		$req_fields = $this->filterArrayByKeys($this->generators, ['slug', 'title', 'callback']);
 		foreach ($req_fields as $k => $g) {
+			$product = wc_get_product(get_the_ID());
+		if (!$product->is_type('variable')) {
 			add_meta_box(
 				$g['slug'],
 				$g['title'],
@@ -102,6 +104,7 @@ class Dongtrader_qr_metas
 
 			);
 		}
+	}
 	}
 
 	//Get Meta values if data already exists for product meta

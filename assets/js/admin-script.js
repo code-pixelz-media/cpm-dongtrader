@@ -116,6 +116,7 @@ jQuery(document).ready(function ($) {
     $temp.val(urlcp).select();
     if (document.execCommand("copy") && $temp.remove())
       alert("QR URL copied to clipboard");
+     
   });
 
   $(document).on("click", ".qr-remover", function (rm) {
