@@ -409,26 +409,18 @@ function dongtrader_delete_qr_fields() {
     wp_die();
 }
 
-// add_action('wp_footer','test_guy');
-
-// function test_guy(){
-
-//     $variations = '1319';
-//     $variationsm =  get_post_meta($variations , 'attribute_color', true);
-//     var_dump($variationsm);
-//     // $variation_product = new WC_Product_Variation($variations);
-//     // $product_vari_name =  $variation_product->get_name();
-
-//     // var_dump($product_vari_name);
-//     // $get_url     = get_permalink($variations);
-//     // $query       = parse_url($get_url, PHP_URL_QUERY);
-//     //var_dump($query);
-//    // $get_color   = $query['attribute_color'];
-//     // $html        = '';
-//     // $modfied_url = $get_url .'&varid='.$variations;
 
 
 
-//     //var_dump($get_color);
+//User Registration hook
 
-// }
+add_action( 'user_register', 'dongtrader_user_registration_hook', 10, 2 );
+
+function dongtrader_user_registration_hook( $user_id , $userdata) {
+
+    var_dump($userdata);die();
+
+}
+
+
+
