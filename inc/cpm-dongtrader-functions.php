@@ -467,41 +467,6 @@ function dongtrader_user_registration_hook( $user_id) {
     }
 }
 
-
-add_action('wp_footer', 'test_man');
-
-function test_man(){
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'manage_users_gf';
-    $result = $wpdb->get_row( $wpdb->prepare( "SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;") );
-    $last_circle_name = $result->gf_circle_name;
-    $circle_count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE gf_circle_name = %s" ,$last_circle_name) );
-    $new_circle_name = $circle_count <= 5 ? $last_circle_name+1 : $last_circle_name;
-   
-//     global $wpdb;
-//     $table_name = $wpdb->prefix . 'manage_circles';
-//    $t= current_time('mysql', 1);
-
-//    var_dump($t);
-
-// $str ='{"people": [{
-//     "name": "Harry Manas",
-//     "email": "hamns2s3s@gmail.com",
-//     "external_id": "34562",
-//     "tag_names": ["tag 1", "tag 2"]
-//     }]
-//     }';
-// //add user to glass frog api
-// $samp= glassfrog_api_request('people', $str, "POST");
-
-// $meta = get_user_meta('34','glassfrog_response', true);
-
-// $decoded = json_decode($meta,true);
-
-// var_dump($samp->people[0]->id);
-  
-}
-
 /**
  * Step 1 : Create a database table where we can save circles each circle will have 5 members each(https://i.imgur.com/i5dECgu.png).
  * Step 2 : Save user details from response received from glassfrog api to the above table
