@@ -79,50 +79,29 @@ function qrtiger_api_request($endpoint = '', $bodyParams = array(), $method = "G
 
 
 /* A function that is used to make the Glassfrog API requests. */
-function glassfrog_api_request($endpoint = '', $bodyParams = array(), $method = "GET")
+function glassfrog_api_request($endpoint = '', $str, $method = "GET")
 {
     /* Get the API credentials from the database. */
-    $glassfrog_creds = dongtrader_get_api_cred('glassfrog');
+    $api_creds = get_option('dongtraders_api_settings_fields');
+    /*Get API Key*/
+    $gf_api_key = $api_creds['glassfrog-api-key'];
+    /*Get API Url*/
+    $gf_api_url = $api_creds['glassfrog-api-url'];
     /* Check if the API credentials are empty or not. */
-    $checkFields = !empty($glassfrog_creds['glassfrog-api-url']) && !empty($glassfrog_creds['glassfrog-api-key']) ? true : false;
-    /* Check if the API credentials are empty or not. */
+    $checkFields = !empty($gf_api_key) && !empty($gf_api_url) ? true : false;
+    /* if not valid return false */
     if (!$checkFields) return;
-    /* Get the API URL from the database. */
-    $glassfrog_api_root_url = $glassfrog_creds['glassfrog-api-url'];
-    /* Getting the API key from the database. */
-    $glassfrog_api_key      = $glassfrog_creds['glassfrog-api-key'];
-    /* Concatenating the API root URL with the endpoint. */
-    $build_url = $glassfrog_api_root_url . $endpoint;
-    /* A default array. */
-    $glassfrog_defaults = [
-        "qr" => [
-            "size" => 500,
-            "colorDark" => "rgb(5,64,128)",
-            "logo" => "",
-            "eye_outer" => "eyeOuter2",
-            "eye_inner" => "eyeInner1",
-            "qrData" => "pattern0",
-            "backgroundColor" => "rgb(255,255,255)",
-            "transparentBkg" => false,
-            "qrCategory" => "url",
-            "text" => "https://www.qrcode-tiger.com.com/"
-        ],
-        "qrUrl" => "https://www.qrcode-tiger.com.com",
-        "qrType" => "qr2",
-        "qrCategory" => "url"
-    ];
-
-    /* Taking the default array and merging it with the  array. */
-    $body = wp_json_encode(wp_parse_args($glassfrog_defaults, $bodyParams));
-
-    /* Setting the options for the request. */
+     /* Build Url for api request */
+    $build_url = $gf_api_url . $endpoint;
+    /* Params For API requests */
     $options = [
-        'body'        => $method == "POST" ? $body : '',
+        'body' => $method == "POST" ? $str : '',
         'headers'     => [
-            'X-Auth-Token' => $glassfrog_api_key,
+            'X-Auth-Token' => $gf_api_key,
             'Content-Type' => 'application/json',
+           
         ],
-        'timeout'     => 30,
+        
 
     ];
 
@@ -410,17 +389,87 @@ function dongtrader_delete_qr_fields() {
 }
 
 
+/*Create database tables where we can save api response details*/
+function dongtrader_create_dbtable() {
+
+	global $wpdb;
+    $table_name = $wpdb->prefix . 'manage_users_gf';
+        $charset_collate = $wpdb->get_charset_collate();
+        $sql="CREATE TABLE $table_name ( 
+            id INT NOT NULL AUTO_INCREMENT ,
+            gf_person_id INT NOT NULL ,
+            gf_role_id INT NOT NULL , 
+            gf_role_assigned VARCHAR(255) NOT NULL ,
+            gf_name VARCHAR(255) NOT NULL ,
+            gf_circle_name VARCHAR(255) NOT NULL ,
+            created_at DATETIME(5) NOT NULL,
+            user_id INT NOT NULL , PRIMARY KEY (id)) $charset_collate;";
+        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+        dbDelta( $sql );
+
+}
+add_action( 'plugins_loaded', 'dongtrader_create_dbtable');
 
 
 //User Registration hook
 
-add_action( 'user_register', 'dongtrader_user_registration_hook', 10, 2 );
+add_action( 'user_register', 'dongtrader_user_registration_hook', 10, 1 );
 
-function dongtrader_user_registration_hook( $user_id , $userdata) {
+function dongtrader_user_registration_hook( $user_id) {
 
-    var_dump($userdata);die();
-
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'manage_users_gf';
+    $user_info = get_userdata($user_id);
+    $username = $user_info->user_login;
+    $first_name = $user_info->first_name;
+    $last_name = $user_info->last_name;
+    $full_name = $first_name . ' ' . $last_name;
+    $email = $user_info->user_email;
+    $str ='{"people": [{
+        "name": "'.$full_name.'",
+        "email": "'.$email.'",
+        "external_id": "'.$user_id.'",
+        "tag_names": ["tag 1", "tag 2"]
+        }]
+        }';
+    $samp= glassfrog_api_request('people', $str, "POST");
+    if($samp && isset($samp)){
+        $gf_id = $samp->people[0]->id;
+        $gf_name = $samp->people[0]->name;
+        $email = $samp->people[0]->email;
+        $result = $wpdb->get_row( "SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;" );
+        $last_circle_name = isset($result) ? $result->gf_circle_name : '1';
+        $circle_count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE gf_circle_name = %s" ,$last_circle_name) );
+        $new_circle_name = $circle_count < 5 ? $last_circle_name : $last_circle_name+1;
+        $wpdb->query(
+            $wpdb->prepare(
+               "INSERT INTO $table_name
+               (
+                gf_person_id,
+                gf_role_id,
+                gf_role_assigned,
+                gf_name,
+                gf_circle_name ,
+                created_at,
+                user_id 
+               )
+               VALUES ( %d, %d, %s, %s, %s, %s, %d )",
+               esc_attr($gf_id),
+               1,
+               'false',
+               esc_attr($gf_name),
+               esc_attr($new_circle_name),
+               current_time('mysql', 1),
+               $user_id
+               
+            )
+         );
+    }
 }
 
-
+/**
+ * Step 1 : Create a database table where we can save circles each circle will have 5 members each(https://i.imgur.com/i5dECgu.png).
+ * Step 2 : Save user details from response received from glassfrog api to the above table
+ * Step 3 : Create meta on products for variations and simple products so that user can be assigned to specific roles  
+ */
 
