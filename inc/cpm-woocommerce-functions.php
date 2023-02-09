@@ -27,7 +27,7 @@ function cpm_dong_my_membership_vcard_endpoint_content()
 {
 
     // of course you can print dynamic content here, one of the most useful functions here is get_current_user_id()
-    ?>
+?>
     <div class='qr-tiger-vcard-code-generator'>
         <h2><?php _e('My Vcard ', 'cpm-dongtrader') ?></h2>
         <form action="" method="post">
@@ -66,7 +66,7 @@ function cpm_dong_my_membership_vcard_endpoint_content()
         <div class="vcards_buttons">
             <a href="JavaScript:Void(0);" class="copy_qr_image_url" onclick="dong_traders_url_copy('#copy_url_id')">Copy QR URL</a> <a class="update_card" href="JavaScript:Void(0);">Update Vcard</a>
         </div>
-<?php
+    <?php
     } else {
         echo '<style>
 	.qr-tiger-vcard-code-generator{
@@ -75,6 +75,98 @@ function cpm_dong_my_membership_vcard_endpoint_content()
 </style>';
     }
 }
+
+
+
+/* Show affiliate referrals menu  */
+
+add_filter('woocommerce_account_menu_items', 'cpm_dong_show_membership_affilate_Data', 40);
+function cpm_dong_show_membership_affilate_Data($menu_links)
+{
+
+    $menu_links = array_slice($menu_links, 0, 5, true)
+        + array('show-membership-affiliate-data' => 'Affiliate Referrals')
+        + array_slice($menu_links, 5, NULL, true);
+
+    return $menu_links;
+}
+// register permalink endpoint
+add_action('init', 'cpm_dong_my_membership_affilate_data_endpoint');
+function cpm_dong_my_membership_affilate_data_endpoint()
+{
+
+    add_rewrite_endpoint('show-membership-affiliate-data', EP_PAGES);
+}
+// content for the new page in My Account, woocommerce_account_{ENDPOINT NAME}_endpoint
+add_action('woocommerce_account_show-membership-affiliate-data_endpoint', 'cpm_dong_my_membership_affilate_data_endpoint_content');
+function cpm_dong_my_membership_affilate_data_endpoint_content()
+{
+    $user_ID = get_current_user_id();
+    $get_user_affilates = pmpro_affiliates_getAffiliatesForUser($user_ID);
+    //var_dump($get_user_affilates);
+
+    ?>
+    <table class="affilate-data">
+        <tr>
+            <th>
+                Referral Code
+            </th>
+            <th>
+                Commission Rate
+            </th>
+        </tr>
+        <tr>
+            <?php
+            foreach ($get_user_affilates as $get_user_affilate) {
+
+                echo '<td>' . $get_user_affilate->code . '</td>';
+                echo '<td>' . $get_user_affilate->commissionrate . '</td>';
+            }
+
+            ?>
+        </tr>
+    </table>
+
+<?php
+
+}
+
+/* show memebership data on woocommerce tab */
+
+add_filter('woocommerce_account_menu_items', 'cpm_dong_show_membership_data', 40);
+function cpm_dong_show_membership_data($menu_links)
+{
+
+    $menu_links = array_slice($menu_links, 0, 5, true)
+        + array('show-membership-data' => 'My Memberships')
+        + array_slice($menu_links, 5, NULL, true);
+
+    return $menu_links;
+}
+// register permalink endpoint
+add_action('init', 'cpm_dong_my_membership_endpoint');
+function cpm_dong_my_membership_endpoint()
+{
+
+    add_rewrite_endpoint('show-membership-data', EP_PAGES);
+}
+// content for the new page in My Account, woocommerce_account_{ENDPOINT NAME}_endpoint
+add_action('woocommerce_account_show-membership-data_endpoint', 'cpm_dong_my_membership_endpoint_content');
+function cpm_dong_my_membership_endpoint_content()
+{
+
+    // of course you can print dynamic content here, one of the most useful functions here is get_current_user_id()
+?>
+    <div class='qr-tiger-code-generator'>
+        <p><?php _e('My Memberships ', 'cpm-dongtrader') ?></p>
+        <?php echo do_shortcode('[pmpro_account]');
+        ?>
+    </div>
+
+<?php
+}
+/* show memebership data on woocommerce tab  ends*/
+
 
 /**
  * Automatically add product to cart on visit
@@ -93,7 +185,7 @@ function dongtraders_product_link_with_membership_goes_checkoutpage()
                 $check_add_product = $_GET['add'];
                 if ($check_add_product == '1') {
                     $has_already_bought_product = dongtraders_has_bought_product_items($product->get_id());
-                    
+
                     if ($has_already_bought_product) {
                         $product_page = get_permalink($product_id);
                         wp_redirect($product_page);
@@ -105,14 +197,13 @@ function dongtraders_product_link_with_membership_goes_checkoutpage()
                     }
                 }
             }
-        //For varaitions direct check out
-                $check_add_varition_product = $_GET['varid'];
-                if (isset($check_add_varition_product) && !empty($check_add_varition_product)) {
-                    WC()->cart->add_to_cart($check_add_varition_product);
-                                wp_redirect($checkout_url);
-                                exit();
-
-                }
+            //For varaitions direct check out
+            $check_add_varition_product = $_GET['varid'];
+            if (isset($check_add_varition_product) && !empty($check_add_varition_product)) {
+                WC()->cart->add_to_cart($check_add_varition_product);
+                wp_redirect($checkout_url);
+                exit();
+            }
         }
     }
     return;
@@ -191,6 +282,9 @@ function dongtraders_has_bought_product_items($product_id)
     }
 }
 
+function action_woocommerce_created_customer($customer_id, $new_customer_data, $password_generated)
+{
+    update_user_meta($customer_id, 'is_affiliate_user', 'Yes');
+};
 
-
-
+//add_action('woocommerce_created_customer', 'action_woocommerce_created_customer', 10, 3);
