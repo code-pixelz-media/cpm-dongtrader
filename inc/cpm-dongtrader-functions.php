@@ -437,7 +437,7 @@ function dongtrader_user_registration_hook( $user_id) {
         $gf_id = $samp->people[0]->id;
         $gf_name = $samp->people[0]->name;
         $email = $samp->people[0]->email;
-        $result = $wpdb->get_row( $wpdb->prepare( "SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;") );
+        $result = $wpdb->get_row( "SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;" );
         $last_circle_name = isset($result) ? $result->gf_circle_name : '1';
         $circle_count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE gf_circle_name = %s" ,$last_circle_name) );
         $new_circle_name = $circle_count < 5 ? $last_circle_name : $last_circle_name+1;
