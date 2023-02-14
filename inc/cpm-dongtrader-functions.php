@@ -287,7 +287,7 @@ function dongtrader_meta_qr_generator()
     $productnum     = esc_attr($_POST['productnums']);
     $product        = wc_get_product($productnum);
     $product_url    = get_permalink($productnum);
-    $check_out_Url =  get_permalink($productnum) . '?add=1';
+    $check_out_Url  = get_permalink($productnum) . '?add=1';
 
     //add your datas here
     $resp = array(
@@ -334,10 +334,7 @@ function dongtrader_meta_qr_generator()
         $loop = esc_attr($_POST['loop']);
         $html= '';
         if(!empty($variations)){
-            
             $get_url     = get_permalink($variations);
-            $query       = parse_url($get_url, PHP_URL_QUERY);
-            $get_color   = $query['attribute_color'];
             $html        = '';
             $modfied_url = $get_url .'&varid='.$variations;
             $attr_color       = get_post_meta($variations , 'attribute_color' ,true);
@@ -345,7 +342,7 @@ function dongtrader_meta_qr_generator()
             if($current__array){
                 $update_data = json_encode($current__array);
                 update_post_meta($variations, 'variable_product_qr_data', esc_attr($update_data));
-                $html .= '<div data-color="'.$get_color.'" id="dong-qr-components'.$loop.'" class="dong-qr-components dong-qr-components-var">';
+                $html .= '<div data-color="'.$attr_color.'" id="dong-qr-components'.$loop.'" class="dong-qr-components dong-qr-components-var">';
                 $html.= '<div class="qr-img-container-var">';
 				//qr image
 				$html.= '<img src="' . $current__array['qr_image_url'] . '' . '" alt="" width="100" height="100">';
@@ -410,16 +407,54 @@ function dongtrader_create_dbtable() {
 }
 add_action( 'plugins_loaded', 'dongtrader_create_dbtable');
 
+function dongtrader_divide_product_price($price,$latestmembs){
+        if(!$price) return;
 
-//User Registration hook
+        //Send 40% to site owner
+        $forty_percent_to_owner = $price * 40/100;
 
-add_action( 'user_register', 'dongtrader_user_registration_hook', 10, 1 );
+        //remaining prices after deduction by sending to site owner
 
-function dongtrader_user_registration_hook( $user_id) {
+        $deducted_price = $price-$forty_percent_to_owner;
+
+        //Circle lead Amount
+
+        $for_circle_lead = '';
+
+        //distribute dedducted price among the 5 members of the circle
+
+        $divided_price =  $deducted_price/$latestmembs;
+
+        return [
+            'siteowner-amt'=> $forty_percent_to_owner,
+            'members-amt'=> $divided_price,
+        ];
+}
+
+// add_action('wp_footer', function(){
+//     // $attr_colora = dongtrader_divide_product_price(100,5);
+//     // var_dump($attr_colora);
+
+//     $meta =  get_post_meta(1319,'test_order',true);
+//     var_dump($meta);
+
+// });
+
+
+/**
+ * Step 1 : Create a database table where we can save circles each circle will have 5 members each(https://i.imgur.com/i5dECgu.png).
+ * Step 2 : Save user details from response received from glassfrog api to the above table
+ * Step 3 : Create meta on products for variations and simple products so that user can be assigned to specific roles  
+ */
+//add_action( 'user_register', 'dongtrader_user_registration_hook', 10, 1 );
+
+add_action('woocommerce_created_customer', 'dongtrader_user_registration_hook', 10, 3);
+
+function dongtrader_user_registration_hook($customer_id, $new_customer_data, $password_generated) {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'manage_users_gf';
-    $user_info = get_userdata($user_id);
+    $user_info = get_userdata($customer_id);
     $username = $user_info->user_login;
     $first_name = $user_info->first_name;
     $last_name = $user_info->last_name;
@@ -428,11 +463,15 @@ function dongtrader_user_registration_hook( $user_id) {
     $str ='{"people": [{
         "name": "'.$full_name.'",
         "email": "'.$email.'",
-        "external_id": "'.$user_id.'",
+        "external_id": "'.$customer_id.'",
         "tag_names": ["tag 1", "tag 2"]
         }]
         }';
     $samp= glassfrog_api_request('people', $str, "POST");
+
+    
+    //update_post_meta($_POST['product_id'],'test_order',wp_json_encode($new_customer_data));
+    // print_r();
     if($samp && isset($samp)){
         $gf_id = $samp->people[0]->id;
         $gf_name = $samp->people[0]->name;
@@ -460,16 +499,16 @@ function dongtrader_user_registration_hook( $user_id) {
                esc_attr($gf_name),
                esc_attr($new_circle_name),
                current_time('mysql', 1),
-               $user_id
+               $customer_id
                
             )
-         );
+        );
     }
 }
 
-/**
- * Step 1 : Create a database table where we can save circles each circle will have 5 members each(https://i.imgur.com/i5dECgu.png).
- * Step 2 : Save user details from response received from glassfrog api to the above table
- * Step 3 : Create meta on products for variations and simple products so that user can be assigned to specific roles  
- */
 
+/**
+ * Step 1: Give current user a role of affilaiate
+ * Step 2 : Get the cost of current producct
+ * 
+ */
