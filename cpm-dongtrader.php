@@ -28,6 +28,7 @@ function dongtrader_scripts()
 	wp_enqueue_style('dongtrader-admin-style', plugin_dir_url(__FILE__) . 'assets/css/admin-style.css', array(), false, 'all');
 	wp_enqueue_style('dongtrader-jquery-ui-custom-styles', plugin_dir_url(__FILE__) . 'assets/css/jquery-ui.custom.css', array(), false, 'all');
 	wp_enqueue_style('dongtrader-select2.min-styles', plugin_dir_url(__FILE__) . 'assets/css/select2.min.css', array(), false, 'all');
+	wp_enqueue_style('dongtrader-frontend-styles', plugin_dir_url(__FILE__) . 'assets/css/dongtraders-style.css', array(), false, 'all');
 
 	/* js for plugin settings */
 	wp_enqueue_script('jquery');
@@ -39,16 +40,12 @@ function dongtrader_scripts()
 	wp_add_inline_script('dongtrader-admin-scripts', 'const dongScript = ' . json_encode(array(
 		'ajaxUrl' => admin_url('admin-ajax.php'),
 	)), 'before');
+	
+	wp_enqueue_script('dongtrader-public-scripts', plugin_dir_url(__FILE__) . 'assets/js/dongtraders-public.js', array('jquery'), '', true);
 }
 add_action('admin_enqueue_scripts', 'dongtrader_scripts');
 
-/* Enqueuing the stylesheet for the plugin for frontend pages */
-function dongtrader_styles()
-{
-	wp_enqueue_style('dongtrader-frontend-styles', plugin_dir_url(__FILE__) . 'assets/css/dongtraders-style.css', array(), false, 'all');
-	wp_enqueue_script('dongtrader-public-scripts', plugin_dir_url(__FILE__) . 'assets/js/dongtraders-public.js', array('jquery'), '', true);
-}
-add_action('wp_enqueue_scripts', 'dongtrader_styles');
+
 
 
 

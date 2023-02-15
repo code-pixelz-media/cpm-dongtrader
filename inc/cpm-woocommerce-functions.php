@@ -198,8 +198,9 @@ function dongtraders_product_link_with_membership_goes_checkoutpage()
                 }
             }
             //For varaitions direct check out
-            $check_add_varition_product = $_GET['varid'];
-            if (isset($check_add_varition_product) && !empty($check_add_varition_product)) {
+            
+            if (isset( $_GET['varid'])) {
+                $check_add_varition_product = $_GET['varid'];
                 WC()->cart->add_to_cart($check_add_varition_product);
                 wp_redirect($checkout_url);
                 exit();
@@ -285,6 +286,9 @@ function dongtraders_has_bought_product_items($product_id)
 function action_woocommerce_created_customer($customer_id, $new_customer_data, $password_generated)
 {
     update_user_meta($customer_id, 'is_affiliate_user', 'Yes');
-};
+}
 
-//add_action('woocommerce_created_customer', 'action_woocommerce_created_customer', 10, 3);
+
+
+
+

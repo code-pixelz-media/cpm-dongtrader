@@ -30,6 +30,12 @@ class Dongtrader_qr_metas
 					'buttonClass' => 'generate-product-qr-direct-checkout',
 					'callback' => 'render_metabox_direct_checkout'
 				),
+				array(
+					'slug' => '_glassfrog_checkbox',
+					'title' => __('Save Customer Details To Glassfrog API', 'cpm-dongtrader'),
+					'buttonClass' => false,
+					'callback' => 'render_metabox_glassfrog_checkbox'
+				)
 		
 			);
 		}
@@ -94,6 +100,17 @@ class Dongtrader_qr_metas
 		foreach ($req_fields as $k => $g) {
 			$p_check = get_post_type(get_the_ID());
 			if($p_check == 'product'){
+				if($g['slug'] == '_glassfrog_checkbox'){
+					add_meta_box(
+						$g['slug'],
+						$g['title'],
+						array($this, $g['callback']),
+						'product',
+						'side',
+						'low'
+
+					);
+				}
 				$product_check = wc_get_product(get_the_ID());
 				if (!$product_check->is_type('variable')) {
 					add_meta_box(
@@ -149,6 +166,16 @@ class Dongtrader_qr_metas
 		$this->render_generator_button_with_image($this->generators[1], $post->ID);
 	}
 
+	public function render_metabox_glassfrog_checkbox($post){
+		$value = get_post_meta( $post->ID, '_glassfrog_checkbox', true );
+		?>
+		<label for="_glassfrog_checkbox">
+		  <input type="checkbox" name="_glassfrog_checkbox" id="_glassfrog_checkbox" <?php checked( $value, 'on' ); ?>>
+		 Enable
+		</label>
+		<?php
+	}
+
 	public function filterArrayByKeys(array $input, array $column_keys)
 	{
 		$result      = array();
@@ -169,7 +196,8 @@ class Dongtrader_qr_metas
 		update_post_meta($post_id, '_product_qr_codes', $product_qr_code);
 		$direct_checkout_code = isset($_POST['_product-qr-direct-checkouts']) ? esc_attr($_POST['_product-qr-direct-checkouts']) : '';
 		update_post_meta($post_id, '_product-qr-direct-checkouts', $direct_checkout_code);
-		
+		$glassfrog_check = isset($_POST['_glassfrog_checkbox']) ? esc_attr($_POST['_glassfrog_checkbox']) : 'off';
+		update_post_meta($post_id, '_glassfrog_checkbox', $glassfrog_check);
 		
 	}
 }

@@ -416,11 +416,6 @@ function dongtrader_divide_product_price($price,$latestmembs){
         //remaining prices after deduction by sending to site owner
 
         $deducted_price = $price-$forty_percent_to_owner;
-
-        //Circle lead Amount
-
-        $for_circle_lead = '';
-
         //distribute dedducted price among the 5 members of the circle
 
         $divided_price =  $deducted_price/$latestmembs;
@@ -431,14 +426,6 @@ function dongtrader_divide_product_price($price,$latestmembs){
         ];
 }
 
-// add_action('wp_footer', function(){
-//     // $attr_colora = dongtrader_divide_product_price(100,5);
-//     // var_dump($attr_colora);
-
-//     $meta =  get_post_meta(1319,'test_order',true);
-//     var_dump($meta);
-
-// });
 
 
 /**
@@ -448,9 +435,9 @@ function dongtrader_divide_product_price($price,$latestmembs){
  */
 //add_action( 'user_register', 'dongtrader_user_registration_hook', 10, 1 );
 
-add_action('woocommerce_created_customer', 'dongtrader_user_registration_hook', 10, 3);
+// add_action('woocommerce_created_customer', 'dongtrader_user_registration_hook', 10, 3);
 
-function dongtrader_user_registration_hook($customer_id, $new_customer_data, $password_generated) {
+function dongtrader_user_registration_hook($customer_id) {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'manage_users_gf';
@@ -468,10 +455,6 @@ function dongtrader_user_registration_hook($customer_id, $new_customer_data, $pa
         }]
         }';
     $samp= glassfrog_api_request('people', $str, "POST");
-
-    
-    //update_post_meta($_POST['product_id'],'test_order',wp_json_encode($new_customer_data));
-    // print_r();
     if($samp && isset($samp)){
         $gf_id = $samp->people[0]->id;
         $gf_name = $samp->people[0]->name;
@@ -506,9 +489,38 @@ function dongtrader_user_registration_hook($customer_id, $new_customer_data, $pa
     }
 }
 
+// add_action('wp_footer', function(){
+
+//     $order = wc_get_order(1554 );
+//     $user_id = $order->get_user_id();
+//     $items =  $order->get_items();
+//     $p_id = [];
+//     foreach ( $items as $item ) {
+//         $product_id = $item->get_product_id();
+//         $p_id[] = $product_id;
+//     }
+//     $gf_checkbox = get_post_meta($p_id[0] , '_glassfrog_checkbox' , true);
+    
+
+// });
+
 
 /**
- * Step 1: Give current user a role of affilaiate
- * Step 2 : Get the cost of current producct
- * 
+ * Save User data to glassfrog api from orderid
+ *  
  */
+add_action( 'woocommerce_thankyou', 'dongtrader_after_order_received_process',10);
+
+function dongtrader_after_order_received_process( $order_id) {
+    $order = wc_get_order($order_id );
+    $customer_id = $order->get_user_id();
+    $items =  $order->get_items();
+    $p_id = [];
+    foreach ( $items as $item ) {
+        $p_id[] = $item->get_product_id();
+    }
+    $gf_checkbox = get_post_meta($p_id[0] , '_glassfrog_checkbox' , true);
+    if($gf_checkbox == 'on'){
+        dongtrader_user_registration_hook($customer_id);
+    }
+}
