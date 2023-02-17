@@ -6,6 +6,7 @@
 
 //Load plugins custom functions
 require_once('cpm-dongtrader-functions.php');
+require_once('cpm-dongtrader-admin-tables.php');
 
 
 //Load woocommerce settings
