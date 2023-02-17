@@ -267,15 +267,25 @@ function dongtraders_list_order_meta_table()
                     <th class="column-rebate">Rebate</th>
                     <th class="column-process">Process</th>
                     <th class="column-profit">Profit</th>
-                    <th class="column-reserve">Reserve</th>
                     <th class="column-cost">Cost</th>
-                    <th class="column-earning">Earning</th>
+                    <!-- $30 product column -->
+                    <th class="column-reserve">Reserve</th>
+                    <th class="column-dcost">Cost</th>
+                    <th class="column-dprofit">Profit</th>
+                    <th class="column-dgroup">Group</th>
+                    <th class="column-dndividual">Individual</th>
+                    <th class="column-dcommission">Commission</th>
+                    <th class="column-dearning">Earning</th>
+                    <th class="column-degroup">Group</th>
+                    <th class="column-dendividual">Individual</th>
+                    <th class="column-decommission">Commission</th>
+
                 </tr>
             </thead>
             <tbody id="orders" class="list:order orders-list">
                 <tr>
                     <td class="column-order-id has-row-actions" data-colname="Order ID">
-                        <strong><a href="admin.php?page=pmpro-orders&amp;order=15">1234</a></strong>
+                        <strong><a href="admin.php?page=pmpro-orders&amp;order=15">1235</a></strong>
                         <div class="row-actions">
 
                         </div>
@@ -287,18 +297,61 @@ function dongtraders_list_order_meta_table()
                     <td class="column-order-date" data-colname="Order Date">
                         2/02/2023 </td>
                     <td class="column-rebate" data-colname="Rebate">$0.00</td>
-                    <td class="column-process" data-colname="Process">
-                        $0.00<br> </td>
-                    <td class="column-profit" data-colname="Profit">
-                        $0.00 </td>
-                    <td class="column-reserve" data-colname="Reserve">
-                        $0.00 </td>
+                    <td class="column-process" data-colname="Process">$0.00<br> </td>
+                    <td class="column-profit" data-colname="Profit">$0.00 </td>
                     <td class="column-cost" data-colname="Cost">
                         <span class="pmpro_order-status pmpro_order-status-success">
                             $0.00 </span>
                     </td>
-                    <td class="column-earning" data-colname="Earning">
-                        $0.00 </td>
+                    <!--   $30 td -->
+                    <td class="column-reserve" data-colname="Reserve">$0.00 </td>
+                    <td class="column-dcost" data-colname="Cost">$0.00 </td>
+                    <!--  Profit -->
+                    <td class="column-dprofit" data-colname="Profit">$0.00 </td>
+                    <td class="column-dgroup" data-colname="Group">$0.00 </td>
+                    <td class="column-dndividual" data-colname="Individual">$0.00 </td>
+                    <td class="column-dcommission" data-colname="Commission">$0.00 </td>
+                    <!--   earning -->
+                    <td class="column-dearning" data-colname="Earning">$0.00 </td>
+                    <td class="column-degroup" data-colname="Group">$0.00 </td>
+                    <td class="column-dendividual" data-colname="Individual">$0.00 </td>
+                    <td class="column-decommission" data-colname="Commission">$0.00 </td>
+
+                </tr>
+                <tr>
+                    <td class="column-order-id has-row-actions" data-colname="Order ID">
+                        <strong><a href="admin.php?page=pmpro-orders&amp;order=15">1234</a></strong>
+                        <div class="row-actions">
+
+                        </div>
+                    </td>
+                    <td class="column-contact-details" data-colname="Contact Details">
+                        <a href="user-edit.php?user_id=31">Anil</a><br>
+                        anil@fsouda.com
+                    </td>
+                    <td class="column-order-date" data-colname="Order Date">
+                        2/02/2023 </td>
+                    <td class="column-rebate" data-colname="Rebate">$0.00</td>
+                    <td class="column-process" data-colname="Process">$0.00<br> </td>
+                    <td class="column-profit" data-colname="Profit">$0.00 </td>
+                    <td class="column-cost" data-colname="Cost">
+                        <span class="pmpro_order-status pmpro_order-status-success">
+                            $0.00 </span>
+                    </td>
+                    <!--   $30 td -->
+                    <td class="column-reserve" data-colname="Reserve">$0.00 </td>
+                    <td class="column-dcost" data-colname="Cost">$0.00 </td>
+                    <!--  Profit -->
+                    <td class="column-dprofit" data-colname="Profit"> - </td>
+                    <td class="column-dgroup" data-colname="Group"> - </td>
+                    <td class="column-dndividual" data-colname="Individual"> - </td>
+                    <td class="column-dcommission" data-colname="Commission"> - </td>
+                    <!--   earning -->
+                    <td class="column-dearning" data-colname="Earning"> - </td>
+                    <td class="column-degroup" data-colname="Group"> - </td>
+                    <td class="column-dendividual" data-colname="Individual"> - </td>
+                    <td class="column-decommission" data-colname="Commission"> - </td>
+
                 </tr>
 
             </tbody>
