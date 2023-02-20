@@ -407,36 +407,11 @@ function dongtrader_create_dbtable() {
 }
 add_action( 'plugins_loaded', 'dongtrader_create_dbtable');
 
-function dongtrader_divide_product_price($price,$latestmembs){
-        if(!$price) return;
-
-        //Send 40% to site owner
-        $forty_percent_to_owner = $price * 40/100;
-
-        //remaining prices after deduction by sending to site owner
-
-        $deducted_price = $price-$forty_percent_to_owner;
-        //distribute dedducted price among the 5 members of the circle
-
-        $divided_price =  $deducted_price/$latestmembs;
-
-        return [
-            'siteowner-amt'=> $forty_percent_to_owner,
-            'members-amt'=> $divided_price,
-        ];
-}
-
-
-
 /**
  * Step 1 : Create a database table where we can save circles each circle will have 5 members each(https://i.imgur.com/i5dECgu.png).
  * Step 2 : Save user details from response received from glassfrog api to the above table
  * Step 3 : Create meta on products for variations and simple products so that user can be assigned to specific roles  
  */
-//add_action( 'user_register', 'dongtrader_user_registration_hook', 10, 1 );
-
-// add_action('woocommerce_created_customer', 'dongtrader_user_registration_hook', 10, 3);
-
 function dongtrader_user_registration_hook($customer_id) {
 
     global $wpdb;
@@ -489,38 +464,9 @@ function dongtrader_user_registration_hook($customer_id) {
     }
 }
 
-// add_action('wp_footer', function(){
-
-//     $order = wc_get_order(1554 );
-//     $user_id = $order->get_user_id();
-//     $items =  $order->get_items();
-//     $p_id = [];
-//     foreach ( $items as $item ) {
-//         $product_id = $item->get_product_id();
-//         $p_id[] = $product_id;
-//     }
-//     $gf_checkbox = get_post_meta($p_id[0] , '_glassfrog_checkbox' , true);
-    
-
-// });
 
 
-/**
- * Save User data to glassfrog api from orderid
- *  
- */
-add_action( 'woocommerce_thankyou', 'dongtrader_after_order_received_process',10);
 
-function dongtrader_after_order_received_process( $order_id) {
-    $order = wc_get_order($order_id );
-    $customer_id = $order->get_user_id();
-    $items =  $order->get_items();
-    $p_id = [];
-    foreach ( $items as $item ) {
-        $p_id[] = $item->get_product_id();
-    }
-    $gf_checkbox = get_post_meta($p_id[0] , '_glassfrog_checkbox' , true);
-    if($gf_checkbox == 'on'){
-        dongtrader_user_registration_hook($customer_id);
-    }
-}
+
+
+
