@@ -283,77 +283,76 @@ function dongtraders_list_order_meta_table()
                 </tr>
             </thead>
             <tbody id="orders" class="list:order orders-list">
-                <tr>
-                    <td class="column-order-id has-row-actions" data-colname="Order ID">
-                        <strong><a href="admin.php?page=pmpro-orders&amp;order=15">1235</a></strong>
-                        <div class="row-actions">
+                <?php
+                $args = array(
+                    'post_type'         => 'shop_order',
+                    'posts_per_page'    => -1,
+                    'post_status'    => 'wc-completed'
+                );
 
-                        </div>
-                    </td>
-                    <td class="column-contact-details" data-colname="Contact Details">
-                        <a href="user-edit.php?user_id=31">womon</a><br>
-                        womon67326@fsouda.com
-                    </td>
-                    <td class="column-order-date" data-colname="Order Date">
-                        2/02/2023 </td>
-                    <td class="column-rebate" data-colname="Rebate">$0.84</td>
-                    <td class="column-process" data-colname="Process">$0.36<br> </td>
-                    <td class="column-profit" data-colname="Profit">$10.80 </td>
-                    <td class="column-cost" data-colname="Cost">
-                        <span class="pmpro_order-status pmpro_order-status-success">
-                            $12.00 </span>
-                    </td>
-                    <!--   $30 td -->
-                    <td class="column-reserve" data-colname="Reserve">$0.00 </td>
-                    <td class="column-dcost" data-colname="Cost">$0.00 </td>
-                    <!--  Profit -->
-                    <td class="column-dprofit" data-colname="Profit">$0.00 </td>
-                    <td class="column-dgroup" data-colname="Group">$0.00 </td>
-                    <td class="column-dndividual" data-colname="Individual">$0.00 </td>
-                    <td class="column-dcommission" data-colname="Commission">$0.00 </td>
-                    <!--   earning -->
-                    <td class="column-dearning" data-colname="Earning">$0.00 </td>
-                    <td class="column-degroup" data-colname="Group">$0.00 </td>
-                    <td class="column-dendividual" data-colname="Individual">$0.00 </td>
-                    <td class="column-decommission" data-colname="Commission">$0.00 </td>
+                $dong_orders = get_posts($args);
+                $price_symbol = get_woocommerce_currency_symbol();
+                // var_dump($posts);
+                foreach ($dong_orders as $dong_order) {
+                    $order_id = $dong_order->ID;
+                    $order = new WC_Order($order_id);
+                    //var_dump($order);
+                    $order_first_name = $order->billing_first_name ?  $order->billing_first_name : null;
+                    $order_second_name = $order->billing_last_name ? $order->billing_last_name : null;
+                    $order_full_name = $order_first_name . ' ' . $order_second_name;
+                    $order_email = $order->billing_email ? $order->billing_email : null;
+                    $order_date = $order->date_created;
+                    $order_total = $order->total;
+                    $createDate = new DateTime($order_date);
+                    $o_date = $createDate->format('Y-m-d');
+                    $rebate = get_post_meta($order_id, 'dong_reabate', true) ? get_post_meta($order_id, 'dong_reabate', true) :  0;
+                    $dong_processamt = get_post_meta($order_id, 'dong_processamt', true) ? get_post_meta($order_id, 'dong_processamt', true) :  0;
+                    $dong_profitamt = get_post_meta($order_id, 'dong_profitamt', true) ? get_post_meta($order_id, 'dong_profitamt', true) :  0;
+                    $dong_profit_indivudual = get_post_meta($order_id, 'dong_profit_di', true) ? get_post_meta($order_id, 'dong_profit_di', true) :  0;
+                    $profit_amt_group = get_post_meta($order_id, 'dong_profit_dg', true) ? get_post_meta($order_id, 'dong_profit_dg', true) :  0;
+                    $profit_commission_amt = get_post_meta($order_id, 'dong_profit_dca', true) ? get_post_meta($order_id, 'dong_profit_dca', true) :  0;
+                    $commission_amt_to_individual = get_post_meta($order_id, 'dong_comm_cdi', true) ? get_post_meta($order_id, 'dong_comm_cdi', true) :  0;
+                    $commission_amt_to_group = get_post_meta($order_id, 'dong_comm_cdg', true) ? get_post_meta($order_id, 'dong_comm_cdg', true) :  0;
+                    $treasury_amount = get_post_meta($order_id, 'dong_treasury', true) ? get_post_meta($order_id, 'dong_treasury', true) :  0;
+                    $dong_earnings = get_post_meta($order_id, 'dong_earnings', true) ? get_post_meta($order_id, 'dong_earnings', true) :  0;
+                    $dong_discounts = get_post_meta($order_id, 'dong_discounts', true) ? get_post_meta($order_id, 'dong_discounts', true) :  0;
 
-                </tr>
-                <tr>
-                    <td class="column-order-id has-row-actions" data-colname="Order ID">
-                        <strong><a href="admin.php?page=pmpro-orders&amp;order=15">1236</a></strong>
-                        <div class="row-actions">
-
-                        </div>
-                    </td>
-                    <td class="column-contact-details" data-colname="Contact Details">
-                        <a href="user-edit.php?user_id=31">Anil</a><br>
-                        anil@fsouda.com
-                    </td>
-                    <td class="column-order-date" data-colname="Order Date">
-                        2/02/2023 </td>
-                    <td class="column-rebate" data-colname="Rebate">$2.10</td>
-                    <td class="column-process" data-colname="Process">$0.90<br> </td>
-                    <td class="column-profit" data-colname="Profit">$10.00 </td>
-                    <td class="column-cost" data-colname="Cost">
-                        <span class="pmpro_order-status pmpro_order-status-success">
-                            $30.00 </span>
-                    </td>
-                    <!--   $30 td -->
-                    <td class="column-reserve" data-colname="Reserve">$9.00 </td>
-                    <td class="column-dcost" data-colname="Cost">$10.00 </td>
-                    <!--  Profit -->
-                    <td class="column-dprofit" data-colname="Profit"> $10.00 </td>
-                    <td class="column-dgroup" data-colname="Group"> $4.00 </td>
-                    <td class="column-dndividual" data-colname="Individual"> $5.00 </td>
-                    <td class="column-dcommission" data-colname="Commission"> $1.00 </td>
-                    <!--   earning -->
-                    <td class="column-dearning" data-colname="Earning"> $1.00 </td>
-                    <td class="column-degroup" data-colname="Group"> $0.40 </td>
-                    <td class="column-dendividual" data-colname="Individual"> $0.50 </td>
-                    <td class="column-decommission" data-colname="Commission"> $0.10 </td>
-
-                </tr>
-
+                    echo '
+                    <tr>
+                        <td class="column-order-id has-row-actions" data-colname="Order ID">
+                            <strong>' . $order_id . ' </strong>
+                            <div class="row-actions">
+                            </div>
+                        </td>
+                        <td class="column-contact-details" data-colname="Contact Details">
+                            ' . $order_full_name . '
+                            <br>
+                            ' . $order_email . '
+                        </td>
+                        <td class="column-order-date" data-colname="Order Date">
+                            ' . $o_date . ' </td>
+                        <td class="column-rebate" data-colname="Rebate">' . $price_symbol . $rebate . '</td>
+                        <td class="column-process" data-colname="Process">' . $price_symbol . $dong_processamt . '<br> </td>
+                        <td class="column-profit" data-colname="Profit">' . $price_symbol . $dong_profitamt . ' </td>
+                        <td class="column-cost" data-colname="Cost">
+                            <span class="pmpro_order-status pmpro_order-status-success">
+                                ' . $price_symbol . $order_total . ' </span>
+                        </td>
+                        <!--   $30 td -->
+                        <td class="column-reserve" data-colname="Reserve">' . $price_symbol . $rebate . ' </td>
+                        <td class="column-dcost" data-colname="Cost">' . $price_symbol . $rebate . ' </td>
+                        <!--  Profit -->
+                        <td class="column-dprofit" data-colname="Profit">' . $price_symbol . $rebate . ' </td>
+                        <td class="column-dgroup" data-colname="Group">' . $price_symbol . $profit_amt_group . ' </td>
+                        <td class="column-dndividual" data-colname="Individual">' . $price_symbol . $dong_profit_indivudual . ' </td>
+                        <td class="column-dcommission" data-colname="Commission">' . $price_symbol . $profit_commission_amt . ' </td>
+                        <!--   earning -->
+                        <td class="column-dearning" data-colname="Earning">' . $price_symbol . $dong_earnings . ' </td>
+                        <td class="column-degroup" data-colname="Group">' . $price_symbol . $rebate . ' </td>
+                        <td class="column-dendividual" data-colname="Individual">' . $price_symbol . $rebate . ' </td>
+                        <td class="column-decommission" data-colname="Commission">' . $price_symbol . $rebate . ' </td>
+                    </tr>';
+                } ?>
             </tbody>
         </table>
     </form>
