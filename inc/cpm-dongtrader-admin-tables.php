@@ -296,12 +296,12 @@ function dongtraders_list_order_meta_table()
                     </td>
                     <td class="column-order-date" data-colname="Order Date">
                         2/02/2023 </td>
-                    <td class="column-rebate" data-colname="Rebate">$0.00</td>
-                    <td class="column-process" data-colname="Process">$0.00<br> </td>
-                    <td class="column-profit" data-colname="Profit">$0.00 </td>
+                    <td class="column-rebate" data-colname="Rebate">$0.84</td>
+                    <td class="column-process" data-colname="Process">$0.36<br> </td>
+                    <td class="column-profit" data-colname="Profit">$10.80 </td>
                     <td class="column-cost" data-colname="Cost">
                         <span class="pmpro_order-status pmpro_order-status-success">
-                            $0.00 </span>
+                            $12.00 </span>
                     </td>
                     <!--   $30 td -->
                     <td class="column-reserve" data-colname="Reserve">$0.00 </td>
@@ -320,7 +320,7 @@ function dongtraders_list_order_meta_table()
                 </tr>
                 <tr>
                     <td class="column-order-id has-row-actions" data-colname="Order ID">
-                        <strong><a href="admin.php?page=pmpro-orders&amp;order=15">1234</a></strong>
+                        <strong><a href="admin.php?page=pmpro-orders&amp;order=15">1236</a></strong>
                         <div class="row-actions">
 
                         </div>
@@ -331,26 +331,26 @@ function dongtraders_list_order_meta_table()
                     </td>
                     <td class="column-order-date" data-colname="Order Date">
                         2/02/2023 </td>
-                    <td class="column-rebate" data-colname="Rebate">$0.00</td>
-                    <td class="column-process" data-colname="Process">$0.00<br> </td>
-                    <td class="column-profit" data-colname="Profit">$0.00 </td>
+                    <td class="column-rebate" data-colname="Rebate">$2.10</td>
+                    <td class="column-process" data-colname="Process">$0.90<br> </td>
+                    <td class="column-profit" data-colname="Profit">$10.00 </td>
                     <td class="column-cost" data-colname="Cost">
                         <span class="pmpro_order-status pmpro_order-status-success">
-                            $0.00 </span>
+                            $30.00 </span>
                     </td>
                     <!--   $30 td -->
-                    <td class="column-reserve" data-colname="Reserve">$0.00 </td>
-                    <td class="column-dcost" data-colname="Cost">$0.00 </td>
+                    <td class="column-reserve" data-colname="Reserve">$9.00 </td>
+                    <td class="column-dcost" data-colname="Cost">$10.00 </td>
                     <!--  Profit -->
-                    <td class="column-dprofit" data-colname="Profit"> - </td>
-                    <td class="column-dgroup" data-colname="Group"> - </td>
-                    <td class="column-dndividual" data-colname="Individual"> - </td>
-                    <td class="column-dcommission" data-colname="Commission"> - </td>
+                    <td class="column-dprofit" data-colname="Profit"> $10.00 </td>
+                    <td class="column-dgroup" data-colname="Group"> $4.00 </td>
+                    <td class="column-dndividual" data-colname="Individual"> $5.00 </td>
+                    <td class="column-dcommission" data-colname="Commission"> $1.00 </td>
                     <!--   earning -->
-                    <td class="column-dearning" data-colname="Earning"> - </td>
-                    <td class="column-degroup" data-colname="Group"> - </td>
-                    <td class="column-dendividual" data-colname="Individual"> - </td>
-                    <td class="column-decommission" data-colname="Commission"> - </td>
+                    <td class="column-dearning" data-colname="Earning"> $1.00 </td>
+                    <td class="column-degroup" data-colname="Group"> $0.40 </td>
+                    <td class="column-dendividual" data-colname="Individual"> $0.50 </td>
+                    <td class="column-decommission" data-colname="Commission"> $0.10 </td>
 
                 </tr>
 
