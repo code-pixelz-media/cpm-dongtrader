@@ -292,30 +292,30 @@ function dongtraders_list_order_meta_table()
 
                 $dong_orders = get_posts($args);
                 $price_symbol = get_woocommerce_currency_symbol();
-                // var_dump($posts);
                 foreach ($dong_orders as $dong_order) {
                     $order_id = $dong_order->ID;
                     $order = new WC_Order($order_id);
                     //var_dump($order);
-                    $order_first_name = $order->billing_first_name ?  $order->billing_first_name : null;
-                    $order_second_name = $order->billing_last_name ? $order->billing_last_name : null;
+                    $order_first_name = $order->get_billing_first_name() ?  $order->get_billing_first_name() : null;
+                    $order_second_name = $order->get_billing_first_name() ? $order->get_billing_last_name() : null;
                     $order_full_name = $order_first_name . ' ' . $order_second_name;
-                    $order_email = $order->billing_email ? $order->billing_email : null;
-                    $order_date = $order->date_created;
-                    $order_total = $order->total;
+                    $order_email = $order->get_billing_email() ? $order->get_billing_email() : null;
+                    $order_date = $order->get_date_created();
+                    $order_total = $order->get_formatted_order_total();
                     $createDate = new DateTime($order_date);
                     $o_date = $createDate->format('Y-m-d');
-                    $rebate = get_post_meta($order_id, 'dong_reabate', true) ? get_post_meta($order_id, 'dong_reabate', true) :  0;
-                    $dong_processamt = get_post_meta($order_id, 'dong_processamt', true) ? get_post_meta($order_id, 'dong_processamt', true) :  0;
-                    $dong_profitamt = get_post_meta($order_id, 'dong_profitamt', true) ? get_post_meta($order_id, 'dong_profitamt', true) :  0;
-                    $dong_profit_indivudual = get_post_meta($order_id, 'dong_profit_di', true) ? get_post_meta($order_id, 'dong_profit_di', true) :  0;
-                    $profit_amt_group = get_post_meta($order_id, 'dong_profit_dg', true) ? get_post_meta($order_id, 'dong_profit_dg', true) :  0;
-                    $profit_commission_amt = get_post_meta($order_id, 'dong_profit_dca', true) ? get_post_meta($order_id, 'dong_profit_dca', true) :  0;
-                    $commission_amt_to_individual = get_post_meta($order_id, 'dong_comm_cdi', true) ? get_post_meta($order_id, 'dong_comm_cdi', true) :  0;
-                    $commission_amt_to_group = get_post_meta($order_id, 'dong_comm_cdg', true) ? get_post_meta($order_id, 'dong_comm_cdg', true) :  0;
-                    $treasury_amount = get_post_meta($order_id, 'dong_treasury', true) ? get_post_meta($order_id, 'dong_treasury', true) :  0;
-                    $dong_earnings = get_post_meta($order_id, 'dong_earnings', true) ? get_post_meta($order_id, 'dong_earnings', true) :  0;
-                    $dong_discounts = get_post_meta($order_id, 'dong_discounts', true) ? get_post_meta($order_id, 'dong_discounts', true) :  0;
+                    $rebate = $order->get_meta('dong_reabate') ? $order->get_meta('dong_reabate') : 0;
+                    $dong_processamt = $order->get_meta('dong_processamt') ? $order->get_meta('dong_processamt') : 0;
+                    $dong_profitamt = $order->get_meta('dong_profitamt') ? $order->get_meta('dong_profitamt') : 0;
+                    $dong_profit_indivudual = $order->get_meta('dong_profit_di') ? $order->get_meta('dong_profit_di') : 0;
+                    $profit_amt_group = $order->get_meta('dong_profit_dg') ? $order->get_meta('dong_profit_dg') : 0;
+                    $profit_commission_amt = $order->get_meta('dong_profit_dca') ? $order->get_meta('dong_profit_dca') : 0;
+                    $commission_amt_to_individual = $order->get_meta('dong_comm_cdi') ? $order->get_meta('dong_comm_cdi') : 0;
+                    $commission_amt_to_group = $order->get_meta('dong_comm_cdg') ? $order->get_meta('dong_comm_cdg') : 0;
+                    $treasury_amount = $order->get_meta('dong_treasury') ? $order->get_meta('dong_treasury') : 0;
+                    $dong_earnings = $order->get_meta('dong_earnings') ? $order->get_meta('dong_earnings') : 0;
+                    $dong_discounts = $order->get_meta('dong_discounts') ? $order->get_meta('dong_discounts') : 0;
+
 
                     echo '
                     <tr>
@@ -336,7 +336,7 @@ function dongtraders_list_order_meta_table()
                         <td class="column-profit" data-colname="Profit">' . $price_symbol . $dong_profitamt . ' </td>
                         <td class="column-cost" data-colname="Cost">
                             <span class="pmpro_order-status pmpro_order-status-success">
-                                ' . $price_symbol . $order_total . ' </span>
+                                ' . $order_total . ' </span>
                         </td>
                         <!--   $30 td -->
                         <td class="column-reserve" data-colname="Reserve">' . $price_symbol . $rebate . ' </td>
