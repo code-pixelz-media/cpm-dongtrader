@@ -2,7 +2,9 @@
 
 /**
  * Constructor will create the menu item
+ * 
  */
+global $wpdb;
 
 function dongtraders_order_listing_menu()
 {
@@ -21,10 +23,42 @@ add_action('admin_menu',  'dongtraders_order_listing_menu');
 function dongtraders_list_order_meta_table()
 {
 
+    if (isset($_REQUEST['s'])) {
+        $s = sanitize_text_field($_REQUEST['s']);
+        //echo $s;
+    } else {
+        $s = false;
+    }
+
+
+    if (isset($_REQUEST['filter'])) {
+        $get_filter = sanitize_text_field($_REQUEST['filter']);
+
+        if ($get_filter == "all") {
+
+            $start = '';
+            $enddate = date("Y-m-d");
+            $all_selected = "selected";
+            $date_selected = "";
+
+            /*  echo "filter all"; */
+        } elseif ($get_filter == "within-a-date-range") {
+
+            $start = sanitize_text_field($_REQUEST['start-month']);
+            $enddate = sanitize_text_field($_REQUEST['end-month']);
+            $date_selected = "selected";
+            $all_selected = "";
+            /* echo "filter with date"; */
+        }
+    } else {
+        $start = '';
+        $enddate = date("Y-m-d");
+        $date_selected = "";
+        $all_selected = "";
+        /* echo "none of above"; */
+    }
+
 ?>
-
-
-
     <form id="posts-filter" method="get" action="">
 
         <h1 class="wp-heading-inline">Dongtraders Product Orders Details</h1>
@@ -32,105 +66,25 @@ function dongtraders_list_order_meta_table()
         <p class="search-box">
             <label class="hidden" for="post-search-input">Search Orders:</label>
             <input type="hidden" name="page" value="dongtraders-orders-list">
-            <input id="post-search-input" type="text" value="" name="s">
+            <input id="post-search-input" type="text" value="<?php echo esc_attr(wp_unslash($s)); ?>" name="s">
             <input class="button" type="submit" value="Search Orders">
         </p>
 
         <div class="tablenav top">
             Show <select id="filter" name="filter">
-                <option value="all" selected="selected">All</option>
-                <option value="within-a-date-range">Within a Date Range</option>
-                <option value="predefined-date-range">Predefined Date Range</option>
-                <option value="within-a-level">Within a Level</option>
-                <option value="with-discount-code">With a Discount Code</option>
-                <option value="within-a-status">Within a Status</option>
-                <option value="only-paid">Only Paid Orders</option>
-                <option value="only-free">Only Free Orders</option>
+                <option value="all" <?php echo $all_selected; ?>>All</option>
+                <option value="within-a-date-range" <?php echo $date_selected; ?>>Within a Date Range</option>
 
             </select>
+
 
             <span id="from" style="display: none;">From</span>
-
-            <select id="start-month" name="start-month" style="display: none;">
-                <option value="1" selected="selected">January</option>
-                <option value="2">February</option>
-                <option value="3">March</option>
-                <option value="4">April</option>
-                <option value="5">May</option>
-                <option value="6">June</option>
-                <option value="7">July</option>
-                <option value="8">August</option>
-                <option value="9">September</option>
-                <option value="10">October</option>
-                <option value="11">November</option>
-                <option value="12">December</option>
-            </select>
-
-            <input id="start-day" name="start-day" type="text" size="2" value="1" style="display: none;">
-            <input id="start-year" name="start-year" type="text" size="4" value="2023" style="display: none;">
-
-
+            <input id="start-month" name="start-month" type="date" size="2" value="<?php echo $start; ?>" style="display: none;">
             <span id="to" style="display: none;">To</span>
-
-            <select id="end-month" name="end-month" style="display: none;">
-                <option value="1">January</option>
-                <option value="2" selected="selected">February</option>
-                <option value="3">March</option>
-                <option value="4">April</option>
-                <option value="5">May</option>
-                <option value="6">June</option>
-                <option value="7">July</option>
-                <option value="8">August</option>
-                <option value="9">September</option>
-                <option value="10">October</option>
-                <option value="11">November</option>
-                <option value="12">December</option>
-            </select>
-
-
-            <input id="end-day" name="end-day" type="text" size="2" value="16" style="display: none;">
-            <input id="end-year" name="end-year" type="text" size="4" value="2023" style="display: none;">
-
+            <input id="end-month" name="end-month" type="date" size="2" value="<?php echo $enddate; ?>" style="display: none;">
             <span id="filterby" style="display: none;">filter by </span>
-
-            <select id="predefined-date" name="predefined-date" style="display: none;">
-
-                <option value="This Month" selected="selected">This Month</option>
-                <option value="Last Month">Last Month</option>
-                <option value="This Year">This Year</option>
-                <option value="Last Year">Last Year</option>
-
-            </select>
-
-            <select id="l" name="l" style="display: none;">
-                <option value="1">Dong Traders 1 - Consumer</option>
-                <option value="2">Dong Traders 1 - Patron</option>
-                <option value="3">Dong Traders 2 - Buyer</option>
-                <option value="4">Dong Traders 2 - Influencer</option>
-                <option value="5">Dong Traders 3 - Buyer</option>
-                <option value="6">Dong Traders 3 - Influencer</option>
-                <option value="7">Dong Traders 4 - Buyer</option>
-                <option value="8">Dong Traders 4 - Influencer</option>
-                <option value="9">Dong Traders 5 - Buyer</option>
-                <option value="10">Dong Traders 5 - Influencer</option>
-                <option value="11">Annual Group Hug - Attendee - 2024</option>
-
-            </select>
-
-
-            <select id="status" name="status" style="display: none;">
-                <option value="" selected="selected"></option>
-                <option value="cancelled">cancelled</option>
-                <option value="error">error</option>
-                <option value="pending">pending</option>
-                <option value="refunded">refunded</option>
-                <option value="review">review</option>
-                <option value="success">success</option>
-                <option value="token">token</option>
-            </select>
-
             <input id="submit" class="button" type="submit" value="Filter">
-
+            <br>
             <script>
                 //update month/year when period dropdown is changed
                 jQuery(document).ready(function() {
@@ -171,81 +125,6 @@ function dongtraders_list_order_meta_table()
                         jQuery('#from').show();
                         jQuery('#to').show();
                         jQuery('#filterby').hide();
-                    } else if (filter == 'predefined-date-range') {
-                        jQuery('#start-month').hide();
-                        jQuery('#start-day').hide();
-                        jQuery('#start-year').hide();
-                        jQuery('#end-month').hide();
-                        jQuery('#end-day').hide();
-                        jQuery('#end-year').hide();
-                        jQuery('#predefined-date').show();
-                        jQuery('#status').hide();
-                        jQuery('#l').hide();
-                        jQuery('#discount-code').hide();
-                        jQuery('#submit').show();
-                        jQuery('#from').hide();
-                        jQuery('#to').hide();
-                        jQuery('#filterby').show();
-                    } else if (filter == 'within-a-level') {
-                        jQuery('#start-month').hide();
-                        jQuery('#start-day').hide();
-                        jQuery('#start-year').hide();
-                        jQuery('#end-month').hide();
-                        jQuery('#end-day').hide();
-                        jQuery('#end-year').hide();
-                        jQuery('#predefined-date').hide();
-                        jQuery('#status').hide();
-                        jQuery('#l').show();
-                        jQuery('#discount-code').hide();
-                        jQuery('#submit').show();
-                        jQuery('#from').hide();
-                        jQuery('#to').hide();
-                        jQuery('#filterby').show();
-                    } else if (filter == 'with-discount-code') {
-                        jQuery('#start-month').hide();
-                        jQuery('#start-day').hide();
-                        jQuery('#start-year').hide();
-                        jQuery('#end-month').hide();
-                        jQuery('#end-day').hide();
-                        jQuery('#end-year').hide();
-                        jQuery('#predefined-date').hide();
-                        jQuery('#status').hide();
-                        jQuery('#l').hide();
-                        jQuery('#discount-code').show();
-                        jQuery('#submit').show();
-                        jQuery('#from').hide();
-                        jQuery('#to').hide();
-                        jQuery('#filterby').show();
-                    } else if (filter == 'within-a-status') {
-                        jQuery('#start-month').hide();
-                        jQuery('#start-day').hide();
-                        jQuery('#start-year').hide();
-                        jQuery('#end-month').hide();
-                        jQuery('#end-day').hide();
-                        jQuery('#end-year').hide();
-                        jQuery('#predefined-date').hide();
-                        jQuery('#status').show();
-                        jQuery('#l').hide();
-                        jQuery('#discount-code').hide();
-                        jQuery('#submit').show();
-                        jQuery('#from').hide();
-                        jQuery('#to').hide();
-                        jQuery('#filterby').show();
-                    } else if (filter == 'only-paid' || filter == 'only-free') {
-                        jQuery('#start-month').hide();
-                        jQuery('#start-day').hide();
-                        jQuery('#start-year').hide();
-                        jQuery('#end-month').hide();
-                        jQuery('#end-day').hide();
-                        jQuery('#end-year').hide();
-                        jQuery('#predefined-date').hide();
-                        jQuery('#status').hide();
-                        jQuery('#l').hide();
-                        jQuery('#discount-code').hide();
-                        jQuery('#submit').show();
-                        jQuery('#from').hide();
-                        jQuery('#to').hide();
-                        jQuery('#filterby').hide();
                     }
                 }
 
@@ -253,7 +132,8 @@ function dongtraders_list_order_meta_table()
             </script>
 
             <div class="tablenav-pages one-page">
-                <span class="displaying-num">15 orders found.</span>
+
+
             </div>
             <br class="clear">
         </div> <!-- end tablenav -->
@@ -284,16 +164,39 @@ function dongtraders_list_order_meta_table()
             </thead>
             <tbody id="orders" class="list:order orders-list">
                 <?php
+                $post_per_page = 2;
+                $paged = isset($_GET['dongtraders-orders-list']) ? abs((int) $_GET['dongtraders-orders-list']) : 1;
                 $args = array(
                     'post_type'         => 'shop_order',
-                    'posts_per_page'    => -1,
-                    'post_status'    => 'wc-completed'
+                    'posts_per_page'    => $post_per_page,
+                    'post_status'    => 'wc-completed',
+                    'paged' => $paged,
+
+                    'meta_query' => array(
+                        array(
+                            'key' => '_paid_date',
+                            'value' => array($start, $enddate),
+                            'compare' => 'BETWEEN',
+                            'type' => 'DATE'
+                        ),
+                        array(
+                            // 'key'     => 'city',
+                            'value'   => $s,
+                            'compare' => 'LIKE',
+                        ),
+
+                    )
                 );
 
-                $dong_orders = get_posts($args);
+                //$dong_orders = get_posts($args);
+                $dong_orders = new WP_Query($args);
+
+                /*  var_dump($dong_orders);
+                die; */
                 $price_symbol = get_woocommerce_currency_symbol();
-                foreach ($dong_orders as $dong_order) {
-                    $order_id = $dong_order->ID;
+                /* foreach ($dong_orders as $dong_order) { */
+                while ($dong_orders->have_posts()) : $dong_orders->the_post();
+                    $order_id = get_the_ID();
                     $order = new WC_Order($order_id);
                     //var_dump($order);
                     $order_first_name = $order->get_billing_first_name() ?  $order->get_billing_first_name() : null;
@@ -352,10 +255,38 @@ function dongtraders_list_order_meta_table()
                         <td class="column-dendividual" data-colname="Individual">' . $price_symbol . $rebate . ' </td>
                         <td class="column-decommission" data-colname="Commission">' . $price_symbol . $rebate . ' </td>
                     </tr>';
-                } ?>
+                //}
+                endwhile;
+                /* wp_reset_query(); */
+                if (empty($dong_orders)) {
+                    echo '<tr><td colspan="100%">' . esc_html__('No Dongtraders Order found.', 'pmpro-affiliates') . '</td></tr>';
+                }
+                $total_order = $dong_orders->found_posts;
+
+                $totalPage         = ceil($total_order / $post_per_page);
+
+                if ($totalPage > 1) {
+                    $dongtraders_order_pagination     =  '<div class="dong-pagination"><span id="table-paging" >Page ' . $paged  . ' of ' . $totalPage . '</span>' . paginate_links(array(
+                        'base' => add_query_arg('dongtraders-orders-list', '%#%'),
+                        'format' => '',
+                        'type' => 'plain',
+                        'prev_text' => __('<'),
+                        'next_text' => __('>'),
+                        'total' => $totalPage,
+                        'current' => $paged
+                    )) . '</div>';
+                }
+
+                wp_reset_postdata();
+
+                ?>
+
             </tbody>
         </table>
+
     </form>
 <?php
-
+    if (!empty($dongtraders_order_pagination)) {
+        echo $dongtraders_order_pagination;
+    }
 }
