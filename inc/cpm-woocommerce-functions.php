@@ -298,7 +298,7 @@ function dongtrader_membership_level_fields($f,$type){
         //Is used only for orders meta
         'dong_profitamt'    => sprintf(__('Profit %s','cpm-dongtrader'),$display_text),
         'dong_reserve'      => sprintf(__('Reserve Amount: ','cpm-dongtrader')),
-        'dong_earnings'     => sprintf(__('Earnings Amount: ','cpm-dongtrader')),
+        'dong_earning_amt'   => sprintf(__('Earnings Amount: ','cpm-dongtrader')),
         //Extra Fields Ends
         'dong_cost'         => sprintf(__('Total Cost: ','cpm-dongtrader')),
         'dong_profit_di'    => sprintf(__('Profit To Individual %s','cpm-dongtrader'),$display_text),
@@ -306,15 +306,15 @@ function dongtrader_membership_level_fields($f,$type){
         'dong_profit_dca'   => sprintf(__('Commision From Profit %s','cpm-dongtrader'),$display_text),
         'dong_comm_cdi'     => sprintf(__('Commision To Individual %s','cpm-dongtrader'),$display_text),
         'dong_comm_cdg'     => sprintf(__('Commision To Group %s','cpm-dongtrader'),$display_text),
-        'dong_earning'     => sprintf(__('Earning %s','cpm-dongtrader'),$display_text),
+        'dong_earning_per'  => sprintf(__('Earning %s','cpm-dongtrader'),$display_text),
         'dong_discounts'    => sprintf(__('Discount %s','cpm-dongtrader'),$display_text)
     );
     if($type) {
         unset($fields['dong_profitamt']); 
-       // unset($fields['dong_earnings']);
+        unset($fields['dong_earnings']);
     }else{
         unset($fields['dong_reserve']); 
-        unset($fields['dong_earnings']); 
+        unset($fields['dong_earning_per']);
         unset($fields['dong_cost']); 
     }
 
@@ -455,7 +455,7 @@ function get_pmpro_extrafields_meta($memId){
     /*Process Amount */
     $process_amount = $pm_meta_vals['dong_processamt']/100 * $price ;
 
-    $constant_sum = $pm_meta_vals['dong_cost']+ $pm_meta_vals['dong_reserve'] + $pm_meta_vals['dong_earnings'];
+    $constant_sum = $pm_meta_vals['dong_cost']+ $pm_meta_vals['dong_reserve'] + $pm_meta_vals['dong_earning_amt'];
     /*Profit after deduction from rebate and process */
     $remining_profit_amount = $price -$constant_sum;
     /*Total Profit that must be distributed to individual */
@@ -473,7 +473,7 @@ function get_pmpro_extrafields_meta($memId){
     /*Discount Amount */
     $early_discount =$pm_meta_vals['dong_discounts']/100  * $remining_profit_amount;
     /**Earnings */
-    $earnings = $check ? $pm_meta_vals['dong_earning'] : '0';
+    $earnings = $check ? $pm_meta_vals['dong_earning_per']/100 * $pm_meta_vals['dong_earning_amt']: '0';
 
     $order_items = [
         'dong_reabate'   => $rebate_amount,  
@@ -485,7 +485,7 @@ function get_pmpro_extrafields_meta($memId){
         'dong_comm_cdi'  => $commission_amt_to_individual,
         'dong_comm_cdg'  => $commission_amt_to_group,
         'dong_treasury'  => $treasury_amount,
-        'dong_earnings'  => $earnings,
+        'dong_earning_amt'  => $earnings,
         'dong_discounts' => $early_discount,
         'dong_reserve'   => $pm_meta_vals['dong_reserve'],
         'dong_cost'      => $pm_meta_vals['dong_cost'],
