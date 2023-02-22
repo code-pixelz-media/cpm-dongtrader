@@ -341,7 +341,7 @@ function dong_editable_order_meta_general( $order ){
            <?php 
                foreach($fields as $key=>$value){
                 $meta_val = !empty($order->get_meta($key)) ? $order->get_meta($key) :0;
-                echo '<p>'.$value.': '.$meta_val.'</p>';
+                echo '<p>'.$value.$meta_val.'</p>';
                }
            ?>
 		</div>
