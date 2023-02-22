@@ -32,7 +32,7 @@ class Dongtrader_qr_metas
 				),
 				array(
 					'slug' => '_glassfrog_checkbox',
-					'title' => __('Save Customer Details To Glassfrog API', 'cpm-dongtrader'),
+					'title' => __('Save Customer Details To Glassfrog API ', 'cpm-dongtrader'),
 					'buttonClass' => false,
 					'callback' => 'render_metabox_glassfrog_checkbox'
 				)

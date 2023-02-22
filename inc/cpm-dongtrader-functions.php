@@ -416,12 +416,12 @@ function dongtrader_user_registration_hook($customer_id) {
 
     global $wpdb;
     $table_name = $wpdb->prefix . 'manage_users_gf';
-    $user_info = get_userdata($customer_id);
-    $username = $user_info->user_login;
+    $user_info  = get_userdata($customer_id);
+    $username   = $user_info->user_login;
     $first_name = $user_info->first_name;
-    $last_name = $user_info->last_name;
-    $full_name = $first_name . ' ' . $last_name;
-    $email = $user_info->user_email;
+    $last_name  = $user_info->last_name;
+    $full_name  = $first_name . ' ' . $last_name;
+    $email      = $user_info->user_email;
     $str ='{"people": [{
         "name": "'.$full_name.'",
         "email": "'.$email.'",
@@ -431,13 +431,14 @@ function dongtrader_user_registration_hook($customer_id) {
         }';
     $samp= glassfrog_api_request('people', $str, "POST");
     if($samp && isset($samp)){
-        $gf_id = $samp->people[0]->id;
+        $gf_id   = $samp->people[0]->id;
         $gf_name = $samp->people[0]->name;
-        $email = $samp->people[0]->email;
-        $result = $wpdb->get_row( "SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;" );
+        $email   = $samp->people[0]->email;
+        $result  = $wpdb->get_row( "SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;" );
+
         $last_circle_name = isset($result) ? $result->gf_circle_name : '1';
-        $circle_count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE gf_circle_name = %s" ,$last_circle_name) );
-        $new_circle_name = $circle_count < 5 ? $last_circle_name : $last_circle_name+1;
+        $circle_count     = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE gf_circle_name = %s" ,$last_circle_name) );
+        $new_circle_name  = $circle_count < 5 ? $last_circle_name : $last_circle_name+1;
         $wpdb->query(
             $wpdb->prepare(
                "INSERT INTO $table_name
