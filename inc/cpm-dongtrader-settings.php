@@ -35,7 +35,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 				<li class="nav-tab" id="third"><a href="#api-integration" class="dashicons-before dashicons-admin-generic"><?php _e('Integration API', 'dongtraders'); ?></a></li>
 
 				<li class="nav-tab" id="fourth"><a href="#advanced" class="dashicons-before dashicons-admin-settings"><?php _e('Orders', 'dongtraders'); ?></a></li>
-				<li class="nav-tab" id="fifth"><a href="#extra" class="dashicons-before dashicons-admin-tools"><?php _e('Extras', 'dongtraders'); ?></a></li>
+				<!-- <li class="nav-tab" id="fifth"><a href="#extra" class="dashicons-before dashicons-admin-tools"><?php _e('Extras', 'dongtraders'); ?></a></li> -->
 			</ul>
 
 			<div class="tab-content">
@@ -91,7 +91,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 
 				<div id="api-integration">
 					<h2 class="tab-title">Set Your API keys</h2>
-					<p>This is for tab for options. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui voluptates odit distinctio perferendis porro aliquam beatae iure laudantium veniam voluptas vero similique ratione mollitia, rerum inventore saepe impedit eveniet necessitatibus!Lorem ipsum dolor sit amet, </p>
+
 					<hr>
 
 					<?php $dongtraders_api_setting_data = get_option('dongtraders_api_settings_fields');

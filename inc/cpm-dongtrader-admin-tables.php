@@ -138,101 +138,101 @@ function dongtraders_list_order_meta_table()
             </div>
             <br class="clear">
         </div> <!-- end tablenav -->
+        <div class="dong-table-wrap">
+            <table class="wp-list-table widefat striped dong-order-table">
+                <thead>
+                    <tr>
+                        <th colspan="8"></th>
+                        <th colspan="3" class="top-col">Profit</th>
+                        <th colspan="3" class="top-col">Earning</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Order ID</strong></td>
+                        <td><strong>Contact Details</strong></td>
+                        <td><strong>Cost</strong></td>
+                        <td><strong>Rebate</strong></td>
+                        <td><strong>Process</strong></td>
+                        <td><strong>Profit</strong></td>
+                        <td><strong>Reserve</strong></td>
+                        <td><strong>Cost</strong></td>
+                        <td><strong>Group</strong></td>
+                        <td><strong>Individual</strong></td>
+                        <td><strong>Commission</strong></td>
+                        <td><strong>Group</strong></td>
+                        <td><strong>Individual</strong></td>
+                        <td><strong>Commission</strong></td>
+                    </tr>
+                </thead>
 
-        <table class="wp-list-table widefat striped dong-order-table">
-            <thead>
-                <tr>
-                    <th colspan="8"></th>
-                    <th colspan="3" class="top-col">Profit</th>
-                    <th colspan="3" class="top-col">Earning</th>
-                </tr>
-                <tr>
-                    <td><strong>Order ID</strong></td>
-                    <td><strong>Contact Details</strong></td>
-                    <td><strong>Cost</strong></td>
-                    <td><strong>Rebate</strong></td>
-                    <td><strong>Process</strong></td>
-                    <td><strong>Profit</strong></td>
-                    <td><strong>Reserve</strong></td>
-                    <td><strong>Cost</strong></td>
-                    <td><strong>Group</strong></td>
-                    <td><strong>Individual</strong></td>
-                    <td><strong>Commission</strong></td>
-                    <td><strong>Group</strong></td>
-                    <td><strong>Individual</strong></td>
-                    <td><strong>Commission</strong></td>
-                </tr>
-            </thead>
+                <tbody id="orders" class="list:order orders-list">
+                    <?php
+                    $post_per_page = 30;
+                    $paged = isset($_GET['dongtrader_api_settings']) ? abs((int) $_GET['dongtrader_api_settings']) : 1;
+                    $args = array(
+                        'post_type'         => 'shop_order',
+                        'posts_per_page'    => $post_per_page,
+                        'post_status'    => 'wc-completed',
+                        'paged' => $paged,
 
-            <tbody id="orders" class="list:order orders-list">
-                <?php
-                $post_per_page = 30;
-                $paged = isset($_GET['dongtrader_api_settings']) ? abs((int) $_GET['dongtrader_api_settings']) : 1;
-                $args = array(
-                    'post_type'         => 'shop_order',
-                    'posts_per_page'    => $post_per_page,
-                    'post_status'    => 'wc-completed',
-                    'paged' => $paged,
+                        'meta_query' => array(
+                            array(
+                                'key' => '_paid_date',
+                                'value' => array($start, $enddate),
+                                'compare' => 'BETWEEN',
+                                'type' => 'DATE'
+                            ),
+                            array(
+                                // 'key'     => 'city',
+                                'value'   => $s,
+                                'compare' => 'LIKE',
+                            ),
 
-                    'meta_query' => array(
-                        array(
-                            'key' => '_paid_date',
-                            'value' => array($start, $enddate),
-                            'compare' => 'BETWEEN',
-                            'type' => 'DATE'
-                        ),
-                        array(
-                            // 'key'     => 'city',
-                            'value'   => $s,
-                            'compare' => 'LIKE',
-                        ),
+                        )
+                    );
 
-                    )
-                );
+                    //$dong_orders = get_posts($args);
+                    $dong_orders = new WP_Query($args);
 
-                //$dong_orders = get_posts($args);
-                $dong_orders = new WP_Query($args);
-
-                /*  var_dump($dong_orders);
+                    /*  var_dump($dong_orders);
                 die; */
-                $price_symbol = get_woocommerce_currency_symbol();
-                /* foreach ($dong_orders as $dong_order) { */
-                while ($dong_orders->have_posts()) : $dong_orders->the_post();
-                    $order_id = get_the_ID();
-                    $order = new WC_Order($order_id);
+                    $price_symbol = get_woocommerce_currency_symbol();
+                    /* foreach ($dong_orders as $dong_order) { */
+                    while ($dong_orders->have_posts()) : $dong_orders->the_post();
+                        $order_id = get_the_ID();
+                        $order = new WC_Order($order_id);
 
-                    //var_dump($order);
-                    $order_first_name = $order->get_billing_first_name() ?  $order->get_billing_first_name() : null;
-                    $order_second_name = $order->get_billing_first_name() ? $order->get_billing_last_name() : null;
-                    $order_full_name = $order_first_name . ' ' . $order_second_name;
-                    $order_email = $order->get_billing_email() ? $order->get_billing_email() : null;
-                    $order_date = $order->get_date_created();
-                    $order_total = $order->get_formatted_order_total();
-                    $createDate = new DateTime($order_date);
-                    $o_date = $createDate->format('Y-m-d');
+                        //var_dump($order);
+                        $order_first_name = $order->get_billing_first_name() ?  $order->get_billing_first_name() : null;
+                        $order_second_name = $order->get_billing_first_name() ? $order->get_billing_last_name() : null;
+                        $order_full_name = $order_first_name . ' ' . $order_second_name;
+                        $order_email = $order->get_billing_email() ? $order->get_billing_email() : null;
+                        $order_date = $order->get_date_created();
+                        $order_total = $order->get_formatted_order_total();
+                        $createDate = new DateTime($order_date);
+                        $o_date = $createDate->format('Y-m-d');
 
-                    $rebate         = $order->get_meta('dong_reabate') ? $order->get_meta('dong_reabate') : 0;
-                    $dong_processamt = $order->get_meta('dong_processamt') ? $order->get_meta('dong_processamt') : 0;
-                    $dong_profitamt = $order->get_meta('dong_profitamt') ? $order->get_meta('dong_profitamt') : 0;
-                    $dong_profit_indivudual = $order->get_meta('dong_profit_di') ? $order->get_meta('dong_profit_di') : 0;
-                    $profit_amt_group = $order->get_meta('dong_profit_dg') ? $order->get_meta('dong_profit_dg') : 0;
-                    //$30 ko 
-                    $order_reserve_amt = $order->get_meta('dong_reserve') ? $order->get_meta('dong_reserve') : 0;
-                    $order_cost_amt = $order->get_meta('dong_cost') ? $order->get_meta('dong_cost') : 0;
+                        $rebate         = $order->get_meta('dong_reabate') ? $order->get_meta('dong_reabate') : 0;
+                        $dong_processamt = $order->get_meta('dong_processamt') ? $order->get_meta('dong_processamt') : 0;
+                        $dong_profitamt = $order->get_meta('dong_profitamt') ? $order->get_meta('dong_profitamt') : 0;
+                        $dong_profit_indivudual = $order->get_meta('dong_profit_di') ? $order->get_meta('dong_profit_di') : 0;
+                        $profit_amt_group = $order->get_meta('dong_profit_dg') ? $order->get_meta('dong_profit_dg') : 0;
+                        //$30 ko 
+                        $order_reserve_amt = $order->get_meta('dong_reserve') ? $order->get_meta('dong_reserve') : 0;
+                        $order_cost_amt = $order->get_meta('dong_cost') ? $order->get_meta('dong_cost') : 0;
 
-                    $profit_commission_amt = $order->get_meta('dong_profit_dca') ? $order->get_meta('dong_profit_dca') : 0;
-                    $commission_amt_to_individual = $order->get_meta('dong_comm_cdi') ? $order->get_meta('dong_comm_cdi') : 0;
-                    $commission_amt_to_group = $order->get_meta('dong_comm_cdg') ? $order->get_meta('dong_comm_cdg') : 0;
-                    $treasury_amount = $order->get_meta('dong_treasury') ? $order->get_meta('dong_treasury') : 0;
-                    $dong_earnings = $order->get_meta('dong_earning_amt') ? $order->get_meta('dong_earning_amt') : 0;
-                    $dong_discounts = $order->get_meta('dong_discounts') ? $order->get_meta('dong_discounts') : 0;
-                    echo '
+                        $profit_commission_amt = $order->get_meta('dong_profit_dca') ? $order->get_meta('dong_profit_dca') : 0;
+                        $commission_amt_to_individual = $order->get_meta('dong_comm_cdi') ? $order->get_meta('dong_comm_cdi') : 0;
+                        $commission_amt_to_group = $order->get_meta('dong_comm_cdg') ? $order->get_meta('dong_comm_cdg') : 0;
+                        $treasury_amount = $order->get_meta('dong_treasury') ? $order->get_meta('dong_treasury') : 0;
+                        $dong_earnings = $order->get_meta('dong_earning_amt') ? $order->get_meta('dong_earning_amt') : 0;
+                        $dong_discounts = $order->get_meta('dong_discounts') ? $order->get_meta('dong_discounts') : 0;
+                        echo '
                 <tr>
-                   <td class="column-order-id has-row-actions" data-colname="Order ID">
+                   <td class="column-order-id " data-colname="Order ID">
                             <strong>#' . $order_id . ' </strong>
-                            <div class="">
-                             ' . $o_date . '
-                            </div>
+                           
+                             <p>' . $o_date . '</p>
+                            
                         </td>
                     <td class="column-contact-details" data-colname="Contact Details">
                             ' . $order_full_name . '
@@ -259,34 +259,35 @@ function dongtraders_list_order_meta_table()
                         <td class="column-decommission" data-colname="Commission">' . $price_symbol . $dong_discounts . ' </td>
                 </tr>
                 ';
-                endwhile;
-                $total_order = $dong_orders->found_posts;
-                if (empty($total_order)) {
-                    echo '<tr><td colspan="100%">' . esc_html__('No Dongtraders Order found.', 'pmpro-affiliates') . '</td></tr>';
-                }
+                    endwhile;
+                    $total_order = $dong_orders->found_posts;
+                    if (empty($total_order)) {
+                        echo '<tr><td colspan="100%">' . esc_html__('No Dongtraders Order found.', 'pmpro-affiliates') . '</td></tr>';
+                    }
 
-                $totalPage         = ceil($total_order / $post_per_page);
+                    $totalPage         = ceil($total_order / $post_per_page);
 
-                if ($totalPage > 1) {
-                    $dongtraders_order_pagination     =  '<div class="dong-pagination"><span id="table-paging" >Page ' . $paged  . ' of ' . $totalPage . '</span>' . paginate_links(array(
-                        'base' => add_query_arg('dongtrader_api_settings', '%#%'),
-                        'format' => '',
-                        'type' => 'plain',
-                        'prev_text' => __('<'),
-                        'next_text' => __('>'),
-                        'total' => $totalPage,
-                        'current' => $paged
-                    )) . '</div>';
-                }
+                    if ($totalPage > 1) {
+                        $dongtraders_order_pagination     =  '<div class="dong-pagination"><span id="table-paging" >Page ' . $paged  . ' of ' . $totalPage . '</span>' . paginate_links(array(
+                            'base' => add_query_arg('dongtrader_api_settings', '%#%'),
+                            'format' => '',
+                            'type' => 'plain',
+                            'prev_text' => __('<'),
+                            'next_text' => __('>'),
+                            'total' => $totalPage,
+                            'current' => $paged
+                        )) . '</div>';
+                    }
 
-                wp_reset_postdata();
+                    wp_reset_postdata();
 
-                ?>
+                    ?>
 
-            </tbody>
+                </tbody>
 
 
-        </table>
+            </table>
+        </div>
 
     </form>
 <?php

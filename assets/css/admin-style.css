@@ -674,19 +674,24 @@
 }
 
 .dongsearch {
-  width: 25%;
+  width: 30%;
   float: right;
 
 }
 
 .tablenav .post_filter {
-
+  width: 70%;
   float: left;
 
 }
 
 .dong-pagination a.page-numbers {
   color: #ffff !important;
+}
+
+.dong-table-wrap {
+  overflow-x: scroll;
+  width: 100%;
 }
 
 .dong-order-table {
@@ -712,6 +717,10 @@
 
 .dong-order-table td {
   border: 1px solid #d1d1d1;
+}
+
+.dong-order-table td p {
+  white-space: nowrap;
 }
 
 .dongsearch #post-search-input {
