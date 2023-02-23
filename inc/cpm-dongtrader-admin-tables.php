@@ -198,6 +198,7 @@ function dongtraders_list_order_meta_table()
                 while ($dong_orders->have_posts()) : $dong_orders->the_post();
                     $order_id = get_the_ID();
                     $order = new WC_Order($order_id);
+                    
                     //var_dump($order);
                     $order_first_name = $order->get_billing_first_name() ?  $order->get_billing_first_name() : null;
                     $order_second_name = $order->get_billing_first_name() ? $order->get_billing_last_name() : null;
@@ -207,11 +208,29 @@ function dongtraders_list_order_meta_table()
                     $order_total = $order->get_formatted_order_total();
                     $createDate = new DateTime($order_date);
                     $o_date = $createDate->format('Y-m-d');
-                    $rebate = $order->get_meta('dong_reabate') ? $order->get_meta('dong_reabate') : 0;
+/*
+        'dong_reabate'   => $rebate_amount,  
+        'dong_processamt'=> $process_amount,
+        'dong_profitamt' => $remining_profit_amount,
+        'dong_profit_di' => $profit_amt_individual,
+        'dong_profit_dg' => $profit_amt_group,
+        'dong_profit_dca'=> $profit_commission_amt,
+        'dong_comm_cdi'  => $commission_amt_to_individual,
+        'dong_comm_cdg'  => $commission_amt_to_group,
+        'dong_treasury'  => $treasury_amount,
+        'dong_earnings'  => $earnings,
+        'dong_discounts' => $early_discount,
+ */
+                    $rebate         = $order->get_meta('dong_reabate') ? $order->get_meta('dong_reabate') : 0;
                     $dong_processamt = $order->get_meta('dong_processamt') ? $order->get_meta('dong_processamt') : 0;
                     $dong_profitamt = $order->get_meta('dong_profitamt') ? $order->get_meta('dong_profitamt') : 0;
                     $dong_profit_indivudual = $order->get_meta('dong_profit_di') ? $order->get_meta('dong_profit_di') : 0;
                     $profit_amt_group = $order->get_meta('dong_profit_dg') ? $order->get_meta('dong_profit_dg') : 0;
+                    //$30 ko 
+                    $order_reserve_amt = $order->get_meta('dong_reserve') ? $order->get_meta('dong_reserve') : 0;
+                    $order_earnings_amt = $order->get_meta('dong_earnings') ? $order->get_meta('dong_earnings') : 0;
+                    $order_cost_amt = $order->get_meta('dong_cost') ? $order->get_meta('dong_cost') : 0; 
+                    
                     $profit_commission_amt = $order->get_meta('dong_profit_dca') ? $order->get_meta('dong_profit_dca') : 0;
                     $commission_amt_to_individual = $order->get_meta('dong_comm_cdi') ? $order->get_meta('dong_comm_cdi') : 0;
                     $commission_amt_to_group = $order->get_meta('dong_comm_cdg') ? $order->get_meta('dong_comm_cdg') : 0;
@@ -242,7 +261,7 @@ function dongtraders_list_order_meta_table()
                                 ' . $order_total . ' </span>
                         </td>
                         <!--   $30 td -->
-                        <td class="column-reserve" data-colname="Reserve">' . $price_symbol . $rebate . ' </td>
+                        <td class="column-reserve" data-colname="Reserve">' . $price_symbol . $order_reserve_amt . ' </td>
                         <td class="column-dcost" data-colname="Cost">' . $price_symbol . $rebate . ' </td>
                         <!--  Profit -->
                         <td class="column-dprofit" data-colname="Profit">' . $price_symbol . $rebate . ' </td>
