@@ -144,10 +144,10 @@ function dongtraders_list_order_meta_table()
                     <th class="column-order-id">Order ID</th>
                     <th class="column-contact-details">Contact Details</th>
                     <th class="column-order-date">Order Date</th>
+                    <th class="column-cost">Cost</th>
                     <th class="column-rebate">Rebate</th>
                     <th class="column-process">Process</th>
                     <th class="column-profit">Profit</th>
-                    <th class="column-cost">Cost</th>
                     <!-- $30 product column -->
                     <th class="column-reserve">Reserve</th>
                     <th class="column-dcost">Cost</th>
@@ -198,7 +198,7 @@ function dongtraders_list_order_meta_table()
                 while ($dong_orders->have_posts()) : $dong_orders->the_post();
                     $order_id = get_the_ID();
                     $order = new WC_Order($order_id);
-                    
+
                     //var_dump($order);
                     $order_first_name = $order->get_billing_first_name() ?  $order->get_billing_first_name() : null;
                     $order_second_name = $order->get_billing_first_name() ? $order->get_billing_last_name() : null;
@@ -208,7 +208,7 @@ function dongtraders_list_order_meta_table()
                     $order_total = $order->get_formatted_order_total();
                     $createDate = new DateTime($order_date);
                     $o_date = $createDate->format('Y-m-d');
-/*
+                    /*
         'dong_reabate'   => $rebate_amount,  
         'dong_processamt'=> $process_amount,
         'dong_profitamt' => $remining_profit_amount,
@@ -228,14 +228,13 @@ function dongtraders_list_order_meta_table()
                     $profit_amt_group = $order->get_meta('dong_profit_dg') ? $order->get_meta('dong_profit_dg') : 0;
                     //$30 ko 
                     $order_reserve_amt = $order->get_meta('dong_reserve') ? $order->get_meta('dong_reserve') : 0;
-                    $order_earnings_amt = $order->get_meta('dong_earnings') ? $order->get_meta('dong_earnings') : 0;
-                    $order_cost_amt = $order->get_meta('dong_cost') ? $order->get_meta('dong_cost') : 0; 
-                    
+                    $order_cost_amt = $order->get_meta('dong_cost') ? $order->get_meta('dong_cost') : 0;
+
                     $profit_commission_amt = $order->get_meta('dong_profit_dca') ? $order->get_meta('dong_profit_dca') : 0;
                     $commission_amt_to_individual = $order->get_meta('dong_comm_cdi') ? $order->get_meta('dong_comm_cdi') : 0;
                     $commission_amt_to_group = $order->get_meta('dong_comm_cdg') ? $order->get_meta('dong_comm_cdg') : 0;
                     $treasury_amount = $order->get_meta('dong_treasury') ? $order->get_meta('dong_treasury') : 0;
-                    $dong_earnings = $order->get_meta('dong_earnings') ? $order->get_meta('dong_earnings') : 0;
+                    $dong_earnings = $order->get_meta('dong_earning_amt') ? $order->get_meta('dong_earning_amt') : 0;
                     $dong_discounts = $order->get_meta('dong_discounts') ? $order->get_meta('dong_discounts') : 0;
 
 
@@ -253,26 +252,27 @@ function dongtraders_list_order_meta_table()
                         </td>
                         <td class="column-order-date" data-colname="Order Date">
                             ' . $o_date . ' </td>
-                        <td class="column-rebate" data-colname="Rebate">' . $price_symbol . $rebate . '</td>
-                        <td class="column-process" data-colname="Process">' . $price_symbol . $dong_processamt . '<br> </td>
-                        <td class="column-profit" data-colname="Profit">' . $price_symbol . $dong_profitamt . ' </td>
-                        <td class="column-cost" data-colname="Cost">
+                             <td class="column-cost" data-colname="Cost">
                             <span class="pmpro_order-status pmpro_order-status-success">
                                 ' . $order_total . ' </span>
                         </td>
+                        <td class="column-rebate" data-colname="Rebate">' . $price_symbol . $rebate . '</td>
+                        <td class="column-process" data-colname="Process">' . $price_symbol . $dong_processamt . '<br> </td>
+                        <td class="column-profit" data-colname="Profit">' . $price_symbol . $dong_profitamt . ' </td>
+                       
                         <!--   $30 td -->
                         <td class="column-reserve" data-colname="Reserve">' . $price_symbol . $order_reserve_amt . ' </td>
-                        <td class="column-dcost" data-colname="Cost">' . $price_symbol . $rebate . ' </td>
+                        <td class="column-dcost" data-colname="Cost">' . $price_symbol . $order_cost_amt . ' </td>
                         <!--  Profit -->
-                        <td class="column-dprofit" data-colname="Profit">' . $price_symbol . $rebate . ' </td>
+                        <td class="column-dprofit" data-colname="Profit">' . $price_symbol . $dong_profitamt . ' </td>
                         <td class="column-dgroup" data-colname="Group">' . $price_symbol . $profit_amt_group . ' </td>
                         <td class="column-dndividual" data-colname="Individual">' . $price_symbol . $dong_profit_indivudual . ' </td>
                         <td class="column-dcommission" data-colname="Commission">' . $price_symbol . $profit_commission_amt . ' </td>
                         <!--   earning -->
                         <td class="column-dearning" data-colname="Earning">' . $price_symbol . $dong_earnings . ' </td>
-                        <td class="column-degroup" data-colname="Group">' . $price_symbol . $rebate . ' </td>
-                        <td class="column-dendividual" data-colname="Individual">' . $price_symbol . $rebate . ' </td>
-                        <td class="column-decommission" data-colname="Commission">' . $price_symbol . $rebate . ' </td>
+                        <td class="column-degroup" data-colname="Group">' . $price_symbol . $commission_amt_to_group . ' </td>
+                        <td class="column-dendividual" data-colname="Individual">' . $price_symbol . $commission_amt_to_individual . ' </td>
+                        <td class="column-decommission" data-colname="Commission">' . $price_symbol . $dong_discounts . ' </td>
                     </tr>';
                 //}
                 endwhile;
