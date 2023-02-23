@@ -673,6 +673,76 @@
   overflow: hidden;
 }
 
+.dongsearch {
+  width: 25%;
+  float: right;
+
+}
+
+.tablenav .post_filter {
+
+  float: left;
+
+}
+
+.dong-pagination a.page-numbers {
+  color: #ffff !important;
+}
+
+.dong-order-table {
+  border-collapse: collapse;
+}
+
+.dong-order-table tr:first-child th:first-child {
+  visibility: hidden !important;
+  opacity: 0;
+  background: #fff !important;
+  border: 1px solid #fff;
+  border-bottom: 1px solid #d1d1d1;
+  border-right: 1px solid #d1d1d1;
+}
+
+.dong-order-table th.top-col {
+  border: 1px solid #d1d1d1;
+  text-align: center;
+  border-left: 1px solid #d1d1d1 !important;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.dong-order-table td {
+  border: 1px solid #d1d1d1;
+}
+
+.dongsearch #post-search-input {
+  float: inherit !important;
+}
+
+.dongsearch .search-box {
+  text-align: right;
+}
+
+.dongsearch .search-box input[type='submit'] {
+  display: inline-block;
+  text-decoration: none;
+  font-size: 13px;
+  line-height: 2.15384615;
+  min-height: 30px;
+  margin: 0;
+  padding: 0 10px;
+  cursor: pointer;
+  border-width: 1px;
+  border-style: solid;
+  -webkit-appearance: none;
+  border-radius: 3px;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+form#posts-filter {
+  max-width: 100% !important;
+}
+
 .cpm-plugin-wrap form .form-group {
   margin-bottom: 15px;
   overflow: hidden;

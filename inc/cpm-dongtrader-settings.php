@@ -34,7 +34,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 				<?php endif; ?>
 				<li class="nav-tab" id="third"><a href="#api-integration" class="dashicons-before dashicons-admin-generic"><?php _e('Integration API', 'dongtraders'); ?></a></li>
 
-				<li class="nav-tab" id="fourth"><a href="#advanced" class="dashicons-before dashicons-admin-settings"><?php _e('Advanced', 'dongtraders'); ?></a></li>
+				<li class="nav-tab" id="fourth"><a href="#advanced" class="dashicons-before dashicons-admin-settings"><?php _e('Orders', 'dongtraders'); ?></a></li>
 				<li class="nav-tab" id="fifth"><a href="#extra" class="dashicons-before dashicons-admin-tools"><?php _e('Extras', 'dongtraders'); ?></a></li>
 			</ul>
 
@@ -188,35 +188,31 @@ $dong_qr_array = get_option('dong_user_qr_values');
 					</div>
 				<?php endif; ?>
 				<div id="advanced">
-					<h2 class="tab-title">Advanced Title</h2>
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Totam, rem dolores earum temporibus nihil consequatur vero perspiciatis accusantium architecto, impedit, aliquam natus. Sequi ad harum tempore, fugit iusto illo nihil.Lorem ipsum dolor sit amet, consectetur adipisicing elit. Totam, rem dolores earum temporibus nihil consequatur vero perspiciatis accusantium architecto, impedit, aliquam natus. Sequi ad harum tempore, fugit iusto illo nihil</p>
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Totam, rem dolores earum temporibus nihil consequatur vero perspiciatis accusantium architecto, impedit, aliquam natus. Sequi ad harum tempore, fugit iusto illo nihil.Lorem ipsum dolor sit amet.</p>
-				</div>
+					<h2 class="tab-title">Order</h2>
 
-				<div id="extra">
-					<h2 class="tab-title">Extras Title</h2>
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Totam, rem dolores earum temporibus nihil consequatur vero perspiciatis accusantium architecto, impedit, aliquam natus. Sequi ad harum tempore, fugit iusto illo nihil.Lorem ipsum dolor sit amet, consectetur adipisicing elit. Totam, rem dolores earum temporibus nihil consequatur vero perspiciatis accusantium architecto, impedit, aliquam natus. Sequi ad harum tempore, fugit iusto illo nihil</p>
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Totam, rem dolores earum temporibus nihil consequatur vero perspiciatis accusantium architecto, impedit, aliquam natus. Sequi ad harum tempore, fugit iusto illo nihil.Lorem ipsum dolor sit amet.</p>
+					<?php dongtraders_list_order_meta_table(); ?>
+
+
+
 				</div>
 			</div>
-		</div>
 
-		<div class="footer-wrap">
-			<div class="row">
-				<div class="creator col-md-3">
-					<span>Proudly Created by</span>
-					<a href="codepixelzmedia.com"><img src="<?php echo plugin_dir_url(__FILE__) . '../img/cpm-logo.png'; ?>" alt="cpm-logo" class="cpm-logo"></a>
-				</div>
+			<div class="footer-wrap">
+				<div class="row">
+					<div class="creator col-md-3">
+						<span>Proudly Created by</span>
+						<a href="codepixelzmedia.com"><img src="<?php echo plugin_dir_url(__FILE__) . '../img/cpm-logo.png'; ?>" alt="cpm-logo" class="cpm-logo"></a>
+					</div>
 
-				<div class="col-md-6">
-				</div>
+					<div class="col-md-6">
+					</div>
 
-				<div class="copyright col-md-3">
-					<span>All rights reserved</span>
-					&copy; <?php echo date("Y"); ?>
+					<div class="copyright col-md-3">
+						<span>All rights reserved</span>
+						&copy; <?php echo date("Y"); ?>
+					</div>
 				</div>
 			</div>
-		</div>
 
-	</div>
-	<div class="clear"></div>
+		</div>
+		<div class="clear"></div>
