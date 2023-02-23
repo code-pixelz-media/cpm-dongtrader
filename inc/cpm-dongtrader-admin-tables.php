@@ -258,10 +258,11 @@ function dongtraders_list_order_meta_table()
                 //}
                 endwhile;
                 /* wp_reset_query(); */
-                if (empty($dong_orders)) {
+
+                $total_order = $dong_orders->found_posts;
+                if (empty($total_order)) {
                     echo '<tr><td colspan="100%">' . esc_html__('No Dongtraders Order found.', 'pmpro-affiliates') . '</td></tr>';
                 }
-                $total_order = $dong_orders->found_posts;
 
                 $totalPage         = ceil($total_order / $post_per_page);
 
