@@ -527,7 +527,7 @@ function get_pmpro_extrafields_meta($memId){
             //check if data is stored previously on member meta
             $user_trading_meta = get_user_meta($ma,'_user_trading_details', true);
 
-            //if data is previously stored 
+            //if data is previously stored if not set empty array
             $trading_details_user_meta = !empty($user_trading_meta) ? $user_trading_meta : [];
 
             //check if current customer is the member of the circle
@@ -598,8 +598,10 @@ add_action( 'show_user_profile', 'custom_user_profile_fields' );
 add_action( 'edit_user_profile', 'custom_user_profile_fields' );
 
 function custom_user_profile_fields( $user ) {
+    $user_trading_metas = get_user_meta($user->ID ,'_user_trading_details', true);
+    if(empty($user_trading_metas)) return;
 ?>
-<hr />
+        <hr />
 		<h3><?php esc_html_e( 'Receiveable Amounts', 'cpm-dongtrader' ); ?></h3>
 		<p>
             <strong>
@@ -611,25 +613,34 @@ function custom_user_profile_fields( $user ) {
             <table class="wp-list-table widefat striped fixed" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <thead>
                     <tr>
-                        <th><?php esc_html_e( 'Order', 'cpm-dongtrader' ); ?></th>
+                        <th><?php esc_html_e( 'Order ID', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Rebate Receiveable', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Profit Receiveable', 'cpm-dongtrader' ); ?></th>
-                        <th><?php esc_html_e( 'Commission Receiveables', 'cpm-dongtrader' ); ?></th>
+                        <th><?php esc_html_e( 'Commission Receiveable', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Total Receiveable Amount', 'cpm-dongtrader' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td>
-                        #2345
-                    </td>
-                    <td>
-                        20
-                    </td>
-                </tr>
-                <tr>
-                   
-                </tr>
+                    <?php foreach($user_trading_metas as $utm) :?>
+                        <tr>
+                            <td>
+                               <?php echo $utm['order_id'] ?>
+                            </td>
+                            <td>
+                               <?php echo $utm['rebate'] ?>
+                            </td>
+                            <td>
+                               <?php echo $utm['dong_profit_dg'] ?>
+                            </td>
+                            <td>
+                               <?php echo $utm['dong_comm_dg'] ?>
+                            </td>
+                            <td>
+                               <?php echo $utm['dong_total'] ?>
+                            </td>
+                        </tr>
+                 
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
