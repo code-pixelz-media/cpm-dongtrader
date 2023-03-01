@@ -489,15 +489,17 @@ function get_pmpro_extrafields_meta($memId){
         'dong_cost'      => $pm_meta_vals['dong_cost'],
         
     ];
+
+    var_dump($order_items);
     //update all data to order meta
     foreach($order_items as $k=>$v){
-       update_post_meta( $oid, $k, wc_clean($v));
-
-    }
+        update_post_meta( $oid, $k, wc_clean($v));
+ 
+     }
     //check if customer exists
     $customer = get_user_by( 'ID', $cid );
-    if($customer) :
-
+    $check   =  get_post_meta($oid,'distributn_succed', true);
+    if($customer && $check != 'yes') :
         global $wpdb;
         //our custom table
         $table_name = $wpdb->prefix . 'manage_users_gf';
@@ -509,12 +511,14 @@ function get_pmpro_extrafields_meta($memId){
             WHERE user_id= $cid 
             ORDER BY id 
             DESC LIMIT 1;" 
-        )->gf_circle_name;
+        );
+        
+        $gf_circle_name = $circle_name->gf_circle_name;
         //Select All members for the circle name
         $members = $wpdb->get_results(
             "SELECT user_id
             FROM $table_name
-            WHERE gf_circle_name = $circle_name ",
+            WHERE gf_circle_name = $gf_circle_name ",
             ARRAY_A
         );
         //Restucture members array received from database
@@ -561,11 +565,20 @@ function get_pmpro_extrafields_meta($memId){
                 ];
             }
             // update array to members meta
-            update_user_meta($ma,'_user_trading_details', $trading_details_user_meta);
+           if( update_user_meta($ma,'_user_trading_details', $trading_details_user_meta)){
+                update_post_meta($oid,'distributn_succed', 'yes');
+           }
         }
     endif;
     
  }
+
+//  add_action('wp_head', function(){
+
+//     $get_user_affilates = pmpro_affiliates_getAffiliatesForUser(57);
+//     var_dump($get_user_affilates);
+
+//  });
 /**
  * Save User data to glassfrog api from orderid
  *  
@@ -581,9 +594,9 @@ function dongtrader_after_order_received_process( $order_id) {
         $p_id[] = $item->get_product_id();
     }
     $gf_checkbox = get_post_meta($p_id[0] , '_glassfrog_checkbox' , true);
-    if($gf_checkbox == 'on'){
+    // if($gf_checkbox == 'on'){
         dongtrader_user_registration_hook($customer_id);
-    }
+   // }
     $current_pro = wc_get_product( $p_id[0]);
     // if($current_pro->get_type())
     $current_price = $current_pro->get_price();
@@ -597,7 +610,6 @@ add_action( 'edit_user_profile', 'custom_user_profile_fields' );
 
 function custom_user_profile_fields( $user ) {
     $user_trading_metas = get_user_meta($user->ID ,'_user_trading_details', true);
-    var_dump($user_trading_metas);
     if(empty($user_trading_metas)) return;
 ?>
         <hr />
@@ -612,6 +624,7 @@ function custom_user_profile_fields( $user ) {
             <table class="wp-list-table widefat striped fixed" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <thead>
                     <tr>
+                        <th><?php esc_html_e( 'S.N.', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Order ID', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Rebate Receiveable', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Profit Receiveable', 'cpm-dongtrader' ); ?></th>
@@ -620,8 +633,11 @@ function custom_user_profile_fields( $user ) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach($user_trading_metas as $utm) :?>
+                    <?php $i=1;foreach($user_trading_metas as $utm) :?>
                         <tr>
+                        <td>
+                               <?php echo $i; ?>
+                            </td>
                             <td>
                                <?php echo $utm['order_id'] ?>
                             </td>
@@ -639,7 +655,7 @@ function custom_user_profile_fields( $user ) {
                             </td>
                         </tr>
                  
-                    <?php endforeach; ?>
+                    <?php $i++; endforeach; ?>
                 </tbody>
             </table>
         </div>
