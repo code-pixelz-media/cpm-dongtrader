@@ -173,8 +173,8 @@ function dongtraders_list_order_meta_table()
                         'posts_per_page'    => $post_per_page,
                         'post_status'    => 'wc-completed',
                         'paged' => $paged,
-
-                        'meta_query' => array(
+                        /* 
+                           'meta_query' => array(
                             array(
                                 'key' => '_paid_date',
                                 'value' => array($start, $enddate),
@@ -187,7 +187,7 @@ function dongtraders_list_order_meta_table()
                                 'compare' => 'LIKE',
                             ),
 
-                        )
+                        ) */
                     );
 
                     //$dong_orders = get_posts($args);

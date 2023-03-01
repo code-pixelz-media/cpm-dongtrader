@@ -35,7 +35,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 				<li class="nav-tab" id="third"><a href="#api-integration" class="dashicons-before dashicons-admin-generic"><?php _e('Integration API', 'dongtraders'); ?></a></li>
 
 				<li class="nav-tab" id="fourth"><a href="#advanced" class="dashicons-before dashicons-admin-settings"><?php _e('Orders', 'dongtraders'); ?></a></li>
-				<!-- <li class="nav-tab" id="fifth"><a href="#extra" class="dashicons-before dashicons-admin-tools"><?php _e('Extras', 'dongtraders'); ?></a></li> -->
+				<li class="nav-tab" id="fifth"><a href="#import-order" class="dashicons-before dashicons-admin-tools"><?php _e('Import Order', 'dongtraders'); ?></a></li>
 			</ul>
 
 			<div class="tab-content">
@@ -191,6 +191,217 @@ $dong_qr_array = get_option('dong_user_qr_values');
 					<h2 class="tab-title">Order</h2>
 
 					<?php dongtraders_list_order_meta_table(); ?>
+
+
+
+				</div>
+
+				<!-- import order tab -->
+				<div id="import-order">
+					<h2 class="tab-title">Import Order From CSV file </h2>
+					<form action="" method="post" enctype="multipart/form-data">
+						<div class="form-group">
+							<label for=""><?php _e('Select CSV file', 'cpm-dongtrader') ?></label>
+							<div class="form-control-wrap">
+								<input type="file" name="get_file" class="form-control" accept=".csv" required>
+
+							</div>
+
+						</div>
+						<div class="form-group settings-submit">
+							<input type="submit" class="cpm-btn submit save-settings-dash" name="import_csv" value="Import CSV">
+						</div>
+
+					</form>
+
+
+					<?php
+
+					if (isset($_POST['import_csv'])) {
+
+						$upload_dir = wp_upload_dir();
+						// $upload_dir = $uploads['baseurl'];
+						$file = $upload_dir['basedir'] . '/' . $_FILES['get_file']['name'];
+						$fileurl = $upload_dir['baseurl'] . '/' . $_FILES['get_file']['name'];
+						if (!move_uploaded_file(
+							$_FILES['get_file']['tmp_name'],
+							$file
+						)) {
+							print_r('Failed to move uploaded file.');
+						}
+
+						if (($open = fopen($fileurl, "r")) !== FALSE) {
+							// var_dump('file-open');
+							// Skip the first line
+							$first_row = true;
+							$get_orders = array();
+							$headers = array();
+
+							while (($data = fgetcsv($open, 1000, ",")) !== FALSE) {
+
+								if ($first_row) {
+									$headers = $data;
+									$first_row = false;
+								} else {
+									$get_orders[] = array_combine($headers, array_values($data));
+								}
+							}
+
+							/* fclose($open);
+							echo "<pre>";
+							var_dump($get_orders);
+							echo "</pre>"; */
+							foreach ($get_orders as $get_order) {
+								# code...
+								/* $order_csv_id = $get_order['csv_id']; */
+								$order_date = $get_order['order_date'];
+								$billing_first_name = $get_order['billing_first_name'];
+								$billing_last_name = $get_order['billing_last_name'];
+								$billing_full_name = $billing_first_name . ' ' . $billing_last_name;
+								$billing_phone = $get_order['billing_phone'];
+								$billing_address_1 = $get_order['billing_address_1'];
+								$billing_postcode = $get_order['billing_postcode'];
+								$billing_city = $get_order['billing_city'];
+								$billing_state = $get_order['billing_state'];
+								$billing_country = $get_order['billing_country'];
+								$product_id = $get_order['product_id'];
+								$variation_id = $get_order['variation_id'];
+
+								$paid_date = $get_order['paid_date'];
+								$status = $get_order['status'];
+								$order_total = $get_order['order_total'];
+								$order_currency = $get_order['order_currency'];
+								$payment_method = $get_order['payment_method'];
+								$shipping_method = $get_order['shipping_method'];
+								$customer_email = $get_order['customer_email'];
+								$affiliate_user = $get_order['affilate_user'];
+								$time = new DateTime($order_date);
+								$date = $time->format("F d, Y");
+								$time = $time->format('h:i A');
+								$csv_paid_date = new DateTime($paid_date);
+								$final_paid_date = $csv_paid_date->format("d-m-Y h:i:s");
+
+								//echo $final_paid_date . '<br>';
+
+								$post_title = 'Order &ndash; ' . $date . '@ ' . $time . '';
+								if ($variation_id == '0') {
+
+									$product_name = get_the_title($product_id);
+									$product_id_csv =  $product_id;
+								} else {
+									$product_name = get_the_title($variation_id);
+									$product_id_csv = $variation_id;
+								}
+
+								/* echo $customer_email . '<br>'; */
+								if (email_exists($customer_email)) {
+									/* exit; */
+								} else {
+									$random_password = wp_generate_password();
+
+
+									$user_id = wc_create_new_customer($customer_email, $billing_first_name, $random_password);
+
+
+									$order_id = wp_insert_post(array(
+										'post_type' => 'shop_order',
+										'post_title' => $post_title,
+										'post_status'    => $status,
+										'meta_input' => array(
+											/* '_csv_order_id' => $order_csv_id, */
+											'_billing_email' => $customer_email,
+											'_billing_first_name' => $billing_first_name,
+											'_billing_last_name' => $billing_last_name,
+											'_billing_address_1' => $billing_address_1,
+											'_billing_city' => $billing_city,
+											'_shipping_first_name' => $billing_first_name,
+											'_shipping_last_name' => $billing_last_name,
+											'_shipping_address_1' => $billing_address_1,
+											'_shipping_city' => $billing_city,
+											'_billing_postcode' => $billing_postcode,
+											'_payment_method' => $payment_method,
+											'_billing_state' => $billing_state,
+											'_billing_country' => $billing_country,
+											'_shipping_state' => $billing_state,
+											'_shipping_country' => $billing_country,
+											'_order_currency' => $order_currency,
+											'_order_total' => $order_total,
+											'_billing_phone' => $billing_phone,
+											'_paid_date' => $final_paid_date,
+										),
+									));
+
+									/* distrubution function  */
+									$price = $order_total;
+									$proId = $product_id_csv;
+									$oid = $order_id;
+									$cid = $user_id;
+
+									dongtrader_product_price_distribution($price, $proId, $oid, $cid);
+									// create an order item first
+									$order_item_id = wc_add_order_item(
+										$order_id,
+										array(
+											'order_item_name' => $product_name, // may differ from the product name
+											'order_item_type' => 'line_item', // product
+										)
+									);
+									if ($order_item_id) {
+										// provide its meta information
+										wc_add_order_item_meta($order_item_id, '_qty', 1, true); // quantity
+
+										wc_add_order_item_meta($order_item_id, '_product_id', $product_id, true); // ID of the product
+										wc_add_order_item_meta($order_item_id, '_variation_id', $variation_id, true); // ID of the product
+										// you can also add "_variation_id" meta
+										wc_add_order_item_meta($order_item_id, '_line_subtotal', $order_total, true); // price per item
+										wc_add_order_item_meta($order_item_id, '_line_total', $order_total, true); // total price
+									}
+
+									$email = $customer_email;
+									$address = array(
+										'first_name' => $billing_first_name,
+										'last_name'  => $billing_last_name,
+										'email'      => $email,
+										'phone'      => $billing_phone,
+										'address_1'  => $billing_address_1,
+										'city'       => $billing_city,
+										'state'      => $billing_state,
+										'postcode'   => $billing_postcode,
+										'country'    => $billing_country,
+										'affiliate_user' => $affiliate_user
+									);
+
+									update_post_meta($order_id, '_customer_user', $user_id);
+
+
+									update_user_meta($user_id, "billing_first_name", $address['first_name']);
+									update_user_meta($user_id, "billing_last_name", $address['last_name']);
+									update_user_meta($user_id, "billing_email", $address['email']);
+									update_user_meta($user_id, "billing_address_1", $address['address_1']);
+									update_user_meta($user_id, "billing_city", $address['city']);
+									update_user_meta($user_id, "billing_postcode", $address['postcode']);
+									update_user_meta($user_id, "billing_country", $address['country']);
+									update_user_meta($user_id, "billing_state", $address['state']);
+									update_user_meta($user_id, "billing_phone", $address['phone']);
+									update_user_meta($user_id, "shipping_first_name", $address['first_name']);
+									update_user_meta($user_id, "shipping_last_name", $address['last_name']);
+									update_user_meta($user_id, "shipping_address_1", $address['address_1']);
+									update_user_meta($user_id, "shipping_city", $address['city']);
+									update_user_meta($user_id, "shipping_postcode", $address['postcode']);
+									update_user_meta($user_id, "shipping_country", $address['country']);
+									update_user_meta($user_id, "shipping_state", $address['state']);
+									update_user_meta($user_id, "affiliate_user", $address['affiliate_user']);
+								}
+							}
+						}
+						echo '
+						 <div class="success-box">
+                        Order Imported
+                    </div>';
+					}
+
+					?>
+
 
 
 
