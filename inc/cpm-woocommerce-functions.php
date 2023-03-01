@@ -514,6 +514,8 @@ function get_pmpro_extrafields_meta($memId){
         );
         
         $gf_circle_name = $circle_name->gf_circle_name;
+
+        var_dump($gf_circle_name);
         //Select All members for the circle name
         $members = $wpdb->get_results(
             "SELECT user_id
