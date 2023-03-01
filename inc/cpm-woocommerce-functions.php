@@ -490,7 +490,6 @@ function get_pmpro_extrafields_meta($memId){
         
     ];
 
-    var_dump($order_items);
     //update all data to order meta
     foreach($order_items as $k=>$v){
         update_post_meta( $oid, $k, wc_clean($v));
