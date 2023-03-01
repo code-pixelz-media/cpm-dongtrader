@@ -441,8 +441,6 @@ function get_pmpro_extrafields_meta($memId){
  */
  function dongtrader_product_price_distribution($price,$proId, $oid,$cid){
 
-    // Check
-
     $gf_membership_checkbox = get_post_meta($proId , '_glassfrog_checkbox' , true);
     // Get boolean by checking checkbox
     $check = $gf_membership_checkbox == 'on' ? true : false;
@@ -599,6 +597,7 @@ add_action( 'edit_user_profile', 'custom_user_profile_fields' );
 
 function custom_user_profile_fields( $user ) {
     $user_trading_metas = get_user_meta($user->ID ,'_user_trading_details', true);
+    var_dump($user_trading_metas);
     if(empty($user_trading_metas)) return;
 ?>
         <hr />
