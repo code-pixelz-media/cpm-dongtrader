@@ -665,6 +665,12 @@ add_action( 'edit_user_profile', 'custom_user_profile_fields' );
 function custom_user_profile_fields( $user ) {
     $user_trading_metas = get_user_meta($user->ID ,'_user_trading_details', true);
     if(empty($user_trading_metas)) return;
+    $rebate_arr         = array_column($user_trading_metas,'rebate');
+    $dong_profit_dg_arr = array_column($user_trading_metas,'dong_profit_dg');
+    $dong_profit_di_arr = array_column($user_trading_metas,'dong_profit_di');
+    $dong_comm_dg_arr   = array_column($user_trading_metas,'dong_comm_dg');
+    $dong_comm_cdi_arr  = array_column($user_trading_metas,'dong_comm_cdi');
+    $dong_total_arr     = array_column($user_trading_metas,'dong_total');
 ?>
         <hr />
 		<h3><?php esc_html_e( 'Receiveable Amounts', 'cpm-dongtrader' ); ?></h3>
@@ -681,25 +687,16 @@ function custom_user_profile_fields( $user ) {
                         <th><?php esc_html_e( 'S.N.', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Order ID', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Created Date', 'cpm-dongtrader' ); ?></th>
-                        <th><?php esc_html_e( 'Rebate Receiveable', 'cpm-dongtrader' ); ?></th>
-                        <th><?php esc_html_e( 'Profit Receiveable', 'cpm-dongtrader' ); ?></th>
-                        <th><?php esc_html_e( 'Individual Profit Receiveable', 'cpm-dongtrader' ); ?></th>
-                        <th><?php esc_html_e( 'Commission Receiveable', 'cpm-dongtrader' ); ?></th>
-                        <th><?php esc_html_e( 'Individual Commission Receiveable', 'cpm-dongtrader' ); ?></th>
+                        <th><?php esc_html_e( 'Rebate ', 'cpm-dongtrader' ); ?></th>
+                        <th><?php esc_html_e( 'Profit ', 'cpm-dongtrader' ); ?></th>
+                        <th><?php esc_html_e( 'Individual Profit ', 'cpm-dongtrader' ); ?></th>
+                        <th><?php esc_html_e( 'Commission ', 'cpm-dongtrader' ); ?></th>
+                        <th><?php esc_html_e( 'Individual Commission ', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Total Receiveable Amount', 'cpm-dongtrader' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php 
-                    $rebate_arr         = array_column($user_trading_metas,'rebate');
-                    $dong_profit_dg_arr = array_column($user_trading_metas,'dong_profit_dg');
-                    $dong_profit_di_arr = array_column($user_trading_metas,'dong_profit_di');
-                    $dong_comm_dg_arr   = array_column($user_trading_metas,'dong_comm_dg');
-                    $dong_comm_cdi_arr  = array_column($user_trading_metas,'dong_comm_cdi');
-                    $dong_total_arr     = array_column($user_trading_metas,'dong_total');
-
-                  
-                   
+                    <?php  
                     $i=1;foreach($user_trading_metas as $utm) :
                         $order = new WC_Order($utm['order_id']);
                         $order_date = $order->order_date;
@@ -739,7 +736,7 @@ function custom_user_profile_fields( $user ) {
                  
                     <?php $i++; endforeach; ?>
                     <tr rowspan= "2" style="border: 1px solid blue;">
-                        <td  colspan="3">Totals</td>
+                        <td  colspan="3">Grand Total</td>
                         <td><?php echo '$'.array_sum($rebate_arr); ?></td>
                         <td><?php echo '$'.array_sum($dong_profit_dg_arr); ?></td>
                         <td><?php echo '$'.array_sum($dong_comm_dg_arr); ?></td>
