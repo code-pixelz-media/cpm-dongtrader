@@ -702,7 +702,7 @@ function custom_user_profile_fields( $user ) {
                    
                     $i=1;foreach($user_trading_metas as $utm) :
                         $order = new WC_Order($utm['order_id']);
-                        $order_date = $order->order_date();
+                        $order_date = $order->order_date;
                         ?>
                         <tr>
                             <td>
