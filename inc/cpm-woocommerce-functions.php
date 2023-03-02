@@ -739,8 +739,8 @@ function custom_user_profile_fields( $user ) {
                         <td  colspan="3">Grand Total</td>
                         <td><?php echo '$'.array_sum($rebate_arr); ?></td>
                         <td><?php echo '$'.array_sum($dong_profit_dg_arr); ?></td>
-                        <td><?php echo '$'.array_sum($dong_comm_dg_arr); ?></td>
                         <td><?php echo '$'.array_sum($dong_profit_di_arr); ?></td>
+                        <td><?php echo '$'.array_sum($dong_comm_dg_arr); ?></td>
                         <td><?php echo '$'.array_sum($dong_comm_cdi_arr); ?></td>
                         <td><?php echo '$'.array_sum($dong_total_arr ); ?></td>
                     </tr>
