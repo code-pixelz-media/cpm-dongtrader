@@ -274,7 +274,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 								$payment_method = $get_order['payment_method'];
 								$shipping_method = $get_order['shipping_method'];
 								$customer_email = $get_order['customer_email'];
-								$affiliate_user = $get_order['affilate_user'];
+								$affiliate_user_id = $get_order['affilate_user_id'];
 								$time = new DateTime($order_date);
 								$date = $time->format("F d, Y");
 								$time = $time->format('h:i A');
@@ -300,7 +300,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 									$random_password = wp_generate_password();
 
 
-									$user_id = wc_create_new_customer($customer_email, $billing_first_name, $random_password);
+									$user_id = wc_create_new_customer($customer_email, $billing_first_name . rand(10, 100), $random_password);
 
 
 									$order_id = wp_insert_post(array(
@@ -328,6 +328,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 											'_order_total' => $order_total,
 											'_billing_phone' => $billing_phone,
 											'_paid_date' => $final_paid_date,
+											'dong_affid' => $affiliate_user_id
 										),
 									));
 
@@ -368,7 +369,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 										'state'      => $billing_state,
 										'postcode'   => $billing_postcode,
 										'country'    => $billing_country,
-										'affiliate_user' => $affiliate_user
+										//'affiliate_user' => $affiliate_user
 									);
 
 									update_post_meta($order_id, '_customer_user', $user_id);
@@ -390,7 +391,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 									update_user_meta($user_id, "shipping_postcode", $address['postcode']);
 									update_user_meta($user_id, "shipping_country", $address['country']);
 									update_user_meta($user_id, "shipping_state", $address['state']);
-									update_user_meta($user_id, "affiliate_user", $address['affiliate_user']);
+									//update_user_meta($user_id, "dong_affid", $address['affiliate_user']);
 								}
 							}
 						}

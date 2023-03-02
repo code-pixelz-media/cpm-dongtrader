@@ -36,8 +36,8 @@ function dongtraders_list_order_meta_table()
 
         if ($get_filter == "all") {
 
-            $start = '';
-            $enddate = date("Y-m-d");
+            /*   $start = '2019-12-20';
+            $enddate = date("Y-m-d"); */
             $all_selected = "selected";
             $date_selected = "";
 
@@ -51,19 +51,19 @@ function dongtraders_list_order_meta_table()
             /* echo "filter with date"; */
         }
     } else {
-        $start = '';
-        $enddate = date("Y-m-d");
+        /*   $start = "2019-12-20";
+        $enddate = date("Y-m-d"); */
         $date_selected = "";
         $all_selected = "";
-        /* echo "none of above"; */
     }
+
+    /* echo $start . '<br>';
+    echo $enddate . '<br>'; */
 
 ?>
     <form id="posts-filter" method="get" action="">
 
         <!-- <h1 class="wp-heading-inline">Dongtraders Product Orders Details</h1> -->
-
-
 
         <div class="tablenav top">
             <div class="post_filter">
@@ -168,26 +168,33 @@ function dongtraders_list_order_meta_table()
                     <?php
                     $post_per_page = 30;
                     $paged = isset($_GET['dongtrader_api_settings']) ? abs((int) $_GET['dongtrader_api_settings']) : 1;
+                    if (!empty($start) && !empty($enddate)) {
+                        $search_by_date = array(
+                            'key' => '_paid_date',
+                            'value' => array($start, $enddate),
+                            'compare' => 'BETWEEN',
+                            'type' => 'DATE'
+                        );
+                    } else {
+                        $search_by_date = array();
+                    }
+
                     $args = array(
                         'post_type'         => 'shop_order',
                         'posts_per_page'    => $post_per_page,
                         'post_status'    => 'wc-completed',
                         'paged' => $paged,
-                        /* 
-                           'meta_query' => array(
-                            array(
-                                'key' => '_paid_date',
-                                'value' => array($start, $enddate),
-                                'compare' => 'BETWEEN',
-                                'type' => 'DATE'
-                            ),
+
+
+                        'meta_query' => array(
+                            $search_by_date,
                             array(
                                 // 'key'     => 'city',
                                 'value'   => $s,
                                 'compare' => 'LIKE',
                             ),
 
-                        ) */
+                        )
                     );
 
                     //$dong_orders = get_posts($args);
@@ -206,11 +213,11 @@ function dongtraders_list_order_meta_table()
                         $order_second_name = $order->get_billing_first_name() ? $order->get_billing_last_name() : null;
                         $order_full_name = $order_first_name . ' ' . $order_second_name;
                         $order_email = $order->get_billing_email() ? $order->get_billing_email() : null;
-                        $order_date = $order->get_date_created();
+                        $order_date = $order->get_date_paid();
                         $order_total = $order->get_formatted_order_total();
                         $createDate = new DateTime($order_date);
                         $o_date = $createDate->format('Y-m-d');
-
+                        /* echo $o_date . '<br>'; */
                         $rebate         = $order->get_meta('dong_reabate') ? $order->get_meta('dong_reabate') : 0;
                         $dong_processamt = $order->get_meta('dong_processamt') ? $order->get_meta('dong_processamt') : 0;
                         $dong_profitamt = $order->get_meta('dong_profitamt') ? $order->get_meta('dong_profitamt') : 0;
