@@ -692,7 +692,7 @@ function custom_user_profile_fields( $user ) {
                         <th><?php esc_html_e( 'Individual Profit ', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Commission ', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Individual Commission ', 'cpm-dongtrader' ); ?></th>
-                        <th><?php esc_html_e( 'Total Receiveable Amount', 'cpm-dongtrader' ); ?></th>
+                        <th><?php esc_html_e( 'Total ', 'cpm-dongtrader' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
