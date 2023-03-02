@@ -484,7 +484,7 @@ function get_pmpro_extrafields_meta($memId){
     /**Earnings */
     $earnings = $check ? $pm_meta_vals['dong_earning_per']/100 * $pm_meta_vals['dong_earning_amt']: '0';
     
-    $aid = get_post_meta($oid , 'dong_affid', true);
+    $aid = 1;//get_post_meta($oid , 'dong_affid', true);
     
     $order_items = [
         'dong_reabate'   => $rebate_amount,  
