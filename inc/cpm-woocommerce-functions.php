@@ -514,7 +514,6 @@ function get_pmpro_extrafields_meta($memId){
         
         $gf_circle_name = $circle_name->gf_circle_name;
 
-        var_dump($gf_circle_name."Hellow");
         //Select All members for the circle name
         $members = $wpdb->get_results(
             "SELECT user_id
@@ -544,7 +543,9 @@ function get_pmpro_extrafields_meta($memId){
                     'order_id'=> $oid,
                     'rebate' => 0,
                     'dong_profit_dg'=>$p_a_d_c,
+                    'dong_profit_di' => 0,
                     'dong_comm_dg'=>$c_a_t_c,
+                    'dong_comm_cdi' => 0,
                     'dong_total'  => 0 + $p_a_d_c + $c_a_t_c
                     
                 ];
@@ -629,14 +630,16 @@ function custom_user_profile_fields( $user ) {
                         <th><?php esc_html_e( 'Order ID', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Rebate Receiveable', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Profit Receiveable', 'cpm-dongtrader' ); ?></th>
+                        <th><?php esc_html_e( 'Individual Profit Receiveable', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Commission Receiveable', 'cpm-dongtrader' ); ?></th>
+                        <th><?php esc_html_e( 'Individual Commission Receiveable', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Total Receiveable Amount', 'cpm-dongtrader' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php $i=1;foreach($user_trading_metas as $utm) :?>
                         <tr>
-                        <td>
+                            <td>
                                <?php echo $i; ?>
                             </td>
                             <td>
@@ -649,7 +652,13 @@ function custom_user_profile_fields( $user ) {
                                <?php echo $utm['dong_profit_dg'] ?>
                             </td>
                             <td>
+                                <?php echo 0; ?>
+                            </td>
+                            <td>
                                <?php echo $utm['dong_comm_dg'] ?>
+                            </td>
+                            <td>
+                                <?php echo 0; ?>
                             </td>
                             <td>
                                <?php echo $utm['dong_total'] ?>
