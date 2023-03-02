@@ -643,25 +643,25 @@ function custom_user_profile_fields( $user ) {
                                <?php echo $i; ?>
                             </td>
                             <td>
-                               <?php echo $utm['order_id'] ?>
+                               <?php echo '$'.$utm['order_id'] ?>
                             </td>
                             <td>
-                               <?php echo $utm['rebate'] ?>
+                               <?php echo '$'.$utm['rebate'] ?>
                             </td>
                             <td>
-                               <?php echo $utm['dong_profit_dg'] ?>
+                               <?php echo '$'.$utm['dong_profit_dg'] ?>
                             </td>
                             <td>
-                                <?php echo 0; ?>
+                                <?php echo '$'.'0'; ?>
                             </td>
                             <td>
-                               <?php echo $utm['dong_comm_dg'] ?>
+                               <?php echo '$'.$utm['dong_comm_dg'] ?>
                             </td>
                             <td>
-                                <?php echo 0; ?>
+                                <?php echo '$'.'0'; ?>
                             </td>
                             <td>
-                               <?php echo $utm['dong_total'] ?>
+                               <?php echo '$'.$utm['dong_total'] ?>
                             </td>
                         </tr>
                  
