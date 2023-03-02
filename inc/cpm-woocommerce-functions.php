@@ -720,11 +720,11 @@ function custom_user_profile_fields( $user ) {
                             </td>
 
                             <td>
-                               <?php echo '$'.$utm['dong_comm_dg'] ?>
+                               <?php  echo '$'.$utm['dong_profit_di'];?>
                             </td>
                             <!-- Commission -->
                             <td>
-                                <?php echo '$'.$utm['dong_profit_di']; ?>
+                                <?php echo '$'.$utm['dong_comm_dg'] ?>
                             </td>
                             <td>
                                 <?php echo '$'.$utm['dong_comm_cdi']; ?>
