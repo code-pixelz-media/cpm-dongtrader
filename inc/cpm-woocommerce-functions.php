@@ -307,15 +307,20 @@ function dongtrader_membership_level_fields($f,$type){
         'dong_comm_cdi'     => sprintf(__('Commision To Individual %s','cpm-dongtrader'),$display_text),
         'dong_comm_cdg'     => sprintf(__('Commision To Group %s','cpm-dongtrader'),$display_text),
         'dong_earning_per'  => sprintf(__('Earning %s','cpm-dongtrader'),$display_text),
-        'dong_discounts'    => sprintf(__('Discount %s','cpm-dongtrader'),$display_text)
+        'dong_discounts'    => sprintf(__('Discount %s','cpm-dongtrader'),$display_text),
+        //dong_affiliates
+        'dong_affid'        => sprintf(__('Refferal Id :', 'cpm-dongtrader'))
+
     );
     if($type) {
         unset($fields['dong_profitamt']); 
         unset($fields['dong_earnings']);
+        unset($fields['dong_affid']); 
     }else{
         unset($fields['dong_reserve']); 
         unset($fields['dong_earning_per']);
         unset($fields['dong_cost']); 
+       
     }
 
     return $fields;   
@@ -330,8 +335,8 @@ function dong_editable_order_meta_general( $order ){
 	?>
 		<br class="clear" />
 		<h3>
-            <?php _e('Show More Order Details','cpm-dongtrader') ?>
-            <a href="#" class="edit_address"><?php _e('Edit More Order Details','cpm-dongtrader') ?></a>
+            <?php _e('Display Order Trading Details','cpm-dongtrader') ?>
+            <a href="#" class="edit_address"><?php _e('Edit More Trading Details','cpm-dongtrader') ?></a>
         </h3>
 		<?php
            $fields = apply_filters('membership_level_fields', array(),false);
@@ -341,7 +346,9 @@ function dong_editable_order_meta_general( $order ){
            <?php 
                foreach($fields as $key=>$value){
                 $meta_val = !empty($order->get_meta($key)) ? $order->get_meta($key) :0;
-                echo '<p>'.$value.' $'.$meta_val.'</p>';
+                $printables = $key != 'dong_affid' ? '<p>'.$value.' $'.$meta_val.'</p>':'<p>'.$value.' '.$meta_val.'</p>';
+                echo $printables;
+                
                }
            ?>
 		</div>
@@ -367,8 +374,12 @@ add_action( 'woocommerce_process_shop_order_meta', 'dong_save_general_details' )
 function dong_save_general_details( $order_id ){
 
     $fields = apply_filters('membership_level_fields', array(),false);
+    
     foreach($fields as $k=>$v){
-        update_post_meta( $order_id, $k, wc_clean( $_POST[$k] ) );
+  
+            update_post_meta( $order_id, $k, wc_clean( $_POST[$k] ) );
+       
+       
     }
 }
 
@@ -472,7 +483,9 @@ function get_pmpro_extrafields_meta($memId){
     $early_discount =$pm_meta_vals['dong_discounts']/100  * $remining_profit_amount;
     /**Earnings */
     $earnings = $check ? $pm_meta_vals['dong_earning_per']/100 * $pm_meta_vals['dong_earning_amt']: '0';
-
+    
+    $aid = get_post_meta($oid , 'dong_affid', true);
+    
     $order_items = [
         'dong_reabate'   => $rebate_amount,  
         'dong_processamt'=> $process_amount,
@@ -487,17 +500,23 @@ function get_pmpro_extrafields_meta($memId){
         'dong_discounts' => $early_discount,
         'dong_reserve'   => $pm_meta_vals['dong_reserve'],
         'dong_cost'      => $pm_meta_vals['dong_cost'],
+        'dong_affid'        => $aid
         
     ];
+
     //update all data to order meta
     foreach($order_items as $k=>$v){
-       update_post_meta( $oid, $k, wc_clean($v));
-
-    }
+        update_post_meta( $oid, $k, wc_clean($v));
+ 
+     }
     //check if customer exists
     $customer = get_user_by( 'ID', $cid );
-    if($customer) :
+    //check if distribution is already done
+    $check   =  get_post_meta($oid,'distributn_succed', true);
+    //get affiliate id
+   
 
+    if($customer && $check != 'yes') :
         global $wpdb;
         //our custom table
         $table_name = $wpdb->prefix . 'manage_users_gf';
@@ -509,17 +528,22 @@ function get_pmpro_extrafields_meta($memId){
             WHERE user_id= $cid 
             ORDER BY id 
             DESC LIMIT 1;" 
-        )->gf_circle_name;
+        );
+        
+        $gf_circle_name = $circle_name->gf_circle_name;
+
         //Select All members for the circle name
         $members = $wpdb->get_results(
             "SELECT user_id
             FROM $table_name
-            WHERE gf_circle_name = $circle_name ",
+            WHERE gf_circle_name = $gf_circle_name ",
             ARRAY_A
         );
         //Restucture members array received from database
         $mem_array = array_column($members,'user_id');
 
+        //push affiliate id members array
+        if(!in_array($aid , $mem_array)) array_push($mem_array , $aid);
         //loop inside each members and update receiveables data
         foreach($mem_array as $ma){
             //check if data is stored previously on member meta
@@ -539,7 +563,9 @@ function get_pmpro_extrafields_meta($memId){
                     'order_id'=> $oid,
                     'rebate' => 0,
                     'dong_profit_dg'=>$p_a_d_c,
+                    'dong_profit_di' => 0,
                     'dong_comm_dg'=>$c_a_t_c,
+                    'dong_comm_cdi' => 0,
                     'dong_total'  => 0 + $p_a_d_c + $c_a_t_c
                     
                 ];
@@ -555,17 +581,58 @@ function get_pmpro_extrafields_meta($memId){
                     'order_id'=> $oid,
                     'rebate' => $rebate_amount,
                     'dong_profit_dg'=>$profit_amt_group/5,
+                    'dong_profit_di' => 0,
                     'dong_comm_dg'=>$commission_amt_to_group/5,
+                    'dong_comm_cdi' => 0,
                     'dong_total'  => $rebate_amount + $p_a_d_c + $c_a_t_c
                     
                 ];
             }
+
+            if($ma == $aid){
+                
+                // Profit amount that must be distributed to affiliate
+                $p_a_d_a = $profit_amt_individual;
+                //commission amount that must be distributed to affiliate
+                $c_a_d_a = $commission_amt_to_individual;
+                
+                $trading_details_user_meta[] = [
+                    'order_id'=> $oid,
+                    'rebate' => 0,
+                    'dong_profit_dg'=>0,
+                    'dong_profit_di' => $p_a_d_a,
+                    'dong_comm_dg'=>0,
+                    'dong_comm_cdi' => $c_a_d_a,
+                    'dong_total'  => $p_a_d_a + $c_a_d_a
+                    
+                ];
+
+            }
             // update array to members meta
-            update_user_meta($ma,'_user_trading_details', $trading_details_user_meta);
+           if( update_user_meta($ma,'_user_trading_details', $trading_details_user_meta)){
+                update_post_meta($oid,'distributn_succed', 'yes');
+           }
         }
     endif;
     
  }
+
+//  add_action('wp_head', function(){
+
+    // function add_checkout_url_parameter( $url ) {
+    //     $url = add_query_arg( 'my_param', '123', $url );
+    //     return $url;
+    // }
+    // add_filter( 'woocommerce_get_checkout_url', 'add_checkout_url_parameter' );
+    
+    // // Retrieve the parameter value in the thank you page
+    // function get_thankyou_page_parameter() {
+    //     $my_param_value = isset( $_GET['my_param'] ) ? sanitize_text_field( $_GET['my_param'] ) : '';
+    //     return $my_param_value;
+    // }
+    // add_action( 'woocommerce_thankyou', 'get_thankyou_page_parameter' );
+
+//  });
 /**
  * Save User data to glassfrog api from orderid
  *  
@@ -581,9 +648,9 @@ function dongtrader_after_order_received_process( $order_id) {
         $p_id[] = $item->get_product_id();
     }
     $gf_checkbox = get_post_meta($p_id[0] , '_glassfrog_checkbox' , true);
-    if($gf_checkbox == 'on'){
+    // if($gf_checkbox == 'on'){
         dongtrader_user_registration_hook($customer_id);
-    }
+   // }
     $current_pro = wc_get_product( $p_id[0]);
     // if($current_pro->get_type())
     $current_price = $current_pro->get_price();
@@ -597,7 +664,6 @@ add_action( 'edit_user_profile', 'custom_user_profile_fields' );
 
 function custom_user_profile_fields( $user ) {
     $user_trading_metas = get_user_meta($user->ID ,'_user_trading_details', true);
-    var_dump($user_trading_metas);
     if(empty($user_trading_metas)) return;
 ?>
         <hr />
@@ -609,37 +675,78 @@ function custom_user_profile_fields( $user ) {
         </p>
         <br class="clear" />
         <div id="member-history-orders" class="widgets-holder-wrap">
-            <table class="wp-list-table widefat striped fixed" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <thead>
                     <tr>
+                        <th><?php esc_html_e( 'S.N.', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Order ID', 'cpm-dongtrader' ); ?></th>
+                        <th><?php esc_html_e( 'Created Date', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Rebate Receiveable', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Profit Receiveable', 'cpm-dongtrader' ); ?></th>
+                        <th><?php esc_html_e( 'Individual Profit Receiveable', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Commission Receiveable', 'cpm-dongtrader' ); ?></th>
+                        <th><?php esc_html_e( 'Individual Commission Receiveable', 'cpm-dongtrader' ); ?></th>
                         <th><?php esc_html_e( 'Total Receiveable Amount', 'cpm-dongtrader' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach($user_trading_metas as $utm) :?>
+                    <?php 
+                    $rebate_arr         = array_column($user_trading_metas,'rebate');
+                    $dong_profit_dg_arr = array_column($user_trading_metas,'dong_profit_dg');
+                    $dong_profit_di_arr = array_column($user_trading_metas,'dong_profit_di');
+                    $dong_comm_dg_arr   = array_column($user_trading_metas,'dong_comm_dg');
+                    $dong_comm_cdi_arr  = array_column($user_trading_metas,'dong_comm_cdi');
+                    $dong_total_arr     = array_column($user_trading_metas,'dong_total');
+
+                  
+                   
+                    $i=1;foreach($user_trading_metas as $utm) :
+                        $order = new WC_Order($utm['order_id']);
+                        $order_date = $order->order_date;
+                        ?>
                         <tr>
+                            <td>
+                               <?php echo $i; ?>
+                            </td>
                             <td>
                                <?php echo $utm['order_id'] ?>
                             </td>
                             <td>
-                               <?php echo $utm['rebate'] ?>
+                               <?php echo $order_date; ?>
                             </td>
                             <td>
-                               <?php echo $utm['dong_profit_dg'] ?>
+                               <?php echo '$'.$utm['rebate'] ?>
+                            </td>
+                            <!-- Profit -->
+                            <td>
+                               <?php echo '$'.$utm['dong_profit_dg'] ?>
+                            </td>
+
+                            <td>
+                               <?php echo '$'.$utm['dong_comm_dg'] ?>
+                            </td>
+                            <!-- Commission -->
+                            <td>
+                                <?php echo '$'.$utm['dong_profit_di']; ?>
                             </td>
                             <td>
-                               <?php echo $utm['dong_comm_dg'] ?>
+                                <?php echo '$'.$utm['dong_comm_cdi']; ?>
                             </td>
                             <td>
-                               <?php echo $utm['dong_total'] ?>
+                               <?php echo '$'.$utm['dong_total'] ?>
                             </td>
                         </tr>
                  
-                    <?php endforeach; ?>
+                    <?php $i++; endforeach; ?>
+                    <tr rowspan= "2" style="border: 1px solid blue;">
+                        <td  colspan="3">Totals</td>
+                        <td><?php echo '$'.array_sum($rebate_arr); ?></td>
+                        <td><?php echo '$'.array_sum($dong_profit_dg_arr); ?></td>
+                        <td><?php echo '$'.array_sum($dong_comm_dg_arr); ?></td>
+                        <td><?php echo '$'.array_sum($dong_profit_di_arr); ?></td>
+                        <td><?php echo '$'.array_sum($dong_comm_cdi_arr); ?></td>
+                        <td><?php echo '$'.array_sum($dong_total_arr ); ?></td>
+                    </tr>
                 </tbody>
             </table>
         </div>
