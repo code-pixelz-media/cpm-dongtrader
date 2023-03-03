@@ -513,9 +513,7 @@ function get_pmpro_extrafields_meta($memId){
     $customer = get_user_by( 'ID', $cid );
     //check if distribution is already done
     $check   =  get_post_meta($oid,'distributn_succed', true);
-    //get affiliate id
    
-
     if($customer && $check != 'yes') :
         global $wpdb;
         //our custom table
