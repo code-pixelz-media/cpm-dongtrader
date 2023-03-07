@@ -615,24 +615,24 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
                 ];
             }
 
-            if ($ma == $aid) {
+            // if ($ma == $aid) {
 
-                // Profit amount that must be distributed to affiliate
-                $p_a_d_a = $profit_amt_individual;
-                //commission amount that must be distributed to affiliate
-                $c_a_d_a = $commission_amt_to_individual;
+            //     // Profit amount that must be distributed to affiliate
+            //     $p_a_d_a = $profit_amt_individual;
+            //     //commission amount that must be distributed to affiliate
+            //     $c_a_d_a = $commission_amt_to_individual;
 
-                $trading_details_user_meta[] = [
-                    'order_id' => $oid,
-                    'rebate' => 0,
-                    'dong_profit_dg' => 0,
-                    'dong_profit_di' => $p_a_d_a,
-                    'dong_comm_dg' => 0,
-                    'dong_comm_cdi' => $c_a_d_a,
-                    'dong_total'  => $p_a_d_a + $c_a_d_a
+            //     $trading_details_user_meta[] = [
+            //         'order_id' => $oid,
+            //         'rebate' => 0,
+            //         'dong_profit_dg' => 0,
+            //         'dong_profit_di' => $p_a_d_a,
+            //         'dong_comm_dg' => 0,
+            //         'dong_comm_cdi' => $c_a_d_a,
+            //         'dong_total'  => $p_a_d_a + $c_a_d_a
 
-                ];
-            }
+            //     ];
+            // }
 
             // $aff_id = get_user_by('ID', $aid);
             // if($aff_id){
