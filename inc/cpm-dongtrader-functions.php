@@ -427,11 +427,10 @@ function dongtrader_user_registration_hook($customer_id)
         "tag_names": ["tag 1", "tag 2"]
         }]
         }';
-    $samp = glassfrog_api_request('people', $str, "POST");
+    $samp = true; //glassfrog_api_request('people', $str, "POST");
     if ($samp && isset($samp)) {
-        $gf_id   = $samp->people[0]->id;
-        $gf_name = $samp->people[0]->name;
-        $email   = $samp->people[0]->email;
+        $gf_id   = '22';//$samp->people[0]->id;
+        $gf_name = $full_name;
         $result  = $wpdb->get_row("SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;");
 
         $last_circle_name = isset($result) ? $result->gf_circle_name : '1';
