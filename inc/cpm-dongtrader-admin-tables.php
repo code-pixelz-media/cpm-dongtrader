@@ -51,8 +51,8 @@ function dongtraders_list_order_meta_table()
             /* echo "filter with date"; */
         }
     } else {
-        /*   $start = "2019-12-20";
-        $enddate = date("Y-m-d"); */
+        $start = "";
+        $enddate = "";
         $date_selected = "";
         $all_selected = "";
     }
