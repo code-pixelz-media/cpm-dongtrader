@@ -660,7 +660,7 @@ function dongtrader_after_order_received_process($order_id)
 add_action('show_user_profile', 'custom_user_profile_fields');
 add_action('edit_user_profile', 'custom_user_profile_fields');
 
-delete_user_meta(1,'_user_trading_details');
+//delete_user_meta(1,'_user_trading_details');
 //_user_trading_details
 
 function custom_user_profile_fields($user)
