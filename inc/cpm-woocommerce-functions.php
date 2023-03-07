@@ -846,7 +846,7 @@ function dongtraders_csv_order_importer()
                     $chceck_data = dongtrader_user_registration_hook($user_id);
                     var_dump($chceck_data); */
 
-
+                    dongtrader_user_registration_hook($user_id);
                     $order_id = wp_insert_post(array(
                         'post_type' => 'shop_order',
                         'post_title' => $post_title,
@@ -886,9 +886,7 @@ function dongtraders_csv_order_importer()
                     } else {
                         $msg = '<div class="error-box">Order Data could not Imported ! Please Try again</div>';
                     }
-                    dongtrader_user_registration_hook($cid);
-                    /* $chceck_data = 
-									var_dump($chceck_data); */
+                 
 
                     dongtrader_product_price_distribution($price, $proId, $oid, $cid);
                     // create an order item first
