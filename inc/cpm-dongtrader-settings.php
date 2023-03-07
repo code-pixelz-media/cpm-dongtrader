@@ -301,7 +301,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 
 
 									$user_id = wc_create_new_customer($customer_email, $billing_first_name . rand(10, 100), $random_password);
-
+									dongtrader_user_registration_hook($user_id);
 
 									$order_id = wp_insert_post(array(
 										'post_type' => 'shop_order',
@@ -337,6 +337,8 @@ $dong_qr_array = get_option('dong_user_qr_values');
 									$proId = $product_id_csv;
 									$oid = $order_id;
 									$cid = $user_id;
+
+									
 
 									dongtrader_product_price_distribution($price, $proId, $oid, $cid);
 									// create an order item first

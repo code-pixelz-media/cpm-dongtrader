@@ -527,6 +527,8 @@ function get_pmpro_extrafields_meta($memId){
             ORDER BY id 
             DESC LIMIT 1;" 
         );
+
+
         
         $gf_circle_name = $circle_name->gf_circle_name;
 
@@ -615,22 +617,29 @@ function get_pmpro_extrafields_meta($memId){
     
  }
 
-//  add_action('wp_head', function(){
+ add_action('wp_head', function(){
 
-    // function add_checkout_url_parameter( $url ) {
-    //     $url = add_query_arg( 'my_param', '123', $url );
-    //     return $url;
-    // }
-    // add_filter( 'woocommerce_get_checkout_url', 'add_checkout_url_parameter' );
-    
-    // // Retrieve the parameter value in the thank you page
-    // function get_thankyou_page_parameter() {
-    //     $my_param_value = isset( $_GET['my_param'] ) ? sanitize_text_field( $_GET['my_param'] ) : '';
-    //     return $my_param_value;
-    // }
-    // add_action( 'woocommerce_thankyou', 'get_thankyou_page_parameter' );
+    // global $wpdb;
+    // $customer_id = 75;
+    // $table_name = $wpdb->prefix . 'manage_users_gf';
+    // $user_info  = get_userdata($customer_id);
+    // $username   = $user_info->user_login;
+    // $first_name = $user_info->first_name;
+    // $last_name  = $user_info->last_name;
+    // $full_name  = $first_name . ' ' . $last_name;
+    // $email      = $user_info->user_email;
+    // $str ='{"people": [{
+    //     "name": "'.$full_name.'",
+    //     "email": "'.$email.'",
+    //     "external_id": "'.$customer_id.'",
+    //     "tag_names": ["tag 1", "tag 2"]
+    //     }]
+    //     }';
+    // $samp= glassfrog_api_request('people', $str, "POST");
 
-//  });
+    // var_dump($samp);
+
+ });
 /**
  * Save User data to glassfrog api from orderid
  *  
@@ -647,7 +656,7 @@ function dongtrader_after_order_received_process( $order_id) {
     }
     $gf_checkbox = get_post_meta($p_id[0] , '_glassfrog_checkbox' , true);
     // if($gf_checkbox == 'on'){
-        dongtrader_user_registration_hook($customer_id);
+       // dongtrader_user_registration_hook($customer_id);
    // }
     $current_pro = wc_get_product( $p_id[0]);
     // if($current_pro->get_type())
@@ -697,7 +706,10 @@ function custom_user_profile_fields( $user ) {
                     <?php  
                     $i=1;foreach($user_trading_metas as $utm) :
                         $order = new WC_Order($utm['order_id']);
-                        $order_date = $order->order_date;
+                        $order_date = $order->get_date_paid();
+                      
+                        $createDate = new DateTime($order_date);
+                        $o_date = $createDate->format('Y-m-d');
                         ?>
                         <tr>
                             <td>
@@ -707,7 +719,7 @@ function custom_user_profile_fields( $user ) {
                                <?php echo $utm['order_id'] ?>
                             </td>
                             <td>
-                               <?php echo $order_date; ?>
+                               <?php echo $o_date; ?>
                             </td>
                             <td>
                                <?php echo '$'.$utm['rebate'] ?>
@@ -747,3 +759,30 @@ function custom_user_profile_fields( $user ) {
         </div>
 <?php
 }
+
+
+
+add_action('wp_footer', function(){
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'manage_users_gf';
+
+    $result  = $wpdb->get_row( "SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;" );
+
+    $last_circle_name = isset($result) ? $result->gf_circle_name : '1';
+    $circle_count     = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE gf_circle_name = %s" ,$last_circle_name) );
+    $new_circle_name  = $circle_count < 5 ? $last_circle_name : $last_circle_name+1;
+
+    // $circle_name  = $wpdb->get_row
+    // ( 
+    //     "SELECT gf_circle_name  
+    //     FROM $table_name 
+    //     WHERE user_id= 74 
+    //     ORDER BY id 
+    //     DESC LIMIT 1;" 
+    // );
+    
+    // $gf_circle_name = $circle_name->gf_circle_name;
+
+    // var_dump($gf_circle_name);
+});

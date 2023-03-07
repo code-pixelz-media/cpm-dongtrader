@@ -79,7 +79,7 @@ function qrtiger_api_request($endpoint = '', $bodyParams = array(), $method = "G
 
 
 /* A function that is used to make the Glassfrog API requests. */
-function glassfrog_api_request($endpoint = '', $str, $method = "GET")
+function glassfrog_api_request($endpoint = '', $str='', $method = "GET")
 {
     /* Get the API credentials from the database. */
     $api_creds = get_option('dongtraders_api_settings_fields');
@@ -429,16 +429,18 @@ function dongtrader_user_registration_hook($customer_id) {
         "tag_names": ["tag 1", "tag 2"]
         }]
         }';
-    $samp= glassfrog_api_request('people', $str, "POST");
+    $samp= true;//glassfrog_api_request('people', $str, "POST");
+
+    
     if($samp && isset($samp)){
-        $gf_id   = $samp->people[0]->id;
-        $gf_name = $samp->people[0]->name;
-        $email   = $samp->people[0]->email;
+        $gf_id   = '22';//$samp->people[0]->id;
+        $gf_name = $full_name;//$samp->people[0]->name;
+        $email   =  $email ;//$samp->people[0]->email;
         $result  = $wpdb->get_row( "SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;" );
 
         $last_circle_name = isset($result) ? $result->gf_circle_name : '1';
         $circle_count     = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE gf_circle_name = %s" ,$last_circle_name) );
-        $new_circle_name  = $circle_count < 5 ? $last_circle_name : $last_circle_name+1;
+        $new_circle_name  = $circle_count < 5 ? intval($last_circle_name) : $last_circle_name+1;
         $wpdb->query(
             $wpdb->prepare(
                "INSERT INTO $table_name
@@ -451,7 +453,7 @@ function dongtrader_user_registration_hook($customer_id) {
                 created_at,
                 user_id 
                )
-               VALUES ( %d, %d, %s, %s, %s, %s, %d )",
+               VALUES ( %d, %d, %s, %s, %d, %s, %d )",
                esc_attr($gf_id),
                1,
                'false',
