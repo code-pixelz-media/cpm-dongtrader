@@ -79,7 +79,7 @@ function qrtiger_api_request($endpoint = '', $bodyParams = array(), $method = "G
 
 
 /* A function that is used to make the Glassfrog API requests. */
-function glassfrog_api_request($endpoint = '', $str, $method = "GET")
+function glassfrog_api_request($endpoint = '', $str = '', $method = "GET")
 {
     /* Get the API credentials from the database. */
     $api_creds = get_option('dongtraders_api_settings_fields');

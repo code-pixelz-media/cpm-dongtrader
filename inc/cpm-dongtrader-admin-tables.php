@@ -142,9 +142,9 @@ function dongtraders_list_order_meta_table()
             <table class="wp-list-table widefat striped dong-order-table">
                 <thead>
                     <tr>
-                        <th colspan="8"></th>
+                        <th colspan="7"></th>
                         <th colspan="3" class="top-col">Profit</th>
-                        <th colspan="3" class="top-col">Earning</th>
+                        <th colspan="3" class="top-col">Commissions</th>
                     </tr>
                     <tr>
                         <td><strong>Order ID</strong></td>
@@ -154,13 +154,13 @@ function dongtraders_list_order_meta_table()
                         <td><strong>Process</strong></td>
                         <td><strong>Profit</strong></td>
                         <td><strong>Reserve</strong></td>
-                        <td><strong>Cost</strong></td>
+                        <!-- <td><strong>Cost</strong></td> -->
                         <td><strong>Group</strong></td>
                         <td><strong>Individual</strong></td>
                         <td><strong>Commission</strong></td>
                         <td><strong>Group</strong></td>
                         <td><strong>Individual</strong></td>
-                        <td><strong>Commission</strong></td>
+                        <td><strong>Earning</strong></td>
                     </tr>
                 </thead>
 
@@ -255,7 +255,7 @@ function dongtraders_list_order_meta_table()
                     <td class="column-profit" data-colname="Profit">' . $price_symbol . $dong_profitamt . ' </td>
                     <!--   $30 td -->
                         <td class="column-reserve" data-colname="Reserve">' . $price_symbol . $order_reserve_amt . ' </td>
-                        <td class="column-dcost" data-colname="Cost">' . $price_symbol . $order_cost_amt . ' </td>
+                        <!--<td class="column-dcost" data-colname="Cost">' . $price_symbol . $order_cost_amt . ' </td> -->
                      <!--  Profit -->
                         <td class="column-dgroup" data-colname="Group">' . $price_symbol . $profit_amt_group . ' </td>
                         <td class="column-dndividual" data-colname="Individual">' . $price_symbol . $dong_profit_indivudual . ' </td>
@@ -263,7 +263,7 @@ function dongtraders_list_order_meta_table()
                          <!--   earning -->
                          <td class="column-degroup" data-colname="Group">' . $price_symbol . $commission_amt_to_group . ' </td>
                         <td class="column-dendividual" data-colname="Individual">' . $price_symbol . $commission_amt_to_individual . ' </td>
-                        <td class="column-decommission" data-colname="Commission">' . $price_symbol . $dong_discounts . ' </td>
+                        <td class="column-decommission" data-colname="Earning">' . $price_symbol . $dong_earnings . ' </td>
                 </tr>
                 ';
                     endwhile;

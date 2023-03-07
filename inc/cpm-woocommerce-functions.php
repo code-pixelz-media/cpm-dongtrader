@@ -614,22 +614,22 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
     endif;
 }
 
-//  add_action('wp_head', function(){
+add_action('wp_head', function () {
 
-// function add_checkout_url_parameter( $url ) {
-//     $url = add_query_arg( 'my_param', '123', $url );
-//     return $url;
-// }
-// add_filter( 'woocommerce_get_checkout_url', 'add_checkout_url_parameter' );
+    // function add_checkout_url_parameter( $url ) {
+    //     $url = add_query_arg( 'my_param', '123', $url );
+    //     return $url;
+    // }
+    // add_filter( 'woocommerce_get_checkout_url', 'add_checkout_url_parameter' );
 
-// // Retrieve the parameter value in the thank you page
-// function get_thankyou_page_parameter() {
-//     $my_param_value = isset( $_GET['my_param'] ) ? sanitize_text_field( $_GET['my_param'] ) : '';
-//     return $my_param_value;
-// }
-// add_action( 'woocommerce_thankyou', 'get_thankyou_page_parameter' );
+    // // Retrieve the parameter value in the thank you page
+    // function get_thankyou_page_parameter() {
+    //     $my_param_value = isset( $_GET['my_param'] ) ? sanitize_text_field( $_GET['my_param'] ) : '';
+    //     return $my_param_value;
+    // }
+    // add_action( 'woocommerce_thankyou', 'get_thankyou_page_parameter' );
 
-//  });
+});
 /**
  * Save User data to glassfrog api from orderid
  *  
@@ -949,3 +949,30 @@ function dongtraders_csv_order_importer()
         }
     }
 }
+
+
+
+add_action('wp_footer', function () {
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'manage_users_gf';
+
+    $result  = $wpdb->get_row("SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;");
+
+    $last_circle_name = isset($result) ? $result->gf_circle_name : '1';
+    $circle_count     = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE gf_circle_name = %s", $last_circle_name));
+    $new_circle_name  = $circle_count < 5 ? $last_circle_name : $last_circle_name + 1;
+
+    // $circle_name  = $wpdb->get_row
+    // ( 
+    //     "SELECT gf_circle_name  
+    //     FROM $table_name 
+    //     WHERE user_id= 74 
+    //     ORDER BY id 
+    //     DESC LIMIT 1;" 
+    // );
+
+    // $gf_circle_name = $circle_name->gf_circle_name;
+
+    // var_dump($gf_circle_name);
+});

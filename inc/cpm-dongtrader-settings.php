@@ -214,7 +214,6 @@ $dong_qr_array = get_option('dong_user_qr_values');
 
 					</form>
 					<?php
-					/* A function that is importing the csv file. */
 					dongtraders_csv_order_importer();
 					?>
 
