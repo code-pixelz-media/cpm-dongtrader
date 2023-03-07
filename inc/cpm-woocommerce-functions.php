@@ -485,7 +485,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
     /**Earnings */
     $earnings = $check ? $pm_meta_vals['dong_earning_per'] / 100 * $pm_meta_vals['dong_earning_amt'] : '0';
 
-    $aid = get_post_meta($oid, 'dong_affid', true);
+    $aid = 1;//get_post_meta($oid, 'dong_affid', true);
 
     $order_items = [
         'dong_reabate'   => $rebate_amount,
@@ -538,11 +538,38 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
             WHERE gf_circle_name = $gf_circle_name ",
             ARRAY_A
         );
+
+
         //Restucture members array received from database
         $mem_array = array_column($members, 'user_id');
 
+        $aff_check = get_post_meta($oid, 'aff_distributn_succed', true);
         //push affiliate id members array
-        if (!in_array($aid, $mem_array)) array_push($mem_array, $aid);
+       if (!in_array($aid, $mem_array) && $aff_check != 'yes'){
+
+         //check if data is stored previously on member meta
+        $aff_user_trading_meta = get_user_meta($aid, '_user_trading_details', true);
+
+         //if data is previously stored if not set empty array
+        $aff_trading_details_user_meta = !empty($aff_user_trading_meta) ? $aff_user_trading_meta : [];
+        $p_a_d_a = $profit_amt_individual;
+        $c_a_d_a = $commission_amt_to_individual;
+        $aff_trading_details_user_meta[] = [
+            'order_id' => $oid,
+            'rebate' => 0,
+            'dong_profit_dg' => 0,
+            'dong_profit_di' => $p_a_d_a,
+            'dong_comm_dg' => 0,
+            'dong_comm_cdi' => $c_a_d_a,
+            'dong_total'  => $p_a_d_a + $c_a_d_a
+
+        ];
+
+        if(update_user_meta($aid, '_user_trading_details', $aff_trading_details_user_meta)){
+            update_post_meta($oid, 'aff_distributn_succed', 'yes');
+        }
+
+       }
         //loop inside each members and update receiveables data
         foreach ($mem_array as $ma) {
             //check if data is stored previously on member meta
@@ -606,6 +633,24 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
 
                 ];
             }
+
+            // $aff_id = get_user_by('ID', $aid);
+            // if($aff_id){
+            //     $user_trading_meta = get_user_meta($aid, '_user_trading_details', true);
+            //     $p_a_d_a = $profit_amt_individual;
+            //     $c_a_d_a = $commission_amt_to_individual;
+            //     $trading_details_user_meta[] = [
+            //             'order_id' => $oid,
+            //             'rebate' => 0,
+            //             'dong_profit_dg' => 0,
+            //             'dong_profit_di' => $p_a_d_a,
+            //             'dong_comm_dg' => 0,
+            //             'dong_comm_cdi' => $c_a_d_a,
+            //             'dong_total'  => $p_a_d_a + $c_a_d_a
+    
+            //         ];
+            // }
+    
             // update array to members meta
             if (update_user_meta($ma, '_user_trading_details', $trading_details_user_meta)) {
                 update_post_meta($oid, 'distributn_succed', 'yes');
