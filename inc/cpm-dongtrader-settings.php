@@ -199,7 +199,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 				<!-- import order tab -->
 				<div id="import-order">
 					<h2 class="tab-title">Import Order From CSV file </h2>
-					<form action="" method="post" enctype="multipart/form-data" onSubmit="window.location.reload()">
+					<form action="#" method="post" enctype="multipart/form-data" onSubmit="window.location.reload()">
 						<div class=" form-group">
 							<label for=""><?php _e('Select CSV file', 'cpm-dongtrader') ?></label>
 							<div class="form-control-wrap">

@@ -129,7 +129,9 @@ function dongtraders_list_order_meta_table()
             </div>
 
             <div class="tablenav-pages one-page dongsearch">
+
                 <div class="search-box">
+                    <input id="refresh_order" class="button" type="submit" value="Refresh Orders">
                     <input type="hidden" name="page" value="dongtrader_api_settings">
                     <input id="post-search-input" type="text" value="<?php echo esc_attr(wp_unslash($s)); ?>" name="s">
                     <input class="button" type="submit" value="Search Orders">

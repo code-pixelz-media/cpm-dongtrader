@@ -1,4 +1,7 @@
 jQuery(document).ready(function ($) {
+  jQuery("#refresh_order").click(function () {
+    location.reload();
+  });
   /*Retreives Data From session storage */
   let data = sessionStorage.getItem("lastid");
   /* Checks The Last Tab clicked from session storage and makes the same tab active from session storage */

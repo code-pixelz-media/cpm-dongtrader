@@ -775,7 +775,7 @@ function custom_user_profile_fields($user)
 /* uploader order csv  */
 function dongtraders_csv_order_importer()
 {
-    $msg = '';
+    $order_status_msg = '<div class="error-box">Order Data could not Imported ! Please Try again</div>';
     if (isset($_POST['import_csv'])) {
 
         $upload_dir = wp_upload_dir();
@@ -892,17 +892,14 @@ function dongtraders_csv_order_importer()
                     /*  echo $product_price . '-product price'; */
 
                     $order_id = $order->get_id();
-                    /* echo $order_id . '-cpm order id'; */
                     if ($order_id) {
-                        $msg = '<div class="success-box">Order Data Imported Sucessfully</div>';
-                    } else {
-                        $msg = '<div class="error-box">Order Data could not Imported ! Please Try again</div>';
+                        $order_status_msg = '<div class="success-box">Order Data Imported Sucessfully. Please Refresh Order Table.</div>';
                     }
 
                     dongtrader_product_price_distribution($product_price, $product_id, $order_id, $user_id);
                 }
             }
-            echo $msg;
+            echo $order_status_msg;
         }
     }
 }
