@@ -1614,3 +1614,18 @@ span.page-numbers.current {
   color: #2c3338;
   background: #f6f7f7;
 }
+
+
+.trading-history tr th.asc:after {
+  content: ' ▲';
+}
+
+.trading-history tr th:after {
+  content: ' ▼';
+}
+
+.trading-history tr th:hover{
+
+    cursor: pointer;
+
+}

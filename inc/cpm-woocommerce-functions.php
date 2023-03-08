@@ -671,13 +671,27 @@ function dongtrader_after_order_received_process($order_id)
 add_action('show_user_profile', 'custom_user_profile_fields');
 add_action('edit_user_profile', 'custom_user_profile_fields');
 
-//delete_user_meta(1,'_user_trading_details');
-//_user_trading_details
-
 function custom_user_profile_fields($user)
 {
     $user_trading_metas = get_user_meta($user->ID, '_user_trading_details', true);
+
     if (empty($user_trading_metas)) return;
+    //reverse array
+    array_reverse($user_trading_metas);
+    // determine number of items per page
+    $items_per_page = 2;
+    // determine current page number from query parameter
+    $current_page = isset( $_GET['listpaged'] ) ? intval( $_GET['listpaged'] ) : 1;
+
+    // calculate start and end indices for items on current page
+    $start_index = ( $current_page - 1 ) * $items_per_page;
+
+    $end_index = $start_index + $items_per_page;
+
+    // slice the array to get items for current page
+    $items_for_current_page = array_slice( $user_trading_metas, $start_index, $items_per_page );
+
+    // $current_page_loop = array_slice($user_trading_metas);
 ?>
     <hr />
     <h3><?php esc_html_e('Receiveable Amounts', 'cpm-dongtrader'); ?></h3>
@@ -691,15 +705,15 @@ function custom_user_profile_fields($user)
         <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
             <thead>
                 <tr>
-                    <th><?php esc_html_e('S.N.', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Order ID', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('S.N.', 'cpm-dongtrader'); ?><span class="sorting-indicator"></span></th>
+                    <th><?php esc_html_e('Order ID', 'cpm-dongtrader'); ?><span class="sorting-indicator"></span></th>
                     <th><?php esc_html_e('Created Date', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Rebate Receiveable', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Profit Receiveable', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Individual Profit Receiveable', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Commission Receiveable', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Individual Commission Receiveable', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Total Receiveable Amount', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Rebate', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Profit', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Individual Profit', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Commission', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Individual Commission', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Total Amount', 'cpm-dongtrader'); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -710,16 +724,13 @@ function custom_user_profile_fields($user)
                 $dong_comm_dg_arr   = array_column($user_trading_metas, 'dong_comm_dg');
                 $dong_comm_cdi_arr  = array_column($user_trading_metas, 'dong_comm_cdi');
                 $dong_total_arr     = array_column($user_trading_metas, 'dong_total');
-
-
-
                 $i = 1;
-                foreach ($user_trading_metas as $utm) :
+                foreach ($items_for_current_page as $utm) :
                     $order = new WC_Order($utm['order_id']);
                     $order_date = $order->order_date;
                     $order_backend_link = admin_url('post.php?post=' . $utm['order_id'] . '&action=edit');
                 ?>
-                    <tr>
+                    <tr class="enable-sorting">
                         <td>
                             <?php echo $i; ?>
                         </td>
@@ -738,13 +749,12 @@ function custom_user_profile_fields($user)
                         <td>
                             <?php echo '$' . $utm['dong_profit_dg'] ?>
                         </td>
-
-                        <td>
-                            <?php echo '$' . $utm['dong_comm_dg'] ?>
-                        </td>
-                        <!-- Commission -->
                         <td>
                             <?php echo '$' . $utm['dong_profit_di']; ?>
+                        </td>
+                         <!-- Commission -->
+                        <td>
+                            <?php echo '$' . $utm['dong_comm_dg'] ?>
                         </td>
                         <td>
                             <?php echo '$' . $utm['dong_comm_cdi']; ?>
@@ -756,21 +766,77 @@ function custom_user_profile_fields($user)
 
                 <?php $i++;
                 endforeach; ?>
-                <tr rowspan="2" style="border: 1px solid blue;">
-                    <td colspan="3">Totals</td>
-                    <td><?php echo '$' . array_sum($rebate_arr); ?></td>
-                    <td><?php echo '$' . array_sum($dong_profit_dg_arr); ?></td>
-                    <td><?php echo '$' . array_sum($dong_comm_dg_arr); ?></td>
-                    <td><?php echo '$' . array_sum($dong_profit_di_arr); ?></td>
-                    <td><?php echo '$' . array_sum($dong_comm_cdi_arr); ?></td>
-                    <td><?php echo '$' . array_sum($dong_total_arr); ?></td>
-                </tr>
             </tbody>
-        </table>
+                <tfoot>
+                    <tr>
+                        <td colspan="3">All Totals</td>
+                        <td><?php echo '$' . array_sum($rebate_arr); ?></td>
+                        <td><?php echo '$' . array_sum($dong_profit_dg_arr); ?></td>
+                        <td><?php echo '$' . array_sum($dong_profit_di_arr); ?></td>
+                        <td><?php echo '$' . array_sum($dong_comm_dg_arr); ?></td>
+                        <td><?php echo '$' . array_sum($dong_comm_cdi_arr); ?></td>
+                        <td><?php echo '$' . array_sum($dong_total_arr); ?></td>
+                    </tr>
+                </tfoot>
+        </table>        
     </div>
+    <?php 
+    $num_items = count( $user_trading_metas );
+    $num_pages = ceil( $num_items / $items_per_page );
+    
+    echo paginate_links(array(
+        'base' => add_query_arg('listpaged', '%#%'),
+        'format' => '',
+        'prev_text' => __('&laquo; Previous'),
+        'next_text' => __('Next &raquo;'),
+        'total' => $num_pages,
+        'current' => $current_page
+    ));
+    ?>
+    <script>
+        
+        jQuery(document).ready(function($) {
+        $('th').each(function() {
+            $(this).data('sortDir', 'desc'); // set initial sort direction to descending
+        }).click(function() {
+            var table = $(this).parents('table').eq(0);
+            var rows = table.find('tr:gt(0):not(:last)').toArray().sort(comparer($(this).index()));
+            var sortDir = $(this).data('sortDir');
+            $('th').removeClass('asc desc'); // remove caret classes from all th elements
+            if (sortDir === 'desc') {
+                rows = rows.reverse(); // sort in ascending order
+                $(this).data('sortDir', 'asc');
+                $(this).addClass('asc'); // add caret class to current th element
+            } else {
+                $(this).data('sortDir', 'desc');
+                $(this).addClass('desc'); // add caret class to current th element
+            }
+            for (var i = 0; i < rows.length; i++){table.append(rows[i])}
+        });
+
+        function comparer(index) {
+            return function(a, b) {
+                var valA = getCellValue(a, index), valB = getCellValue(b, index);
+                if (index === 1) { // check if we're sorting by price amount
+                    valA = parseFloat(valA.replace(/[^0-9.-]+/g,"")); // convert to number
+                    valB = parseFloat(valB.replace(/[^0-9.-]+/g,""));
+                } else if ((/\d{4}-\d{2}-\d{2}/).test(valA)) { // check if we're sorting by date
+                    // Convert dates to a comparable format
+                    valA = $.trim(valA).replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2");
+                    valB = $.trim(valB).replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2");
+                }
+                return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+            }
+        }
+
+        function getCellValue(row, index) {
+            return $(row).children('td').eq(index).text() 
+
+        }
+    });
+    </script>
 <?php
 }
-
 
 /* uploader order csv  */
 function dongtraders_csv_order_importer()
