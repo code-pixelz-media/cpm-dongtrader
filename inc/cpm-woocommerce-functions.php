@@ -485,7 +485,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
     /**Earnings */
     $earnings = $check ? $pm_meta_vals['dong_earning_per'] / 100 * $pm_meta_vals['dong_earning_amt'] : '0';
 
-    $aid = get_post_meta($oid, 'dong_affid', true);
+    $aid = 1; //get_post_meta($oid, 'dong_affid', true);
 
     $order_items = [
         'dong_reabate'   => $rebate_amount,
@@ -538,11 +538,37 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
             WHERE gf_circle_name = $gf_circle_name ",
             ARRAY_A
         );
+
+
         //Restucture members array received from database
         $mem_array = array_column($members, 'user_id');
 
+        $aff_check = get_post_meta($oid, 'aff_distributn_succed', true);
         //push affiliate id members array
-        if (!in_array($aid, $mem_array)) array_push($mem_array, $aid);
+        if (!in_array($aid, $mem_array) && $aff_check != 'yes') {
+
+            //check if data is stored previously on member meta
+            $aff_user_trading_meta = get_user_meta($aid, '_user_trading_details', true);
+
+            //if data is previously stored if not set empty array
+            $aff_trading_details_user_meta = !empty($aff_user_trading_meta) ? $aff_user_trading_meta : [];
+            $p_a_d_a = $profit_amt_individual;
+            $c_a_d_a = $commission_amt_to_individual;
+            $aff_trading_details_user_meta[] = [
+                'order_id' => $oid,
+                'rebate' => 0,
+                'dong_profit_dg' => 0,
+                'dong_profit_di' => $p_a_d_a,
+                'dong_comm_dg' => 0,
+                'dong_comm_cdi' => $c_a_d_a,
+                'dong_total'  => $p_a_d_a + $c_a_d_a
+
+            ];
+
+            if (update_user_meta($aid, '_user_trading_details', $aff_trading_details_user_meta)) {
+                update_post_meta($oid, 'aff_distributn_succed', 'yes');
+            }
+        }
         //loop inside each members and update receiveables data
         foreach ($mem_array as $ma) {
             //check if data is stored previously on member meta
@@ -588,24 +614,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
                 ];
             }
 
-            if ($ma == $aid) {
 
-                // Profit amount that must be distributed to affiliate
-                $p_a_d_a = $profit_amt_individual;
-                //commission amount that must be distributed to affiliate
-                $c_a_d_a = $commission_amt_to_individual;
-
-                $trading_details_user_meta[] = [
-                    'order_id' => $oid,
-                    'rebate' => 0,
-                    'dong_profit_dg' => 0,
-                    'dong_profit_di' => $p_a_d_a,
-                    'dong_comm_dg' => 0,
-                    'dong_comm_cdi' => $c_a_d_a,
-                    'dong_total'  => $p_a_d_a + $c_a_d_a
-
-                ];
-            }
             // update array to members meta
             if (update_user_meta($ma, '_user_trading_details', $trading_details_user_meta)) {
                 update_post_meta($oid, 'distributn_succed', 'yes');
@@ -660,6 +669,9 @@ function dongtrader_after_order_received_process($order_id)
 add_action('show_user_profile', 'custom_user_profile_fields');
 add_action('edit_user_profile', 'custom_user_profile_fields');
 
+//delete_user_meta(1,'_user_trading_details');
+//_user_trading_details
+
 function custom_user_profile_fields($user)
 {
     $user_trading_metas = get_user_meta($user->ID, '_user_trading_details', true);
@@ -703,13 +715,16 @@ function custom_user_profile_fields($user)
                 foreach ($user_trading_metas as $utm) :
                     $order = new WC_Order($utm['order_id']);
                     $order_date = $order->order_date;
+                    $order_backend_link = admin_url('post.php?post=' . $utm['order_id'] . '&action=edit');
                 ?>
                     <tr>
                         <td>
                             <?php echo $i; ?>
                         </td>
                         <td>
-                            <?php echo $utm['order_id'] ?>
+                            <a href="<?php echo $order_backend_link; ?>">
+                                <?php echo $utm['order_id'] ?>
+                            </a>
                         </td>
                         <td>
                             <?php echo $order_date; ?>
@@ -846,7 +861,7 @@ function dongtraders_csv_order_importer()
                     $chceck_data = dongtrader_user_registration_hook($user_id);
                     var_dump($chceck_data); */
 
-
+                    dongtrader_user_registration_hook($user_id);
                     $order_id = wp_insert_post(array(
                         'post_type' => 'shop_order',
                         'post_title' => $post_title,
@@ -886,9 +901,10 @@ function dongtraders_csv_order_importer()
                     } else {
                         $msg = '<div class="error-box">Order Data could not Imported ! Please Try again</div>';
                     }
-                    dongtrader_user_registration_hook($cid);
+                    /* $chceck_data = dongtrader_user_registration_hook($cid);
+									var_dump($chceck_data); */
 
-                    dongtrader_product_price_distribution($price, $proId, $oid, $cid);
+                    //dongtrader_product_price_distribution($price, $proId, $oid, $cid);
                     // create an order item first
                     $order_item_id = wc_add_order_item(
                         $order_id,
