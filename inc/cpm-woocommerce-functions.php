@@ -485,7 +485,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
     /**Earnings */
     $earnings = $check ? $pm_meta_vals['dong_earning_per'] / 100 * $pm_meta_vals['dong_earning_amt'] : '0';
 
-    $aid = 1;//get_post_meta($oid, 'dong_affid', true);
+    $aid = 1; //get_post_meta($oid, 'dong_affid', true);
 
     $order_items = [
         'dong_reabate'   => $rebate_amount,
@@ -545,7 +545,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
 
         $aff_check = get_post_meta($oid, 'aff_distributn_succed', true);
         //push affiliate id members array
-       if (!in_array($aid, $mem_array) && $aff_check != 'yes'){
+        if (!in_array($aid, $mem_array) && $aff_check != 'yes') {
 
          //check if data is stored previously on member meta
         $aff_user_trading_meta = get_user_meta($aid, '_user_trading_details', true);
@@ -565,7 +565,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
 
         ];
 
-        if(update_user_meta($aid, '_user_trading_details', $aff_trading_details_user_meta)){
+            if (update_user_meta($aid, '_user_trading_details', $aff_trading_details_user_meta)) {
             update_post_meta($oid, 'aff_distributn_succed', 'yes');
         }
 
@@ -716,7 +716,7 @@ function custom_user_profile_fields($user)
                 foreach ($user_trading_metas as $utm) :
                     $order = new WC_Order($utm['order_id']);
                     $order_date = $order->order_date;
-                    $order_backend_link = admin_url( 'post.php?post=' . $utm['order_id'] . '&action=edit' );
+                    $order_backend_link = admin_url('post.php?post=' . $utm['order_id'] . '&action=edit');
                 ?>
                     <tr>
                         <td>
@@ -902,10 +902,7 @@ function dongtraders_csv_order_importer()
                     } else {
                         $msg = '<div class="error-box">Order Data could not Imported ! Please Try again</div>';
                     }
-                 
-
                     dongtrader_product_price_distribution($price, $proId, $oid, $cid);
-                    // create an order item first
                     $order_item_id = wc_add_order_item(
                         $order_id,
                         array(
