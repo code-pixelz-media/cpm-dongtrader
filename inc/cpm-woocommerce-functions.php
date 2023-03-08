@@ -780,59 +780,65 @@ function custom_user_profile_fields($user)
                 </tfoot>
         </table>        
     </div>
-    <?php 
-    $num_items = count( $user_trading_metas );
-    $num_pages = ceil( $num_items / $items_per_page );
-    
-    echo paginate_links(array(
-        'base' => add_query_arg('listpaged', '%#%'),
-        'format' => '',
-        'prev_text' => __('&laquo; Previous'),
-        'next_text' => __('Next &raquo;'),
-        'total' => $num_pages,
-        'current' => $current_page
-    ));
-    ?>
+    <div class="user-trading-list-paginate">
+        <?php 
+        $num_items = count( $user_trading_metas );
+        $num_pages = ceil( $num_items / $items_per_page );
+        echo paginate_links(array(
+            'base' => add_query_arg('listpaged', '%#%'),
+            'format' => 'list',
+            'prev_text' => __('&laquo; Previous'),
+            'next_text' => __('Next &raquo;'),
+            'total' => $num_pages,
+            'current' => $current_page
+        ));
+        ?>
+    </div>
     <script>
-        
         jQuery(document).ready(function($) {
-        $('th').each(function() {
-            $(this).data('sortDir', 'desc'); // set initial sort direction to descending
-        }).click(function() {
-            var table = $(this).parents('table').eq(0);
-            var rows = table.find('tr:gt(0):not(:last)').toArray().sort(comparer($(this).index()));
-            var sortDir = $(this).data('sortDir');
-            $('th').removeClass('asc desc'); // remove caret classes from all th elements
-            if (sortDir === 'desc') {
-                rows = rows.reverse(); // sort in ascending order
-                $(this).data('sortDir', 'asc');
-                $(this).addClass('asc'); // add caret class to current th element
-            } else {
-                $(this).data('sortDir', 'desc');
-                $(this).addClass('desc'); // add caret class to current th element
-            }
-            for (var i = 0; i < rows.length; i++){table.append(rows[i])}
-        });
-
-        function comparer(index) {
-            return function(a, b) {
-                var valA = getCellValue(a, index), valB = getCellValue(b, index);
-                if (index === 1) { // check if we're sorting by price amount
-                    valA = parseFloat(valA.replace(/[^0-9.-]+/g,"")); // convert to number
-                    valB = parseFloat(valB.replace(/[^0-9.-]+/g,""));
-                } else if ((/\d{4}-\d{2}-\d{2}/).test(valA)) { // check if we're sorting by date
-                    // Convert dates to a comparable format
-                    valA = $.trim(valA).replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2");
-                    valB = $.trim(valB).replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2");
+            const paginationParam = /[?&]listpaged=([^&#]*)/.exec(window.location.href)[1];
+                if(paginationParam){
+                    $('html, body').animate({
+                        scrollTop: $('#member-history-orders').offset().top
+                    }, 1000);
                 }
-                return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+            $('th').each(function() {
+                $(this).data('sortDir', 'desc'); // set initial sort direction to descending
+            }).click(function() {
+                var table = $(this).parents('table').eq(0);
+                var rows = table.find('tr:gt(0):not(:last)').toArray().sort(comparer($(this).index()));
+                var sortDir = $(this).data('sortDir');
+                $('th').removeClass('asc desc'); // remove caret classes from all th elements
+                if (sortDir === 'desc') {
+                    rows = rows.reverse(); // sort in ascending order
+                    $(this).data('sortDir', 'asc');
+                    $(this).addClass('asc'); // add caret class to current th element
+                } else {
+                    $(this).data('sortDir', 'desc');
+                    $(this).addClass('desc'); // add caret class to current th element
+                }
+                for (var i = 0; i < rows.length; i++){table.append(rows[i])}
+            });
+
+            function comparer(index) {
+                return function(a, b) {
+                    var valA = getCellValue(a, index), valB = getCellValue(b, index);
+                    if (index === 1) { // check if we're sorting by price amount
+                        valA = parseFloat(valA.replace(/[^0-9.-]+/g,"")); // convert to number
+                        valB = parseFloat(valB.replace(/[^0-9.-]+/g,""));
+                    } else if ((/\d{4}-\d{2}-\d{2}/).test(valA)) { // check if we're sorting by date
+                        // Convert dates to a comparable format
+                        valA = $.trim(valA).replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2");
+                        valB = $.trim(valB).replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2");
+                    }
+                    return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+                }
             }
-        }
 
-        function getCellValue(row, index) {
-            return $(row).children('td').eq(index).text() 
+            function getCellValue(row, index) {
+                return $(row).children('td').eq(index).text() 
 
-        }
+            }
     });
     </script>
 <?php
