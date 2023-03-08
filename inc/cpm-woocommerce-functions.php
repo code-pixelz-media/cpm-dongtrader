@@ -615,41 +615,6 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
                 ];
             }
 
-            // if ($ma == $aid) {
-
-            //     // Profit amount that must be distributed to affiliate
-            //     $p_a_d_a = $profit_amt_individual;
-            //     //commission amount that must be distributed to affiliate
-            //     $c_a_d_a = $commission_amt_to_individual;
-
-            //     $trading_details_user_meta[] = [
-            //         'order_id' => $oid,
-            //         'rebate' => 0,
-            //         'dong_profit_dg' => 0,
-            //         'dong_profit_di' => $p_a_d_a,
-            //         'dong_comm_dg' => 0,
-            //         'dong_comm_cdi' => $c_a_d_a,
-            //         'dong_total'  => $p_a_d_a + $c_a_d_a
-
-            //     ];
-            // }
-
-            // $aff_id = get_user_by('ID', $aid);
-            // if($aff_id){
-            //     $user_trading_meta = get_user_meta($aid, '_user_trading_details', true);
-            //     $p_a_d_a = $profit_amt_individual;
-            //     $c_a_d_a = $commission_amt_to_individual;
-            //     $trading_details_user_meta[] = [
-            //             'order_id' => $oid,
-            //             'rebate' => 0,
-            //             'dong_profit_dg' => 0,
-            //             'dong_profit_di' => $p_a_d_a,
-            //             'dong_comm_dg' => 0,
-            //             'dong_comm_cdi' => $c_a_d_a,
-            //             'dong_total'  => $p_a_d_a + $c_a_d_a
-    
-            //         ];
-            // }
     
             // update array to members meta
             if (update_user_meta($ma, '_user_trading_details', $trading_details_user_meta)) {
@@ -751,13 +716,16 @@ function custom_user_profile_fields($user)
                 foreach ($user_trading_metas as $utm) :
                     $order = new WC_Order($utm['order_id']);
                     $order_date = $order->order_date;
+                    $order_backend_link = admin_url( 'post.php?post=' . $utm['order_id'] . '&action=edit' );
                 ?>
                     <tr>
                         <td>
                             <?php echo $i; ?>
                         </td>
                         <td>
-                            <?php echo $utm['order_id'] ?>
+                            <a href="<?php echo $order_backend_link; ?>">
+                                <?php echo $utm['order_id'] ?>
+                            </a>
                         </td>
                         <td>
                             <?php echo $order_date; ?>
