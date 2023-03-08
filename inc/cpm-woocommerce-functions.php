@@ -547,29 +547,28 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
         //push affiliate id members array
         if (!in_array($aid, $mem_array) && $aff_check != 'yes') {
 
-         //check if data is stored previously on member meta
-        $aff_user_trading_meta = get_user_meta($aid, '_user_trading_details', true);
+            //check if data is stored previously on member meta
+            $aff_user_trading_meta = get_user_meta($aid, '_user_trading_details', true);
 
-         //if data is previously stored if not set empty array
-        $aff_trading_details_user_meta = !empty($aff_user_trading_meta) ? $aff_user_trading_meta : [];
-        $p_a_d_a = $profit_amt_individual;
-        $c_a_d_a = $commission_amt_to_individual;
-        $aff_trading_details_user_meta[] = [
-            'order_id' => $oid,
-            'rebate' => 0,
-            'dong_profit_dg' => 0,
-            'dong_profit_di' => $p_a_d_a,
-            'dong_comm_dg' => 0,
-            'dong_comm_cdi' => $c_a_d_a,
-            'dong_total'  => $p_a_d_a + $c_a_d_a
+            //if data is previously stored if not set empty array
+            $aff_trading_details_user_meta = !empty($aff_user_trading_meta) ? $aff_user_trading_meta : [];
+            $p_a_d_a = $profit_amt_individual;
+            $c_a_d_a = $commission_amt_to_individual;
+            $aff_trading_details_user_meta[] = [
+                'order_id' => $oid,
+                'rebate' => 0,
+                'dong_profit_dg' => 0,
+                'dong_profit_di' => $p_a_d_a,
+                'dong_comm_dg' => 0,
+                'dong_comm_cdi' => $c_a_d_a,
+                'dong_total'  => $p_a_d_a + $c_a_d_a
 
-        ];
+            ];
 
             if (update_user_meta($aid, '_user_trading_details', $aff_trading_details_user_meta)) {
-            update_post_meta($oid, 'aff_distributn_succed', 'yes');
+                update_post_meta($oid, 'aff_distributn_succed', 'yes');
+            }
         }
-
-       }
         //loop inside each members and update receiveables data
         foreach ($mem_array as $ma) {
             //check if data is stored previously on member meta
@@ -615,7 +614,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
                 ];
             }
 
-    
+
             // update array to members meta
             if (update_user_meta($ma, '_user_trading_details', $trading_details_user_meta)) {
                 update_post_meta($oid, 'distributn_succed', 'yes');
@@ -650,6 +649,7 @@ function dongtrader_after_order_received_process($order_id)
 {
     $order = wc_get_order($order_id);
     $customer_id = $order->get_user_id();
+
     $items =  $order->get_items();
     $p_id = [];
     foreach ($items as $item) {
@@ -664,6 +664,7 @@ function dongtrader_after_order_received_process($order_id)
     $current_price = $current_pro->get_price();
 
     dongtrader_product_price_distribution($current_price, $p_id[0], $order_id, $customer_id);
+    dong_set_user_role($customer_id, $p_id[0]);
 }
 
 
@@ -812,11 +813,9 @@ function dongtraders_csv_order_importer()
 							echo "</pre>"; */
             foreach ($get_orders as $get_order) {
                 # code...
-                /* $order_csv_id = $get_order['csv_id']; */
-                $order_date = $get_order['order_date'];
+
                 $billing_first_name = $get_order['billing_first_name'];
                 $billing_last_name = $get_order['billing_last_name'];
-                $billing_full_name = $billing_first_name . ' ' . $billing_last_name;
                 $billing_phone = $get_order['billing_phone'];
                 $billing_address_1 = $get_order['billing_address_1'];
                 $billing_postcode = $get_order['billing_postcode'];
@@ -825,24 +824,9 @@ function dongtraders_csv_order_importer()
                 $billing_country = $get_order['billing_country'];
                 $product_id = $get_order['product_id'];
                 $variation_id = $get_order['variation_id'];
-
-                $paid_date = $get_order['paid_date'];
-                $status = $get_order['status'];
-                $order_total = $get_order['order_total'];
-                $order_currency = $get_order['order_currency'];
-                $payment_method = $get_order['payment_method'];
-                $shipping_method = $get_order['shipping_method'];
                 $customer_email = $get_order['customer_email'];
                 $affiliate_user_id = $get_order['affilate_user_id'];
-                $time = new DateTime($order_date);
-                $date = $time->format("F d, Y");
-                $time = $time->format('h:i A');
-                $csv_paid_date = new DateTime($paid_date);
-                $final_paid_date = $csv_paid_date->format("d-m-Y h:i:s");
 
-                //echo $final_paid_date . '<br>';
-
-                $post_title = 'Order &ndash; ' . $date . '@ ' . $time . '';
                 if ($variation_id == '0') {
 
                     $product_name = get_the_title($product_id);
@@ -852,109 +836,70 @@ function dongtraders_csv_order_importer()
                     $product_id_csv = $variation_id;
                 }
 
-                /* echo $customer_email . '<br>'; */
                 if (!email_exists($customer_email)) {
                     $random_password = wp_generate_password();
+                    $get_product_membership_level = get_post_meta($product_id, '_membership_product_level', true);
 
 
                     $user_id = wc_create_new_customer($customer_email, $billing_first_name . rand(10, 100), $random_password);
-                    /* echo $user_id . '-userid';
-                    $chceck_data = dongtrader_user_registration_hook($user_id);
-                    var_dump($chceck_data); */
+                    pmpro_changeMembershipLevel($get_product_membership_level, $user_id);
 
                     dongtrader_user_registration_hook($user_id);
-                    $order_id = wp_insert_post(array(
-                        'post_type' => 'shop_order',
-                        'post_title' => $post_title,
-                        'post_status'    => $status,
-                        'meta_input' => array(
-                            /* '_csv_order_id' => $order_csv_id, */
-                            '_billing_email' => $customer_email,
-                            '_billing_first_name' => $billing_first_name,
-                            '_billing_last_name' => $billing_last_name,
-                            '_billing_address_1' => $billing_address_1,
-                            '_billing_city' => $billing_city,
-                            '_shipping_first_name' => $billing_first_name,
-                            '_shipping_last_name' => $billing_last_name,
-                            '_shipping_address_1' => $billing_address_1,
-                            '_shipping_city' => $billing_city,
-                            '_billing_postcode' => $billing_postcode,
-                            '_payment_method' => $payment_method,
-                            '_billing_state' => $billing_state,
-                            '_billing_country' => $billing_country,
-                            '_shipping_state' => $billing_state,
-                            '_shipping_country' => $billing_country,
-                            '_order_currency' => $order_currency,
-                            '_order_total' => $order_total,
-                            '_billing_phone' => $billing_phone,
-                            '_paid_date' => $final_paid_date,
-                            'dong_affid' => $affiliate_user_id
-                        ),
-                    ));
+                    // add billing and shipping addresses
+                    $address = array(
+                        'first_name' => $billing_first_name,
+                        'last_name'  => $billing_last_name,
+                        'company'    => '',
+                        'email'      => $customer_email,
+                        'phone'      => $billing_phone,
+                        'address_1'  => $billing_address_1,
+                        'address_2'  => '',
+                        'city'       => $billing_city,
+                        'state'      => $billing_state,
+                        'postcode'   => $billing_postcode,
+                        'country'    => $billing_country
+                    );
 
-                    /* distrubution function  */
-                    $price = $order_total;
-                    $proId = $product_id_csv;
-                    $oid = $order_id;
-                    $cid = $user_id;
-                    if (!empty($order_id)) {
+                    $order = wc_create_order();
+                    $order->set_customer_id($user_id);
+                    $order->update_meta_data('dong_affid', $affiliate_user_id);
+                    // add products
+                    $order->add_product(wc_get_product($product_id_csv), 1);
+
+                    // add shipping
+                    $shipping = new WC_Order_Item_Shipping();
+                    $shipping->set_method_title('Free shipping');
+                    $shipping->set_method_id('free_shipping:1'); // set an existing Shipping method ID
+                    $shipping->set_total(0); // optional
+                    $order->add_item($shipping);
+
+                    $order->set_address($address, 'billing');
+                    $order->set_address($address, 'shipping');
+
+                    // add payment method
+                    $order->set_payment_method('cod');
+                    //$order->set_payment_method_title('Credit/Debit card');
+
+                    // order status
+                    $order->set_status('wc-completed', 'Order is created From Importer');
+                    // calculate and save
+                    $order->calculate_totals();
+
+                    $order->save();
+
+                    $product = wc_get_product($product_id);
+                    $product_price =  $product->get_price();
+                    /*  echo $product_price . '-product price'; */
+
+                    $order_id = $order->get_id();
+                    /* echo $order_id . '-cpm order id'; */
+                    if ($order_id) {
                         $msg = '<div class="success-box">Order Data Imported Sucessfully</div>';
                     } else {
                         $msg = '<div class="error-box">Order Data could not Imported ! Please Try again</div>';
                     }
-                    dongtrader_product_price_distribution($price, $proId, $oid, $cid);
-                    $order_item_id = wc_add_order_item(
-                        $order_id,
-                        array(
-                            'order_item_name' => $product_name, // may differ from the product name
-                            'order_item_type' => 'line_item', // product
-                        )
-                    );
-                    if ($order_item_id) {
-                        // provide its meta information
-                        wc_add_order_item_meta($order_item_id, '_qty', 1, true); // quantity
 
-                        wc_add_order_item_meta($order_item_id, '_product_id', $product_id, true); // ID of the product
-                        wc_add_order_item_meta($order_item_id, '_variation_id', $variation_id, true); // ID of the product
-                        // you can also add "_variation_id" meta
-                        wc_add_order_item_meta($order_item_id, '_line_subtotal', $order_total, true); // price per item
-                        wc_add_order_item_meta($order_item_id, '_line_total', $order_total, true); // total price
-                    }
-
-                    $email = $customer_email;
-                    $address = array(
-                        'first_name' => $billing_first_name,
-                        'last_name'  => $billing_last_name,
-                        'email'      => $email,
-                        'phone'      => $billing_phone,
-                        'address_1'  => $billing_address_1,
-                        'city'       => $billing_city,
-                        'state'      => $billing_state,
-                        'postcode'   => $billing_postcode,
-                        'country'    => $billing_country,
-                        //'affiliate_user' => $affiliate_user
-                    );
-
-                    update_post_meta($order_id, '_customer_user', $user_id);
-
-
-                    update_user_meta($user_id, "billing_first_name", $address['first_name']);
-                    update_user_meta($user_id, "billing_last_name", $address['last_name']);
-                    update_user_meta($user_id, "billing_email", $address['email']);
-                    update_user_meta($user_id, "billing_address_1", $address['address_1']);
-                    update_user_meta($user_id, "billing_city", $address['city']);
-                    update_user_meta($user_id, "billing_postcode", $address['postcode']);
-                    update_user_meta($user_id, "billing_country", $address['country']);
-                    update_user_meta($user_id, "billing_state", $address['state']);
-                    update_user_meta($user_id, "billing_phone", $address['phone']);
-                    update_user_meta($user_id, "shipping_first_name", $address['first_name']);
-                    update_user_meta($user_id, "shipping_last_name", $address['last_name']);
-                    update_user_meta($user_id, "shipping_address_1", $address['address_1']);
-                    update_user_meta($user_id, "shipping_city", $address['city']);
-                    update_user_meta($user_id, "shipping_postcode", $address['postcode']);
-                    update_user_meta($user_id, "shipping_country", $address['country']);
-                    update_user_meta($user_id, "shipping_state", $address['state']);
-                    //update_user_meta($user_id, "dong_affid", $address['affiliate_user']);
+                    dongtrader_product_price_distribution($product_price, $product_id, $order_id, $user_id);
                 }
             }
             echo $msg;

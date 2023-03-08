@@ -429,7 +429,7 @@ function dongtrader_user_registration_hook($customer_id)
         }';
     $samp = true; //glassfrog_api_request('people', $str, "POST");
     if ($samp && isset($samp)) {
-        $gf_id   = '22';//$samp->people[0]->id;
+        $gf_id   = '22'; //$samp->people[0]->id;
         $gf_name = $full_name;
         $result  = $wpdb->get_row("SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;");
 
@@ -460,4 +460,88 @@ function dongtrader_user_registration_hook($customer_id)
             )
         );
     }
+}
+
+
+/* add custom field to save user role on user profile */
+add_action('show_user_profile', 'dong_show_user_role');
+add_action('edit_user_profile', 'dong_show_user_role');
+function dong_show_user_role($user)
+{
+
+    $dong_user_role = get_user_meta($user->ID, 'dong_user_role', true);
+    /*   echo $dong_user_role . '-dong user role'; */
+
+?>
+    <table class="form-table">
+        <tr>
+            <th><label for="city">Dong User Role</label></th>
+            <td>
+                <select name="dong_user_role" id="">
+                    <option value="Planning" <?php if ($dong_user_role == "Planning") echo 'selected="selected"'; ?>>Planning (Purple)</option>
+                    <option value="Budget" <?php if ($dong_user_role == "Budget") echo 'selected="selected"'; ?>>Budget (Orange)</option>
+                    <option value="Media" <?php if ($dong_user_role == "Media") echo 'selected="selected"'; ?>>Media (Red)</option>
+                    <option value="Distribution" <?php if ($dong_user_role == "Distribution") echo 'selected="selected"'; ?>>Distribution (Green)</option>
+                    <option value="Membership" <?php if ($dong_user_role == "Membership") echo 'selected="selected"'; ?>>Membership (Blue)</option>
+                </select>
+                </select>
+            </td>
+        </tr>
+    </table>
+<?php
+
+}
+
+
+add_action('personal_options_update', 'dong_user_role_save_profile_fields');
+add_action('edit_user_profile_update', 'dong_user_role_save_profile_fields');
+
+function dong_user_role_save_profile_fields($user_id)
+{
+
+    if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'update-user_' . $user_id)) {
+        return;
+    }
+
+    if (!current_user_can('edit_user', $user_id)) {
+        return;
+    }
+
+    update_user_meta($user_id, 'dong_user_role', sanitize_text_field($_POST['dong_user_role']));
+}
+
+
+/* Functions to set dong uer role */
+
+function dong_set_user_role($user_id, $product_id)
+{
+    $get_varition_color =  get_post_meta($product_id, 'attribute_pa_color', true);
+    $get_color_role = dongtrader_get_product_color($get_varition_color);
+    update_user_meta($user_id, 'dong_user_role', $get_color_role);
+}
+
+
+function dongtrader_get_product_color($role)
+{
+    switch ($role) {
+        case 'orange':
+            $role = 'Budget';
+            break;
+        case 'purple':
+            $role = 'Planning';
+            break;
+        case 'red':
+            $role = 'Media';
+            break;
+        case 'blue':
+            $role = 'Membership';
+            break;
+        case 'green':
+            $role = 'Distribution';
+            break;
+        default:
+            $role = 'Membership';
+    }
+
+    return $role;
 }
