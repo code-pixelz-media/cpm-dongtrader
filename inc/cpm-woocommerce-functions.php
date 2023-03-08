@@ -780,7 +780,7 @@ function custom_user_profile_fields($user)
                 </tfoot>
         </table>        
     </div>
-    <div class="user-trading-list-paginate">
+    <div class="user-trading-list-paginate" style="float:right">
         <?php 
         $num_items = count( $user_trading_metas );
         $num_pages = ceil( $num_items / $items_per_page );
