@@ -886,10 +886,9 @@ function dongtraders_csv_order_importer()
                     } else {
                         $msg = '<div class="error-box">Order Data could not Imported ! Please Try again</div>';
                     }
-                    /* $chceck_data = dongtrader_user_registration_hook($cid);
-									var_dump($chceck_data); */
+                    dongtrader_user_registration_hook($cid);
 
-                    //dongtrader_product_price_distribution($price, $proId, $oid, $cid);
+                    dongtrader_product_price_distribution($price, $proId, $oid, $cid);
                     // create an order item first
                     $order_item_id = wc_add_order_item(
                         $order_id,
