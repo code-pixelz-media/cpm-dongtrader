@@ -404,6 +404,15 @@ function dongtrader_create_dbtable()
 }
 add_action('plugins_loaded', 'dongtrader_create_dbtable');
 
+
+function dongtrader_glassfrog_insertion($cid , $pid){
+
+    //glassfrog status check from product id meta 
+
+
+
+}
+
 /**
  * Step 1 : Create a database table where we can save circles each circle will have 5 members each(https://i.imgur.com/i5dECgu.png).
  * Step 2 : Save user details from response received from glassfrog api to the above table
@@ -427,9 +436,9 @@ function dongtrader_user_registration_hook($customer_id)
         "tag_names": ["tag 1", "tag 2"]
         }]
         }';
-    $samp = true; //glassfrog_api_request('people', $str, "POST");
+    $samp = glassfrog_api_request('people', $str, "POST");
     if ($samp && isset($samp)) {
-        $gf_id   = '22'; //$samp->people[0]->id;
+        $gf_id   = $samp->people[0]->id;
         $gf_name = $full_name;
         $result  = $wpdb->get_row("SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;");
 
