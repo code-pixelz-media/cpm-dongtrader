@@ -467,7 +467,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
     /**Sum of data recieved from pmpro membership levels */
     $constant_sum = $pm_meta_vals['dong_cost'] + $pm_meta_vals['dong_reserve'] + $pm_meta_vals['dong_earning_amt'];
     /*Profit after deduction from rebate and process */
-    $remining_profit_amount = $price - $constant_sum;
+    $remining_profit_amount = $check ? $price - $constant_sum : $price - $rebate_amount-$process_amount;
     /*Total Profit that must be distributed to individual */
     $profit_amt_individual  = $remining_profit_amount * $pm_meta_vals['dong_profit_di'] / 100;
     /*Total Profit that must be distributed to group */
@@ -485,7 +485,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
     /**Earnings */
     $earnings = $check ? $pm_meta_vals['dong_earning_per'] / 100 * $pm_meta_vals['dong_earning_amt'] : '0';
 
-    $aid = 1; //get_post_meta($oid, 'dong_affid', true);
+    $aid = get_post_meta($oid, 'dong_affid', true);
 
     $order_items = [
         'dong_reabate'   => $rebate_amount,
@@ -797,18 +797,18 @@ function custom_user_profile_fields($user)
     <script>
         jQuery(document).ready(function($) {
             const paginationParam = /[?&]listpaged=([^&#]*)/.exec(window.location.href)[1];
-                if(paginationParam){
-                    $('html, body').animate({
-                        scrollTop: $('#member-history-orders').offset().top
-                    }, 1000);
-                }
+            if(paginationParam){
+                $('html, body').animate({
+                    scrollTop: $('#member-history-orders').offset().top
+                }, 1000);
+            }
             $('th').each(function() {
-                $(this).data('sortDir', 'desc'); // set initial sort direction to descending
+                $(this).data('sortDir', 'desc');
             }).click(function() {
                 var table = $(this).parents('table').eq(0);
                 var rows = table.find('tr:gt(0):not(:last)').toArray().sort(comparer($(this).index()));
                 var sortDir = $(this).data('sortDir');
-                $('th').removeClass('asc desc'); // remove caret classes from all th elements
+                $('th').removeClass('asc desc'); 
                 if (sortDir === 'desc') {
                     rows = rows.reverse(); // sort in ascending order
                     $(this).data('sortDir', 'asc');
@@ -980,25 +980,66 @@ function dongtraders_csv_order_importer()
 
 add_action('wp_footer', function () {
 
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'manage_users_gf';
-
-    $result  = $wpdb->get_row("SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;");
-
-    $last_circle_name = isset($result) ? $result->gf_circle_name : '1';
-    $circle_count     = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE gf_circle_name = %s", $last_circle_name));
-    $new_circle_name  = $circle_count < 5 ? $last_circle_name : $last_circle_name + 1;
-
-    // $circle_name  = $wpdb->get_row
-    // ( 
-    //     "SELECT gf_circle_name  
-    //     FROM $table_name 
-    //     WHERE user_id= 74 
-    //     ORDER BY id 
-    //     DESC LIMIT 1;" 
-    // );
-
-    // $gf_circle_name = $circle_name->gf_circle_name;
-
-    // var_dump($gf_circle_name);
+   // dongtrader_product_price_distribution2(12,1569);
 });
+
+
+
+
+function dongtrader_product_price_distribution2($price,$proId)
+{
+
+    $gf_membership_checkbox = get_post_meta($proId, '_glassfrog_checkbox', true);
+    // Get boolean by checking checkbox
+    $check = $gf_membership_checkbox == 'on' ? true : false;
+    // $pm_fields      = apply_filters('membership_level_fields', array(), true);
+    $member_level   = get_post_meta($proId, '_membership_product_level', true);
+    // $order_fields   = apply_filters('membership_level_fields', array(), true);
+    $pm_meta_vals   = get_pmpro_extrafields_meta($member_level);
+    /*Rebate Calculation */
+    $rebate_amount  = $pm_meta_vals['dong_reabate'] / 100 * $price;
+    /*Process Amount */
+    $process_amount = $pm_meta_vals['dong_processamt'] / 100 * $price;
+    /**Sum of data recieved from pmpro membership levels */
+    $constant_sum = $pm_meta_vals['dong_cost'] + $pm_meta_vals['dong_reserve'] + $pm_meta_vals['dong_earning_amt'];
+    /*Profit after deduction from rebate and process */
+    $remining_profit_amount = $check ? $price - $constant_sum : $price - $rebate_amount-$process_amount;
+    /*Total Profit that must be distributed to individual */
+    $profit_amt_individual  = $remining_profit_amount * $pm_meta_vals['dong_profit_di'] / 100;
+    /*Total Profit that must be distributed to group */
+    $profit_amt_group       = $remining_profit_amount * $pm_meta_vals['dong_profit_dg'] / 100;
+    /*commision amount from profit */
+    $profit_commission_amt  = $remining_profit_amount * $pm_meta_vals['dong_profit_dca'] / 100;
+    /*commision amount from individual */
+    $commission_amt_to_individual = $profit_commission_amt * $pm_meta_vals['dong_comm_cdi'] / 100;
+    /*commision amount from individual */
+    $commission_amt_to_group      = $profit_commission_amt * $pm_meta_vals['dong_comm_cdg'] / 100;
+    /*Treasury Amount Calculation */
+    $treasury_amount = $check ? '0' : $remining_profit_amount;
+    /*Discount Amount */
+    $early_discount = $pm_meta_vals['dong_discounts'] / 100  * $remining_profit_amount;
+    /**Earnings */
+    $earnings = $check ? $pm_meta_vals['dong_earning_per'] / 100 * $pm_meta_vals['dong_earning_amt'] : '0';
+
+    $aid = 1; //get_post_meta($oid, 'dong_affid', true);
+
+    $order_items = [
+        'dong_reabate'   => $rebate_amount,
+        'dong_processamt' => $process_amount,
+        'dong_profitamt' => $remining_profit_amount,
+        'dong_profit_di' => $profit_amt_individual,
+        'dong_profit_dg' => $profit_amt_group,
+        'dong_profit_dca' => $profit_commission_amt,
+        'dong_comm_cdi'  => $commission_amt_to_individual,
+        'dong_comm_cdg'  => $commission_amt_to_group,
+        'dong_treasury'  => $treasury_amount,
+        'dong_earning_amt'  => $earnings,
+        'dong_discounts' => $early_discount,
+        'dong_reserve'   => $pm_meta_vals['dong_reserve'],
+        'dong_cost'      => $pm_meta_vals['dong_cost'],
+        'dong_affid'        => $aid
+
+    ];
+
+    var_dump($order_items);
+}
