@@ -979,16 +979,4 @@ function dongtraders_csv_order_importer()
     }
 }
 
-add_action('wp_head', function () {
-    $str = '{"people": [{
-        "name": "Venkatesh Yatru",
-        "email": "bizafu@finews.biz",
-        "external_id": "32",
-        "tag_names": ["tag 1", "tag 2"]
-        }]
-        }';
-    $samp = glassfrog_api_request('people', $str, "POST");
 
-   // var_dump($samp);
- 
-});

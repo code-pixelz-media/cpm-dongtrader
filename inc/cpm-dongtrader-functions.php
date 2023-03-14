@@ -405,14 +405,6 @@ function dongtrader_create_dbtable()
 add_action('plugins_loaded', 'dongtrader_create_dbtable');
 
 
-function dongtrader_glassfrog_insertion($cid , $pid){
-
-    //glassfrog status check from product id meta 
-
-
-
-}
-
 /**
  * Step 1 : Create a database table where we can save circles each circle will have 5 members each(https://i.imgur.com/i5dECgu.png).
  * Step 2 : Save user details from response received from glassfrog api to the above table
