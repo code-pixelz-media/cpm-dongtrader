@@ -167,41 +167,6 @@ function cpm_dong_my_membership_endpoint_content()
 }
 /* show memebership data on woocommerce tab  ends*/
 
-/* show custom order export on woocommerce tab */
-
-add_filter('woocommerce_account_menu_items', 'cpm_dong_show_custom_order_form', 40);
-function cpm_dong_show_custom_order_form($menu_links)
-{
-
-    $menu_links = array_slice($menu_links, 0, 5, true)
-        + array('show-order-form' => 'Add Order')
-        + array_slice($menu_links, 5, NULL, true);
-
-    return $menu_links;
-}
-// register permalink endpoint
-add_action('init', 'cpm_dong_custom_order_form_endpoint');
-function cpm_dong_custom_order_form_endpoint()
-{
-
-    add_rewrite_endpoint('show-order-form', EP_PAGES);
-}
-// content for the new page in My Account, woocommerce_account_{ENDPOINT NAME}_endpoint
-add_action('woocommerce_account_show-order-form_endpoint', 'cpm_dong_custom_order_form_endpoint_content');
-function cpm_dong_custom_order_form_endpoint_content()
-{
-
-    // of course you can print dynamic content here, one of the most useful functions here is get_current_user_id()
-?>
-    <div class='qr-tiger-code-generator'>
-        <p><?php _e('My Memberships ', 'cpm-dongtrader') ?></p>
-        <?php echo do_shortcode('[pmpro_account]');
-        ?>
-    </div>
-
-<?php
-}
-
 
 /**
  * Automatically add product to cart on visit

@@ -387,18 +387,22 @@ function dongtrader_create_dbtable()
 {
 
     global $wpdb;
+    global $wpdb;
     $table_name = $wpdb->prefix . 'manage_users_gf';
     $charset_collate = $wpdb->get_charset_collate();
-    $sql = "CREATE TABLE $table_name ( 
+    $sql = "CREATE TABLE $table_name (
             id INT NOT NULL AUTO_INCREMENT ,
+            product_id INT ,
+            order_id INT ,
             gf_person_id INT NOT NULL ,
-            gf_role_id INT NOT NULL , 
+            gf_role_id INT NOT NULL ,
             gf_role_assigned VARCHAR(255) NOT NULL ,
             gf_name VARCHAR(255) NOT NULL ,
             gf_circle_name VARCHAR(255) NOT NULL ,
             created_at DATETIME(5) NOT NULL,
+            in_circle INT NOT NULL,
             user_id INT NOT NULL , PRIMARY KEY (id)) $charset_collate;";
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
     dbDelta($sql);
 
     /* create table to store custom order */
@@ -429,19 +433,18 @@ add_action('plugins_loaded', 'dongtrader_create_dbtable');
  * Step 2 : Save user details from response received from glassfrog api to the above table
  * Step 3 : Create meta on products for variations and simple products so that user can be assigned to specific roles  
  */
-function dongtrader_user_registration_hook($customer_id)
+function dongtrader_user_registration_hook($customer_id , $p_id , $oid)
 {
-
     global $wpdb;
     $table_name = $wpdb->prefix . 'manage_users_gf';
-    $user_info  = get_userdata($customer_id);
-    $username   = $user_info->user_login;
+    $user_info = get_userdata($customer_id);
+    $username = $user_info->user_login;
     $first_name = $user_info->first_name;
-    $last_name  = $user_info->last_name;
-    $full_name  = $first_name . ' ' . $last_name;
-    $email      = $user_info->user_email;
+    $last_name = $user_info->last_name;
+    $full_name = $first_name . ' ' . $last_name;
+    $email = $user_info->user_email;
     $str = '{"people": [{
-        "name": "' . $full_name . '",
+        "name": "' . $user_info->display_name . '",
         "email": "' . $email . '",
         "external_id": "' . $customer_id . '",
         "tag_names": ["tag 1", "tag 2"]
@@ -449,38 +452,45 @@ function dongtrader_user_registration_hook($customer_id)
         }';
     $samp = glassfrog_api_request('people', $str, "POST");
     if ($samp && isset($samp)) {
-        $gf_id   = $samp->people[0]->id;
-        $gf_name = $full_name;
-        $result  = $wpdb->get_row("SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;");
-
+        $gf_id = $samp->people[0]->id;
+        $gf_name = $samp->people[0]->name;
+        $result = $wpdb->get_row("SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;");
         $last_circle_name = isset($result) ? $result->gf_circle_name : '1';
-        $circle_count     = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE gf_circle_name = %s", $last_circle_name));
-        $new_circle_name  = $circle_count < 5 ? $last_circle_name : $last_circle_name + 1;
+        $circle_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE gf_circle_name = %s", $last_circle_name));
+        $new_circle_name = $circle_count < 5 ? $last_circle_name : $last_circle_name + 1;
+        $in_circle = 1;
         $wpdb->query(
             $wpdb->prepare(
                 "INSERT INTO $table_name
                (
                 gf_person_id,
+                product_id,
+                order_id,
                 gf_role_id,
                 gf_role_assigned,
                 gf_name,
                 gf_circle_name ,
                 created_at,
-                user_id 
+                in_circle,
+                user_id
                )
-               VALUES ( %d, %d, %s, %s, %s, %s, %d )",
+               VALUES ( %d,%d,%d,%d,%s,%s,%s,%s,%d,%d )",
                 esc_attr($gf_id),
+                $p_id,
+                $oid,
                 1,
                 'false',
                 esc_attr($gf_name),
                 esc_attr($new_circle_name),
                 current_time('mysql', 1),
+                $in_circle,
                 $customer_id
-
+    
             )
         );
     }
 }
+
 
 
 /* add custom field to save user role on user profile */
@@ -962,4 +972,67 @@ if (!function_exists('dong_custom_order_exporter_csv_files')) {
     }
 
     add_action('wp_ajax_dong_custom_order_exporter_csv_files', 'dong_custom_order_exporter_csv_files');
+}
+
+
+function glassfrog_api_management()
+{
+    global $wpdb;
+    //Our Custom table name for the database.
+    $table_name    = $wpdb->prefix . 'manage_users_gf';
+    //get glassfrog id and user id from custom table manage_users_gf
+    $results       = $wpdb->get_results("SELECT gf_person_id , user_id FROM $table_name WHERE in_circle = 0 LIMIT 5",ARRAY_A);
+    //if not results exit
+    if(!$results) return;
+    //extract glssfrog id from the results in the above custom query
+    $glassfrog_ids = wp_list_pluck($results,'gf_person_id');
+    //extract user id from the results in the above custom query
+    $user_ids      = wp_list_pluck($results,'user_id');
+    //combine whole array into one
+    $all_users     = array_combine($glassfrog_ids, $user_ids);
+    //looping inside our all users
+    foreach($all_users as $gfid=>$uid){
+        //call the glassfrog api
+        $api_call = glassfrog_api_request('people/'.$gfid.'/roles','' , 'GET'); 
+        //check if api call is all good       
+        if($api_call) :
+            //get all people of the circle
+            $all_people_in_circle   = $api_call->linked->people;
+            //exact circle name in the api
+            $peoples_circle_name    = $api_call->roles[0]->name;
+            //check if five members rule is accomplished in the circle
+            if(count($all_people_in_circle) >= 5 ) :
+                //looping inisde the circle
+                foreach($all_people_in_circle as $ap):
+                    //sync api external id and current user id and if not continue the loop
+                   // if($ap->external_id != $uid) continue;
+                    //get product id from the custom table
+                    $productid = $wpdb->get_row("SELECT product_id  FROM $table_name WHERE gf_person_id= $ap->id ")->product_id;
+                    //get order id from table
+                    $orderid   = $wpdb->get_row("SELECT order_id  FROM $table_name WHERE gf_person_id= $ap->id ")->order_id;
+                    //check existence of product id and order id
+                    if($productid && $orderid):
+                       //trading distribution function
+                       $product = wc_get_product( $productid );
+                       //get the price of the product
+                       $price   = $product->get_price();
+                       //price distribution function
+                       dongtrader_product_price_distribution($price, $productid, $orderid, $uid);
+                       //prepare to update to custom database
+                       $update_query = $wpdb->prepare("UPDATE $table_name SET in_circle = %d WHERE user_id = %d", 1, $uid);
+                       //update to custom database
+                       $wpdb->query($update_query);
+                    
+                    //end check existence of product id and order id
+                    endif;
+                //end  foreach loop started   
+                endforeach;
+            //five members rule check condition ends
+            endif;
+        else:
+            //do nothing
+        endif;
+
+    }
+   
 }
