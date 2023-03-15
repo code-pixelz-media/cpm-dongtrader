@@ -761,6 +761,7 @@ function custom_user_profile_fields($user)
                 $dong_comm_cdi_arr  = array_column($user_trading_metas, 'dong_comm_cdi');
                 $dong_total_arr     = array_column($user_trading_metas, 'dong_total');
                 $i = 1;
+                $price_symbol = get_woocommerce_currency_symbol();
                 foreach ($items_for_current_page as $utm) :
                     $order = new WC_Order($utm['order_id']);
                     $order_date = $order->order_date;
@@ -779,24 +780,24 @@ function custom_user_profile_fields($user)
                             <?php echo $order_date; ?>
                         </td>
                         <td>
-                            <?php echo '$' . $utm['rebate'] ?>
+                            <?php echo $price_symbol . $utm['rebate'] ?>
                         </td>
                         <!-- Profit -->
                         <td>
-                            <?php echo '$' . $utm['dong_profit_dg'] ?>
+                            <?php echo $price_symbol . $utm['dong_profit_dg'] ?>
                         </td>
                         <td>
-                            <?php echo '$' . $utm['dong_profit_di']; ?>
+                            <?php echo $price_symbol . $utm['dong_profit_di']; ?>
                         </td>
                         <!-- Commission -->
                         <td>
-                            <?php echo '$' . $utm['dong_comm_dg'] ?>
+                            <?php echo $price_symbol . $utm['dong_comm_dg'] ?>
                         </td>
                         <td>
-                            <?php echo '$' . $utm['dong_comm_cdi']; ?>
+                            <?php echo $price_symbol . $utm['dong_comm_cdi']; ?>
                         </td>
                         <td>
-                            <?php echo '$' . $utm['dong_total'] ?>
+                            <?php echo $price_symbol . $utm['dong_total'] ?>
                         </td>
                     </tr>
 
@@ -806,12 +807,12 @@ function custom_user_profile_fields($user)
             <tfoot>
                 <tr>
                     <td colspan="3">All Totals</td>
-                    <td><?php echo '$' . array_sum($rebate_arr); ?></td>
-                    <td><?php echo '$' . array_sum($dong_profit_dg_arr); ?></td>
-                    <td><?php echo '$' . array_sum($dong_profit_di_arr); ?></td>
-                    <td><?php echo '$' . array_sum($dong_comm_dg_arr); ?></td>
-                    <td><?php echo '$' . array_sum($dong_comm_cdi_arr); ?></td>
-                    <td><?php echo '$' . array_sum($dong_total_arr); ?></td>
+                    <td><?php echo $price_symbol . array_sum($rebate_arr); ?></td>
+                    <td><?php echo $price_symbol . array_sum($dong_profit_dg_arr); ?></td>
+                    <td><?php echo $price_symbol . array_sum($dong_profit_di_arr); ?></td>
+                    <td><?php echo $price_symbol . array_sum($dong_comm_dg_arr); ?></td>
+                    <td><?php echo $price_symbol . array_sum($dong_comm_cdi_arr); ?></td>
+                    <td><?php echo $price_symbol . array_sum($dong_total_arr); ?></td>
                 </tr>
             </tfoot>
         </table>
