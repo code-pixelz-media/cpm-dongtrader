@@ -682,7 +682,7 @@ function custom_user_profile_fields($user)
     //reverse array
     array_reverse($user_trading_metas);
     // determine number of items per page
-    $items_per_page = 2;
+    $items_per_page = 10;
     // determine current page number from query parameter
     $current_page = isset( $_GET['listpaged'] ) ? intval( $_GET['listpaged'] ) : 1;
 
