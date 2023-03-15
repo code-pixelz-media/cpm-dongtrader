@@ -167,6 +167,41 @@ function cpm_dong_my_membership_endpoint_content()
 }
 /* show memebership data on woocommerce tab  ends*/
 
+/* show custom order export on woocommerce tab */
+
+add_filter('woocommerce_account_menu_items', 'cpm_dong_show_custom_order_form', 40);
+function cpm_dong_show_custom_order_form($menu_links)
+{
+
+    $menu_links = array_slice($menu_links, 0, 5, true)
+        + array('show-order-form' => 'Add Order')
+        + array_slice($menu_links, 5, NULL, true);
+
+    return $menu_links;
+}
+// register permalink endpoint
+add_action('init', 'cpm_dong_custom_order_form_endpoint');
+function cpm_dong_custom_order_form_endpoint()
+{
+
+    add_rewrite_endpoint('show-order-form', EP_PAGES);
+}
+// content for the new page in My Account, woocommerce_account_{ENDPOINT NAME}_endpoint
+add_action('woocommerce_account_show-order-form_endpoint', 'cpm_dong_custom_order_form_endpoint_content');
+function cpm_dong_custom_order_form_endpoint_content()
+{
+
+    // of course you can print dynamic content here, one of the most useful functions here is get_current_user_id()
+?>
+    <div class='qr-tiger-code-generator'>
+        <p><?php _e('My Memberships ', 'cpm-dongtrader') ?></p>
+        <?php echo do_shortcode('[pmpro_account]');
+        ?>
+    </div>
+
+<?php
+}
+
 
 /**
  * Automatically add product to cart on visit
@@ -450,7 +485,7 @@ function get_pmpro_extrafields_meta($memId)
  * Step 4 : Update to order meta 
  * Distribution Formula : rebate=7 process=3 profit(50i , 40g ,10c) comm(50i,40g,10t) , fmla for profit calculation second case reserve+cost+earning- total price 
  */
-function dongtrader_product_price_distribution($price, $proId, $oid, $cid )
+function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
 {
 
     $gf_membership_checkbox = get_post_meta($proId, '_glassfrog_checkbox', true);
@@ -467,7 +502,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid )
     /**Sum of data recieved from pmpro membership levels */
     $constant_sum = $pm_meta_vals['dong_cost'] + $pm_meta_vals['dong_reserve'] + $pm_meta_vals['dong_earning_amt'];
     /*Profit after deduction from rebate and process */
-    $remining_profit_amount = $checkgf ? $price - $constant_sum : $price - $rebate_amount-$process_amount;
+    $remining_profit_amount = $checkgf ? $price - $constant_sum : $price - $rebate_amount - $process_amount;
     /*Total Profit that must be distributed to individual */
     $profit_amt_individual  = $remining_profit_amount * $pm_meta_vals['dong_profit_di'] / 100;
     /*Total Profit that must be distributed to group */
@@ -633,7 +668,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid )
             'dong_profit_di' => 0,
             'dong_comm_dg' => 0,
             'dong_comm_cdi' => 0,
-            'dong_total'  => $rebate_amount 
+            'dong_total'  => $rebate_amount
 
         ];
         if (update_user_meta($ma, '_user_trading_details', $not_gf_trading_details_user_metas)) {
@@ -659,11 +694,11 @@ function dongtrader_after_order_received_process($order_id)
         $p_id[] = $item->get_product_id();
     }
     $gf_checkbox = get_post_meta($p_id[0], '_glassfrog_checkbox', true);
-    if($gf_checkbox == 'on'){
-        dongtrader_user_registration_hook($customer_id, $p_id[0],$order_id);
+    if ($gf_checkbox == 'on') {
+        dongtrader_user_registration_hook($customer_id, $p_id[0], $order_id);
     }
     $current_pro = wc_get_product($p_id[0]);
-  
+
     $current_price = $current_pro->get_price();
 
     dongtrader_product_price_distribution($current_price, $p_id[0], $order_id, $customer_id);
@@ -684,15 +719,15 @@ function custom_user_profile_fields($user)
     // determine number of items per page
     $items_per_page = 2;
     // determine current page number from query parameter
-    $current_page = isset( $_GET['listpaged'] ) ? intval( $_GET['listpaged'] ) : 1;
+    $current_page = isset($_GET['listpaged']) ? intval($_GET['listpaged']) : 1;
 
     // calculate start and end indices for items on current page
-    $start_index = ( $current_page - 1 ) * $items_per_page;
+    $start_index = ($current_page - 1) * $items_per_page;
 
     $end_index = $start_index + $items_per_page;
 
     // slice the array to get items for current page
-    $items_for_current_page = array_slice( $user_trading_metas, $start_index, $items_per_page );
+    $items_for_current_page = array_slice($user_trading_metas, $start_index, $items_per_page);
 
     // $current_page_loop = array_slice($user_trading_metas);
 ?>
@@ -755,7 +790,7 @@ function custom_user_profile_fields($user)
                         <td>
                             <?php echo '$' . $utm['dong_profit_di']; ?>
                         </td>
-                         <!-- Commission -->
+                        <!-- Commission -->
                         <td>
                             <?php echo '$' . $utm['dong_comm_dg'] ?>
                         </td>
@@ -770,23 +805,23 @@ function custom_user_profile_fields($user)
                 <?php $i++;
                 endforeach; ?>
             </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="3">All Totals</td>
-                        <td><?php echo '$' . array_sum($rebate_arr); ?></td>
-                        <td><?php echo '$' . array_sum($dong_profit_dg_arr); ?></td>
-                        <td><?php echo '$' . array_sum($dong_profit_di_arr); ?></td>
-                        <td><?php echo '$' . array_sum($dong_comm_dg_arr); ?></td>
-                        <td><?php echo '$' . array_sum($dong_comm_cdi_arr); ?></td>
-                        <td><?php echo '$' . array_sum($dong_total_arr); ?></td>
-                    </tr>
-                </tfoot>
-        </table>        
+            <tfoot>
+                <tr>
+                    <td colspan="3">All Totals</td>
+                    <td><?php echo '$' . array_sum($rebate_arr); ?></td>
+                    <td><?php echo '$' . array_sum($dong_profit_dg_arr); ?></td>
+                    <td><?php echo '$' . array_sum($dong_profit_di_arr); ?></td>
+                    <td><?php echo '$' . array_sum($dong_comm_dg_arr); ?></td>
+                    <td><?php echo '$' . array_sum($dong_comm_cdi_arr); ?></td>
+                    <td><?php echo '$' . array_sum($dong_total_arr); ?></td>
+                </tr>
+            </tfoot>
+        </table>
     </div>
     <div class="user-trading-list-paginate" style="float:right">
-        <?php 
-        $num_items = count( $user_trading_metas );
-        $num_pages = ceil( $num_items / $items_per_page );
+        <?php
+        $num_items = count($user_trading_metas);
+        $num_pages = ceil($num_items / $items_per_page);
         echo paginate_links(array(
             'base' => add_query_arg('listpaged', '%#%'),
             'format' => 'list',
@@ -800,7 +835,7 @@ function custom_user_profile_fields($user)
     <script>
         jQuery(document).ready(function($) {
             const paginationParam = /[?&]listpaged=([^&#]*)/.exec(window.location.href)[1];
-            if(paginationParam){
+            if (paginationParam) {
                 $('html, body').animate({
                     scrollTop: $('#member-history-orders').offset().top
                 }, 1000);
@@ -811,7 +846,7 @@ function custom_user_profile_fields($user)
                 var table = $(this).parents('table').eq(0);
                 var rows = table.find('tr:gt(0):not(:last)').toArray().sort(comparer($(this).index()));
                 var sortDir = $(this).data('sortDir');
-                $('th').removeClass('asc desc'); 
+                $('th').removeClass('asc desc');
                 if (sortDir === 'desc') {
                     rows = rows.reverse(); // sort in ascending order
                     $(this).data('sortDir', 'asc');
@@ -820,15 +855,18 @@ function custom_user_profile_fields($user)
                     $(this).data('sortDir', 'desc');
                     $(this).addClass('desc'); // add caret class to current th element
                 }
-                for (var i = 0; i < rows.length; i++){table.append(rows[i])}
+                for (var i = 0; i < rows.length; i++) {
+                    table.append(rows[i])
+                }
             });
 
             function comparer(index) {
                 return function(a, b) {
-                    var valA = getCellValue(a, index), valB = getCellValue(b, index);
+                    var valA = getCellValue(a, index),
+                        valB = getCellValue(b, index);
                     if (index === 1) { // check if we're sorting by price amount
-                        valA = parseFloat(valA.replace(/[^0-9.-]+/g,"")); // convert to number
-                        valB = parseFloat(valB.replace(/[^0-9.-]+/g,""));
+                        valA = parseFloat(valA.replace(/[^0-9.-]+/g, "")); // convert to number
+                        valB = parseFloat(valB.replace(/[^0-9.-]+/g, ""));
                     } else if ((/\d{4}-\d{2}-\d{2}/).test(valA)) { // check if we're sorting by date
                         // Convert dates to a comparable format
                         valA = $.trim(valA).replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2");
@@ -839,10 +877,10 @@ function custom_user_profile_fields($user)
             }
 
             function getCellValue(row, index) {
-                return $(row).children('td').eq(index).text() 
+                return $(row).children('td').eq(index).text()
 
             }
-    });
+        });
     </script>
 <?php
 }
@@ -919,7 +957,7 @@ function dongtraders_csv_order_importer()
                     $user_id = wc_create_new_customer($customer_email, $billing_first_name . rand(10, 100), $random_password);
                     pmpro_changeMembershipLevel($get_product_membership_level, $user_id);
 
-                   // dongtrader_user_registration_hook($user_id);
+                    // dongtrader_user_registration_hook($user_id);
                     // add billing and shipping addresses
                     $address = array(
                         'first_name' => $billing_first_name,
@@ -978,5 +1016,3 @@ function dongtraders_csv_order_importer()
         }
     }
 }
-
-
