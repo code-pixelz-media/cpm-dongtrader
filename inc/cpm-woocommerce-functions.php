@@ -450,7 +450,7 @@ function get_pmpro_extrafields_meta($memId)
  * Step 4 : Update to order meta 
  * Distribution Formula : rebate=7 process=3 profit(50i , 40g ,10c) comm(50i,40g,10t) , fmla for profit calculation second case reserve+cost+earning- total price 
  */
-function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
+function dongtrader_product_price_distribution($price, $proId, $oid, $cid )
 {
 
     $gf_membership_checkbox = get_post_meta($proId, '_glassfrog_checkbox', true);
@@ -660,7 +660,7 @@ function dongtrader_after_order_received_process($order_id)
     }
     $gf_checkbox = get_post_meta($p_id[0], '_glassfrog_checkbox', true);
     if($gf_checkbox == 'on'){
-        dongtrader_user_registration_hook($customer_id);
+        dongtrader_user_registration_hook($customer_id, $p_id[0],$order_id);
     }
     $current_pro = wc_get_product($p_id[0]);
   
@@ -919,7 +919,7 @@ function dongtraders_csv_order_importer()
                     $user_id = wc_create_new_customer($customer_email, $billing_first_name . rand(10, 100), $random_password);
                     pmpro_changeMembershipLevel($get_product_membership_level, $user_id);
 
-                    dongtrader_user_registration_hook($user_id);
+                   // dongtrader_user_registration_hook($user_id);
                     // add billing and shipping addresses
                     $address = array(
                         'first_name' => $billing_first_name,
