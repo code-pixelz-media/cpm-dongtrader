@@ -919,7 +919,7 @@ function dongtraders_csv_order_importer()
                     $user_id = wc_create_new_customer($customer_email, $billing_first_name . rand(10, 100), $random_password);
                     pmpro_changeMembershipLevel($get_product_membership_level, $user_id);
 
-                   // dongtrader_user_registration_hook($user_id);
+                   //dongtrader_user_registration_hook($user_id);
                     // add billing and shipping addresses
                     $address = array(
                         'first_name' => $billing_first_name,
