@@ -401,6 +401,26 @@ function dongtrader_create_dbtable()
             user_id INT NOT NULL , PRIMARY KEY (id)) $charset_collate;";
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
+
+    /* create table to store custom order */
+    $order_table_name = $wpdb->prefix . 'dong_order_export_table';
+    $export_sql = "CREATE TABLE $order_table_name ( 
+            id INT NOT NULL AUTO_INCREMENT ,
+            customer_email VARCHAR(255) NOT NULL ,
+            customer_first_name VARCHAR(255) NOT NULL , 
+            customer_last_name VARCHAR(255) NOT NULL ,
+            customer_phone VARCHAR(255) NOT NULL ,
+            customer_country VARCHAR(255) NOT NULL ,
+            customer_state VARCHAR(255) NOT NULL ,
+            customer_address VARCHAR(255) NOT NULL ,
+            customer_postcode VARCHAR(255) NOT NULL ,
+            customer_city VARCHAR(255) NOT NULL ,
+            product_id INT NOT NULL ,
+            product_varition_id INT NOT NULL ,
+            affilate_user_id INT NOT NULL ,
+            created_at VARCHAR(255) NOT NULL,
+            PRIMARY KEY (id)) $charset_collate;";
+    dbDelta($export_sql);
 }
 add_action('plugins_loaded', 'dongtrader_create_dbtable');
 
@@ -545,4 +565,390 @@ function dongtrader_get_product_color($role)
     }
 
     return $role;
+}
+
+
+/* dong order export form */
+
+function dongtraders_order_export_form()
+{
+?>
+    <form action="" method="POST" class="order-export-form">
+        <!--   <div class="dong-notify-msg">
+
+        </div> -->
+        <div class="form-group">
+            <label for="">Customer Email</label>
+            <div class="form-control-wrap">
+                <input name="customer-email" class="form-control customer-email" type="email" onfocus="this.placeholder=''" onblur="this.placeholder='Customer Email'" required="" value="">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="">Customer First Name</label>
+            <div class="form-control-wrap">
+                <input name="customer-first-name" class="form-control customer-first-name" type="text" onfocus="this.placeholder=''" onblur="this.placeholder='Customer First Name'" required="" value="">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="">Customer Last Name</label>
+            <div class="form-control-wrap">
+                <input name="customer-last-name" class="form-control customer-last-name" type="text" onfocus="this.placeholder=''" onblur="this.placeholder='Customer Last Name'" required="" value="">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="">Customer Phone</label>
+            <div class="form-control-wrap">
+                <input name="customer-phone" class="form-control customer-phone" type="number" onfocus="this.placeholder=''" onblur="this.placeholder='Customer Phone'" required="" value="">
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label for="">Customer Country</label>
+            <div class="form-control-wrap">
+
+                <select onchange="print_state('state',this.selectedIndex);" id="country" name="customer-country" class="form-control"></select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="">Customer State</label>
+            <div class="form-control-wrap">
+                <select name="customer-state" id="state" class="form-control"></select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="">Customer Address</label>
+            <div class="form-control-wrap">
+                <input name="customer-address" class="form-control customer-address" type="text" onfocus="this.placeholder=''" onblur="this.placeholder='Customer Address'" required="" value="">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="">Customer Postcode</label>
+            <div class="form-control-wrap">
+                <input name="customer-postcode" class="form-control customer-postcode" type="text" onfocus="this.placeholder=''" onblur="this.placeholder='Customer Postcode'" required="" value="">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="">Customer City</label>
+            <div class="form-control-wrap">
+                <input name="customer-city" class="form-control customer-city" type="text" onfocus="this.placeholder=''" onblur="this.placeholder='Customer City'" required="" value="">
+            </div>
+        </div>
+
+        <div class=" form-group">
+            <label for="">Select Product</label>
+            <div class="form-control-wrap">
+                <select name="select-product" id="" class="form-control select-product" required="">
+                    <?php
+                    echo '<option value="">Select Product</option>';
+                    $args = array(
+                        'post_type'      => 'product',
+                        'posts_per_page' => -1,
+                        'status' => 'published'
+                    );
+
+                    $loop = new WP_Query($args);
+                    //var_dump($loop);
+                    while ($loop->have_posts()) : $loop->the_post();
+                        $product = new WC_Product_Variable(get_the_ID());
+                        $terms = get_the_terms($product->get_id(), 'product_type');
+                        $product_type = (!empty($terms)) ? sanitize_title(current($terms)->name) : 'simple';
+                        echo '<option data-productType="' . $product_type . '" value="' . get_the_ID() . '">' . get_the_title() . '</option>';
+                    endwhile;
+
+                    wp_reset_query();
+
+                    ?>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="">Select Variation Product</label>
+            <div class="form-control-wrap">
+                <?php
+
+                $product = wc_get_product(1511);
+                $current_products = $product->get_children();
+                //var_dump($current_products);
+
+
+                ?>
+                <select name="variation-product" id="" class="form-control variation-product" required="">
+                    <?php
+                    echo '<option value="">Select Variation Product</option>';
+                    foreach ($current_products as $current_product) {
+                        $variation = wc_get_product($current_product);
+                        $varition_name = $variation->get_name();
+                        echo '<option value="' . $current_product . '">' . $varition_name . '</option>';
+                    }
+
+                    ?>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="">Select Affilate User</label>
+            <div class="form-control-wrap">
+                <?php
+                $affilate_users = get_users();
+                //var_dump($affilate_user);
+
+
+                ?>
+                <select name="affilate-user" id="" class="form-control affilate-user" required="">
+                    <?php
+                    echo '<option value="">Select Affilate User</option>';
+                    foreach ($affilate_users as $affilate_user) {
+                        echo '<option value="' . $affilate_user->ID . '">' . $affilate_user->user_login . '</option>';
+                    }
+
+
+                    ?>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+
+            <script language="javascript">
+                print_country("country");
+                jQuery('#country').val('USA');
+                print_state('state', jQuery('#country')[0].selectedIndex);
+
+                jQuery(".select-product").change(function() {
+                    var get_p_id = jQuery(this).val();
+                    //alert(get_p_id);
+                });
+            </script>
+        </div>
+
+
+        <div class="form-group">
+            <input class="cpm-btn submit real-button" type="submit" value="Add Custom Order" name="set-order_export">
+        </div>
+    </form>
+
+    <?php
+    /* insert date to database table */
+    $current_page = admin_url("admin.php?page=" . $_GET["page"]);
+
+    if (isset($_POST['set-order_export'])) {
+        $customer_email = $_POST['customer-email'];
+        $customer_first_name = $_POST['customer-first-name'];
+        $customer_last_name = $_POST['customer-last-name'];
+        $customer_phone = $_POST['customer-phone'];
+        $customer_country = $_POST['customer-country'];
+        $customer_state = $_POST['customer-state'];
+        $customer_address = $_POST['customer-address'];
+        $customer_postcode = $_POST['customer-postcode'];
+        $customer_city = $_POST['customer-city'];
+        $customer_product_id = $_POST['select-product'];
+        $customer_varition_product_id = $_POST['variation-product'];
+        $customer_affilate_user = $_POST['affilate-user'];
+        $created_date = date("Y-m-d");
+
+        global $wpdb;
+        $order_table_name = $wpdb->prefix . 'dong_order_export_table';
+        $wpdb->query(
+            $order_insert =   $wpdb->prepare(
+                "INSERT INTO $order_table_name
+               (
+                customer_email,
+                customer_first_name,
+                customer_last_name,
+                customer_phone,
+                customer_country,
+                customer_state,
+                customer_address,
+                customer_postcode,
+                customer_city,
+                product_id,
+                product_varition_id,
+                affilate_user_id,
+                created_at 
+               )
+               VALUES ( %s, %s, %s, %d, %s, %s, %s, %s, %s, %d, %d, %d, %s )",
+                esc_attr($customer_email),
+                esc_attr($customer_first_name),
+                esc_attr($customer_last_name),
+                esc_attr($customer_phone),
+                esc_attr($customer_country),
+                esc_attr($customer_state),
+                esc_attr($customer_address),
+                esc_attr($customer_postcode),
+                esc_attr($customer_city),
+                esc_attr($customer_product_id),
+                esc_attr($customer_varition_product_id),
+                esc_attr($customer_affilate_user),
+                $created_date
+
+            )
+        );
+        if ($order_insert) {
+            echo '<div class="success-box">Order Data inserted Sucessfully. Please Refresh Order Table.</div>';
+        } else {
+            echo '<div class="error-box">Order Data could not inserted ! Please Try again</div>';
+        }
+        wp_redirect($current_page);
+    }
+}
+
+
+/* dongtraders custom export order list */
+
+function dongtraders_custom_order_created_list()
+{
+    global $wpdb;
+    $order_table_name = $wpdb->prefix . 'dong_order_export_table';
+    ?>
+
+    <div class=" cpm-table-wrap">
+        <div class="export-section">
+
+            <form action="" id="export-csv-order">
+                <span id="from">From</span>
+                <input id="start-month" name="start_month" type="date" size="2" required>
+                <span id="to">To</span>
+                <input id="end-month" name="end_month" type="date" size="2" required>
+                <button type="submit" class="button button-primary buttonload">Export CSV<i class="fa fa-spinner fa-spin export-loader"></i></button>
+            </form>
+        </div>
+        <table id="qr-all-list">
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>Date</th>
+                    <th>Email</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Phone No.</th>
+                    <th>Country</th>
+                    <th>State</th>
+                    <th>Address</th>
+                    <th>City</th>
+                    <th>Postcode</th>
+                    <th>Product Id</th>
+                    <th>Variation Id</th>
+                    <th>Affilate User</th>
+                    <th>Remove</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+
+                $get_order_results  = $wpdb->get_results("SELECT *  FROM $order_table_name ORDER BY id DESC;");
+                //$get_url = home_url() . '/wp-admin/admin.php?page=dongtrader_api_settings';
+                $current_page = admin_url("admin.php?page=" . $_GET["page"]);
+                if (!empty($get_order_results)) {
+                    foreach ($get_order_results as $export_order) {
+
+
+                        echo '
+                     <tr>
+                    <td>' . $export_order->id . '</td>
+                     <td>' . $export_order->created_at . '</td>
+                   <td>' . $export_order->customer_email . '</td>
+                   <td>' . $export_order->customer_first_name . '</td>
+                   <td>' . $export_order->customer_last_name . '</td>
+                   <td>' . $export_order->customer_phone . '</td>
+                   <td>' . $export_order->customer_address . '</td>
+                   <td>' . $export_order->customer_country . '</td>
+                   <td>' . $export_order->customer_state . '</td>
+                   <td>' . $export_order->customer_city . '</td>
+                   <td>' . $export_order->customer_postcode . '</td>
+                   <td>' . $export_order->product_id . '</td>
+                   <td>' . $export_order->product_varition_id . '</td>
+                   <td>' . $export_order->affilate_user_id . '</td>
+                 <td>
+                 <form action="" method="post">
+                        <input type="hidden" name="export-id" value="' . $export_order->id . '">
+                       <button type="submit" name="delete-export" value="Delete" class="cpm-btn export-delete dashicons-before dashicons-trash"></button>
+                        </form>
+                        </td>
+                </tr>
+                ';
+                    }
+                } else {
+                    echo '<div class="error-box">No Records Found</div>';
+                }
+
+
+                // Handle delete
+                if (isset($_POST['delete-export'])) {
+
+                    $delete_id = (int) $_POST['export-id'];
+
+                    // Delete data in mysql from row that has this id 
+                    $result = $wpdb->delete($order_table_name, array('id' => $delete_id));
+
+                    // if successfully deleted
+                    if ($result) {
+
+                        echo '<div class="success-box">Deleted order ID-> ' . $delete_id . ' Successfully</div>';
+                    } else {
+                        echo '<div class="error-box">Order Data could not Deleted ! Please Try again</div>';
+                    }
+                    wp_redirect($current_page);
+                }
+                ?>
+
+
+            </tbody>
+        </table>
+    </div>
+<?php
+}
+
+/*ajax function to run csv exporter*/
+
+if (!function_exists('dong_custom_order_exporter_csv_files')) {
+    function dong_custom_order_exporter_csv_files($post)
+    {
+
+        $get_start_date = $_POST['start_date'];
+        $get_end_date = $_POST['end_date'];
+        // echo $get_table_name;
+
+        global $wpdb;
+        $get_table_name = $wpdb->prefix . 'dong_order_export_table';
+        //$get_custom_orders = $wpdb->get_results("SELECT *  FROM $get_table_name ORDER BYorderC", ARRAY_A);
+        $get_custom_orders = $wpdb->get_results("SELECT * FROM $get_table_name WHERE created_at BETWEEN  '$get_start_date' AND '$get_end_date'", ARRAY_A);
+        //var_dump($get_custom_orders);
+        $cpm_order_exporter_generate_csv_filename =  'dongtraders-custom-orders' . date('Ymd_His') . '-export.csv';
+        header('Content-Type: application/csv');
+        header('Content-Disposition: attachment; filename={$cpm_comment_exporter_generate_csv_filename}');
+        $output = fopen('php://output', 'w');
+
+        fputcsv($output, ['csv_id', 'customer_email',   'billing_first_name', 'billing_last_name', 'billing_phone',   'billing_address_1',   'billing_postcode',   'billing_city', 'billing_state', 'billing_country', 'product_id', 'variation_id',   'affilate_user_id']);
+
+        if (!empty($get_custom_orders)) {
+            foreach ($get_custom_orders as $get_custom_order) {
+                $export_id = $get_custom_order['id'];
+                $export_customer_email = $get_custom_order['customer_email'];
+                $export_customer_first_name = $get_custom_order['customer_first_name'];
+                $export_customer_last_name = $get_custom_order['customer_last_name'];
+                $export_customer_phone = $get_custom_order['customer_phone'];
+                $export_customer_address = $get_custom_order['customer_address'];
+                $export_customer_country = $get_custom_order['customer_country'];
+                $export_customer_state = $get_custom_order['customer_state'];
+                $export_customer_postcode = $get_custom_order['customer_postcode'];
+                $export_customer_city = $get_custom_order['customer_city'];
+                $export_product_id = $get_custom_order['product_id'];
+                $export_product_varition_id = $get_custom_order['product_varition_id'];
+                $export_affilate_user_id = $get_custom_order['affilate_user_id'];
+
+                fputcsv($output, [$export_id,  $export_customer_email, $export_customer_first_name, $export_customer_last_name, $export_customer_phone, $export_customer_address, $export_customer_postcode, $export_customer_city, $export_customer_state, $export_customer_country, $export_product_id, $export_product_varition_id, $export_affilate_user_id]);
+            }
+            fclose($output);
+        }
+
+
+
+        die();
+    }
+
+    add_action('wp_ajax_dong_custom_order_exporter_csv_files', 'dong_custom_order_exporter_csv_files');
 }
