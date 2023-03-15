@@ -506,9 +506,9 @@ function dongtrader_schedule_cron_job() {
 /**
  * Add a custom hook to the cron job, and then run a function when that hook is called.
  */
-add_action( 'dongtrader_cron_job_hook', 'prefix_run_cron_job' );
-function prefix_run_cron_job() {
-   //glassfrog api management here
+add_action( 'dongtrader_cron_job_hook', 'dongtrader_cron_job');
+function dongtrader_cron_job() {
+    glassfrog_api_management();
 }
 
 
