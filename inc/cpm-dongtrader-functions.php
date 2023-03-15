@@ -640,11 +640,12 @@ function glassfrog_api_management()
                        $product = wc_get_product( $productid );
                        //get the price of the product
                        $price   = $product->get_price();
+                       //price distribution function
+                       dongtrader_product_price_distribution($price, $productid, $orderid, $uid);
 
-                       $distributable_amts = '';
-
-                        //distribute the price
-                       //dongtrader_product_price_distribution($price, $productid, $orderid, $uid);
+                       $update_query = $wpdb->prepare("UPDATE $table_name SET in_circle = %d WHERE user_id = %d", 1, $uid);
+                       $wpdb->query($update_query);
+                    
                     //end check existence of product id and order id
                     endif;
                 //end  foreach loop started   
@@ -658,14 +659,4 @@ function glassfrog_api_management()
     }
    
 }
-
-
-
-add_action('wp_head', function(){
-
-
-
-  // glassfrog_api_management();
-
-});
 

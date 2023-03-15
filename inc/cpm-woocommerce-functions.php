@@ -450,7 +450,7 @@ function get_pmpro_extrafields_meta($memId)
  * Step 4 : Update to order meta 
  * Distribution Formula : rebate=7 process=3 profit(50i , 40g ,10c) comm(50i,40g,10t) , fmla for profit calculation second case reserve+cost+earning- total price 
  */
-function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
+function dongtrader_product_price_distribution($price, $proId, $oid, $cid )
 {
 
     $gf_membership_checkbox = get_post_meta($proId, '_glassfrog_checkbox', true);
