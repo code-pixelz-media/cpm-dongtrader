@@ -36,6 +36,8 @@ $dong_qr_array = get_option('dong_user_qr_values');
 
 				<li class="nav-tab" id="fourth"><a href="#advanced" class="dashicons-before dashicons-admin-settings"><?php _e('Orders', 'dongtraders'); ?></a></li>
 				<li class="nav-tab" id="fifth"><a href="#import-order" class="dashicons-before dashicons-admin-tools"><?php _e('Import Order', 'dongtraders'); ?></a></li>
+				<li class="nav-tab" id="sixth"><a href="#export-order-form" class="dashicons-before dashicons-admin-tools"><?php _e('Export Order Form', 'dongtraders'); ?></a></li>
+				<li class="nav-tab" id="seven"><a href="#export-order-list" class="dashicons-before dashicons-admin-tools"><?php _e('Export Order List', 'dongtraders'); ?></a></li>
 			</ul>
 
 			<div class="tab-content">
@@ -94,7 +96,8 @@ $dong_qr_array = get_option('dong_user_qr_values');
 
 					<hr>
 
-					<?php $dongtraders_api_setting_data = get_option('dongtraders_api_settings_fields');
+					<?php
+					$dongtraders_api_setting_data = get_option('dongtraders_api_settings_fields');
 					?>
 					<form action="options.php" method="POST" enctype="multipart/form-data" id="save-settings">
 						<?php
@@ -218,6 +221,26 @@ $dong_qr_array = get_option('dong_user_qr_values');
 					?>
 
 				</div>
+
+				<!-- order export tab -->
+
+				<div id="export-order-form">
+					<h2 class="tab-title">Export Order</h2>
+
+					<?php
+					dongtraders_order_export_form();
+					?>
+				</div>
+				<!-- order export List -->
+
+				<div id="export-order-list">
+					<h2 class="tab-title">Export Order List</h2>
+					<?php
+					dongtraders_custom_order_created_list();
+					?>
+				</div>
+
+
 			</div>
 
 			<div class="footer-wrap">

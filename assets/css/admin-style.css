@@ -662,6 +662,8 @@
   background: #393738;
 }
 
+
+
 /*--------------------------------------------------------------
  * ## CPM PLUGIN FORM
  *--------------------------------------------------------------
@@ -1282,18 +1284,20 @@ span.select2-search.select2-search--inline,
 
 .cpm-plugin-wrap .cpm-table-wrap thead th {
   border-left: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+
 }
 
 .cpm-plugin-wrap .cpm-table-wrap tbody td {
-  border: none;
+  /* border: none; */
   border-top: 1px solid #ddd;
   border-left: 1px solid #ddd;
 }
 
-.cpm-plugin-wrap .cpm-table-wrap thead th:first-child,
+/* .cpm-plugin-wrap .cpm-table-wrap thead th:first-child,
 .cpm-plugin-wrap .cpm-table-wrap tbody td:first-child {
   border-left: none;
-}
+} */
 
 .cpm-plugin-wrap .cpm-table-wrap tbody tr:nth-of-type(odd) td {
   background: #fafafa;
@@ -1624,8 +1628,35 @@ span.page-numbers.current {
   content: ' ▼';
 }
 
-.trading-history tr th:hover{
+.trading-history tr th:hover {
 
-    cursor: pointer;
+  cursor: pointer;
 
+}
+
+.export-section {
+  float: right;
+  margin: 10px 36px 12px 0px;
+}
+
+button.cpm-btn.export-delete.dashicons-before.dashicons-trash {
+  margin-left: 16% !important;
+  background: #ad0a0a;
+}
+
+.buttonload {
+  background-color: #04AA6D;
+  /* Green background */
+  border: none;
+  /* Remove borders */
+  color: white;
+  /* White text */
+  padding: 12px 24px;
+  /* Some padding */
+  font-size: 16px;
+  /* Set a font-size */
+}
+
+i.fa.fa-spinner.fa-spin.export-loader {
+  margin-left: 8%;
 }
