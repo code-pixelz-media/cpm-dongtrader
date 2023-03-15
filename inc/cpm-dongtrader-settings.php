@@ -38,6 +38,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 				<li class="nav-tab" id="fifth"><a href="#import-order" class="dashicons-before dashicons-admin-tools"><?php _e('Import Order', 'dongtraders'); ?></a></li>
 				<li class="nav-tab" id="sixth"><a href="#export-order-form" class="dashicons-before dashicons-admin-tools"><?php _e('Export Order Form', 'dongtraders'); ?></a></li>
 				<li class="nav-tab" id="seven"><a href="#export-order-list" class="dashicons-before dashicons-admin-tools"><?php _e('Export Order List', 'dongtraders'); ?></a></li>
+				<li class="nav-tab" id="fifth"><a href="#gf_user_status" class="dashicons-before dashicons-universal-access"><?php _e('Users API Status', 'dongtraders'); ?></a></li>
 			</ul>
 
 			<div class="tab-content">
@@ -222,7 +223,6 @@ $dong_qr_array = get_option('dong_user_qr_values');
 
 				</div>
 
-				<!-- order export tab -->
 
 				<div id="export-order-form">
 					<h2 class="tab-title">Export Order</h2>
@@ -240,6 +240,10 @@ $dong_qr_array = get_option('dong_user_qr_values');
 					?>
 				</div>
 
+
+				<div id="gf_user_status">
+					<?php var_dump('here'); ?>
+				</div>
 
 			</div>
 
