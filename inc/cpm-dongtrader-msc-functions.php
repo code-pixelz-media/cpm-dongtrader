@@ -44,9 +44,10 @@ function glassfrog_api_management()
     $all_users     = array_combine($glassfrog_ids, $user_ids);
     //looping inside our all users
     foreach($all_users as $gfid=>$uid){
+        var_dump($gfid);
         //call the glassfrog api
         $api_call = glassfrog_api_request('people/'.$gfid.'/roles','' , 'GET'); 
-        var_dump($api_call);
+        //var_dump($api_call);
         //check if api call is all good       
         if($api_call) :
             //get all people of the circle
