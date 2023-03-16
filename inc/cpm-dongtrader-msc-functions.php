@@ -24,7 +24,7 @@ function dongtrader_schedule_cron_job() {
  */
 add_action( 'dongtrader_cron_job_hook', 'dongtrader_cron_job');
 function dongtrader_cron_job() {
-    glassfrog_api_management();
+   glassfrog_api_management();
 }
 //Check the api cron function
 function glassfrog_api_management()
@@ -71,10 +71,9 @@ function glassfrog_api_management()
                        //price distribution function
                        dongtrader_product_price_distribution($price, $productid, $orderid, $uid);
                        //prepare to update to custom database
-                       $update_query = $wpdb->prepare("UPDATE $table_name SET in_circle = %d WHERE user_id = %d", 1, $uid);
+                       $update_query = $wpdb->prepare("UPDATE $table_name SET in_circle = %d , gf_role_assigned = %s WHERE user_id = %d", 1, $peoples_circle_name,$uid);
                        //update to custom database
                        $wpdb->query($update_query);
-                    
                     //end check existence of product id and order id
                     endif;
                 //end  foreach loop started   
@@ -86,5 +85,12 @@ function glassfrog_api_management()
         endif;
 
     }
-   
+
 }
+
+
+// add_action('wp_head', function(){
+//     // $api_call = glassfrog_api_request('people/511758/roles','' , 'GET'); 
+
+//     // var_dump($api_call);
+// });
