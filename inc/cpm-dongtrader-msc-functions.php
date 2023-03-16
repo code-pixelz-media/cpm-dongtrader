@@ -1,5 +1,32 @@
 <?php
 
+add_filter( 'cron_schedules', 'dongtrader_one_minutes_interval' );
+function dongtrader_one_minutes_interval( $schedules ) {
+    $schedules['1_minutes'] = array(
+        'interval' => 1 * 60,
+        'display'  => __( 'Every 1 minutes', 'cpm-dongtrader' ),
+    );
+    return $schedules;
+}
+
+/**
+ * If the cron job isn't scheduled, schedule it.
+ */
+add_action( 'wp', 'dongtrader_schedule_cron_job' );
+function dongtrader_schedule_cron_job() {
+    if ( ! wp_next_scheduled( 'dongtrader_cron_job_hook' ) ) {
+        wp_schedule_event( time(), '1_minutes', 'dongtrader_cron_job_hook' );
+    }
+}
+
+/**
+ * Add a custom hook to the cron job, and then run a function when that hook is called.
+ */
+add_action( 'dongtrader_cron_job_hook', 'dongtrader_cron_job');
+function dongtrader_cron_job() {
+    glassfrog_api_management();
+}
+//Check the api cron function
 function glassfrog_api_management()
 {
     global $wpdb;
@@ -61,3 +88,10 @@ function glassfrog_api_management()
     }
    
 }
+
+
+add_action('wp_head', function(){
+    $api_call = glassfrog_api_request('people/511757/roles','' , 'GET'); 
+
+    var_dump($api_call);
+});
