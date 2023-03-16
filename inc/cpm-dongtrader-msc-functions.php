@@ -34,7 +34,6 @@ function glassfrog_api_management()
     $table_name    = $wpdb->prefix . 'manage_users_gf';
     //get glassfrog id and user id from custom table manage_users_gf
     $results       = $wpdb->get_results("SELECT gf_person_id , user_id FROM $table_name WHERE in_circle = 0 LIMIT 5",ARRAY_A);
-    var_dump($results);
     //if not results exit
     if(!$results) return;
     //extract glssfrog id from the results in the above custom query
@@ -47,6 +46,7 @@ function glassfrog_api_management()
     foreach($all_users as $gfid=>$uid){
         //call the glassfrog api
         $api_call = glassfrog_api_request('people/'.$gfid.'/roles','' , 'GET'); 
+        var_dump($api_call);
         //check if api call is all good       
         if($api_call) :
             //get all people of the circle
