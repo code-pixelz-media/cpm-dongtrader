@@ -451,6 +451,7 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid)
         }]
         }';
     $samp = glassfrog_api_request('people', $str, "POST");
+    
     if ($samp && isset($samp)) {
         $gf_id = $samp->people[0]->id;
         $gf_name = $samp->people[0]->name;
@@ -458,7 +459,7 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid)
         $last_circle_name = isset($result) ? $result->gf_circle_name : '1';
         $circle_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE gf_circle_name = %s", $last_circle_name));
         $new_circle_name = $circle_count < 5 ? $last_circle_name : $last_circle_name + 1;
-        $in_circle = 1;
+        $in_circle = 0;
         $wpdb->query(
             $wpdb->prepare(
                 "INSERT INTO $table_name
@@ -959,6 +960,7 @@ if (!function_exists('dong_custom_order_exporter_csv_files')) {
     add_action('wp_ajax_dong_custom_order_exporter_csv_files', 'dong_custom_order_exporter_csv_files');
 }
 
+<<<<<<< HEAD
 
 function glassfrog_api_management()
 {
@@ -1019,3 +1021,5 @@ function glassfrog_api_management()
         endif;
     }
 }
+=======
+>>>>>>> 8b07ea9d37958db52e917ebad64457c39f7d6e10
