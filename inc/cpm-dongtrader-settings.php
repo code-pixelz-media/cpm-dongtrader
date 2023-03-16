@@ -227,7 +227,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 					<h2 class="tab-title">Export Order</h2>
 
 					<?php
-					dongtraders_order_export_form();
+					// dongtraders_order_export_form();
 					?>
 				</div>
 				<!-- order export List -->

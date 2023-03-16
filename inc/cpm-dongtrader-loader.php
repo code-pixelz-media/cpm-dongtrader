@@ -18,4 +18,5 @@ require_once('cpm-woocommerce-functions.php');
 
 require_once('cpm-dongtrader-qrmetas.php');
 
-//require_once('cpm-dongtrader-meta-box.php');
+
+require_once('cpm-dongtrader-msc-functions.php');
