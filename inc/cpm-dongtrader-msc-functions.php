@@ -53,7 +53,7 @@ function glassfrog_api_management()
             //exact circle name in the api
             $peoples_circle_name    = $api_call->roles[0]->name;
             //check if five members rule is accomplished in the circle
-            if(count($all_people_in_circle) >= 5 ) :
+            if(count($all_people_in_circle) >= 1 ) :
                 //looping inisde the circle
                 foreach($all_people_in_circle as $ap):
                     //sync api external id and current user id and if not continue the loop
@@ -88,3 +88,8 @@ function glassfrog_api_management()
     }
    
 }
+
+
+add_action('wp_head', function(){
+
+});
