@@ -425,7 +425,7 @@ function dongtrader_create_dbtable()
             PRIMARY KEY (id)) $charset_collate;";
     dbDelta($export_sql);
 }
-add_action('plugins_loaded', 'dongtrader_create_dbtable');
+add_action('wp', 'dongtrader_create_dbtable');
 
 
 /**
