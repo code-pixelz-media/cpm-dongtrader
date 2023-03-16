@@ -1,32 +1,5 @@
 <?php
 
-add_filter( 'cron_schedules', 'dongtrader_one_minutes_interval' );
-function dongtrader_one_minutes_interval( $schedules ) {
-    $schedules['1_minutes'] = array(
-        'interval' => 1 * 60,
-        'display'  => __( 'Every 1 minutes', 'cpm-dongtrader' ),
-    );
-    return $schedules;
-}
-
-/**
- * If the cron job isn't scheduled, schedule it.
- */
-add_action( 'wp', 'dongtrader_schedule_cron_job' );
-function dongtrader_schedule_cron_job() {
-    if ( ! wp_next_scheduled( 'dongtrader_cron_job_hook' ) ) {
-        wp_schedule_event( time(), '1_minutes', 'dongtrader_cron_job_hook' );
-    }
-}
-
-/**
- * Add a custom hook to the cron job, and then run a function when that hook is called.
- */
-add_action( 'dongtrader_cron_job_hook', 'dongtrader_cron_job');
-function dongtrader_cron_job() {
-    //glassfrog_api_management();
-}
-//Check the api cron function
 function glassfrog_api_management()
 {
     global $wpdb;
@@ -53,7 +26,7 @@ function glassfrog_api_management()
             //exact circle name in the api
             $peoples_circle_name    = $api_call->roles[0]->name;
             //check if five members rule is accomplished in the circle
-            if(count($all_people_in_circle) >= 1 ) :
+            if(count($all_people_in_circle) >= 5 ) :
                 //looping inisde the circle
                 foreach($all_people_in_circle as $ap):
                     //sync api external id and current user id and if not continue the loop
@@ -64,18 +37,16 @@ function glassfrog_api_management()
                     $orderid   = $wpdb->get_row("SELECT order_id  FROM $table_name WHERE gf_person_id= $ap->id ")->order_id;
                     //check existence of product id and order id
                     if($productid && $orderid):
-                       
                        //trading distribution function
                        $product = wc_get_product( $productid );
                        //get the price of the product
                        $price   = $product->get_price();
                        //price distribution function
-                    //    dongtrader_product_price_distribution($price, $productid, $orderid, $uid);
-                       var_dump('here 2');
+                       dongtrader_product_price_distribution($price, $productid, $orderid, $uid);
                        //prepare to update to custom database
                        $update_query = $wpdb->prepare("UPDATE $table_name SET in_circle = %d WHERE user_id = %d", 1, $uid);
                        //update to custom database
-                      $t= $wpdb->query($update_query); var_dump($t);
+                       $wpdb->query($update_query);
                     
                     //end check existence of product id and order id
                     endif;
@@ -90,8 +61,3 @@ function glassfrog_api_management()
     }
    
 }
-
-
-add_action('wp_head', function(){
-    glassfrog_api_management();
-});
