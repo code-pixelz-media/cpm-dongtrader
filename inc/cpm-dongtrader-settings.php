@@ -36,7 +36,6 @@ $dong_qr_array = get_option('dong_user_qr_values');
 
 				<li class="nav-tab" id="fourth"><a href="#advanced" class="dashicons-before dashicons-admin-settings"><?php _e('Orders', 'dongtraders'); ?></a></li>
 				<li class="nav-tab" id="fifth"><a href="#import-order" class="dashicons-before dashicons-admin-tools"><?php _e('Import Order', 'dongtraders'); ?></a></li>
-				<li class="nav-tab" id="sixth"><a href="#export-order-form" class="dashicons-before dashicons-admin-tools"><?php _e('Export Order Form', 'dongtraders'); ?></a></li>
 				<li class="nav-tab" id="seven"><a href="#export-order-list" class="dashicons-before dashicons-admin-tools"><?php _e('Export Order List', 'dongtraders'); ?></a></li>
 
 			</ul>
@@ -221,14 +220,6 @@ $dong_qr_array = get_option('dong_user_qr_values');
 					dongtraders_csv_order_importer();
 					?>
 
-				</div>
-
-				<div id="export-order-form">
-					<h2 class="tab-title">Export Order</h2>
-
-					<?php
-					// dongtraders_order_export_form();
-					?>
 				</div>
 				<!-- order export List -->
 
