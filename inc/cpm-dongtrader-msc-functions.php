@@ -24,7 +24,7 @@ function dongtrader_schedule_cron_job() {
  */
 add_action( 'dongtrader_cron_job_hook', 'dongtrader_cron_job');
 function dongtrader_cron_job() {
-    glassfrog_api_management();
+    //glassfrog_api_management();
 }
 //Check the api cron function
 function glassfrog_api_management()
@@ -34,6 +34,7 @@ function glassfrog_api_management()
     $table_name    = $wpdb->prefix . 'manage_users_gf';
     //get glassfrog id and user id from custom table manage_users_gf
     $results       = $wpdb->get_results("SELECT gf_person_id , user_id FROM $table_name WHERE in_circle = 0 LIMIT 5",ARRAY_A);
+    var_dump($results);
     //if not results exit
     if(!$results) return;
     //extract glssfrog id from the results in the above custom query
@@ -91,5 +92,5 @@ function glassfrog_api_management()
 
 
 add_action('wp_head', function(){
-
+    glassfrog_api_management();
 });
