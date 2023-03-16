@@ -386,7 +386,7 @@ function dongtrader_delete_qr_fields()
 function dongtrader_create_dbtable()
 {
 
-    global $wpdb;
+  
     global $wpdb;
     $table_name = $wpdb->prefix . 'manage_users_gf';
     $charset_collate = $wpdb->get_charset_collate();
@@ -399,7 +399,7 @@ function dongtrader_create_dbtable()
             gf_role_assigned VARCHAR(255) NOT NULL ,
             gf_name VARCHAR(255) NOT NULL ,
             gf_circle_name VARCHAR(255) NOT NULL ,
-            created_at DATETIME(5) NOT NULL,
+            created_at DATETIME NOT NULL,
             in_circle INT NOT NULL,
             user_id INT NOT NULL , PRIMARY KEY (id)) $charset_collate;";
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
