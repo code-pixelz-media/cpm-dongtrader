@@ -186,15 +186,15 @@ function cpm_dong_custom_order_form_endpoint()
     add_rewrite_endpoint('show-order-form', EP_PAGES);
 }
 // content for the new page in My Account, woocommerce_account_{ENDPOINT NAME}_endpoint
-add_action('woocommerce_account_show-order-form', 'cpm_dong_custom_order_form_endpoint_content');
+add_action('woocommerce_account_show-order-form_endpoint', 'cpm_dong_custom_order_form_endpoint_content');
 function cpm_dong_custom_order_form_endpoint_content()
 {
 
     // of course you can print dynamic content here, one of the most useful functions here is get_current_user_id()
 ?>
-    <div class='qr-tiger-code-generator'>
-        <p><?php _e('My Memberships ', 'cpm-dongtrader') ?></p>
-        <?php echo do_shortcode('[pmpro_account]');
+    <div class='dongtraders_order_export'>
+
+        <?php dongtraders_order_export_form();
         ?>
     </div>
 
