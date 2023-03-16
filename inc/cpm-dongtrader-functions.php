@@ -592,6 +592,9 @@ function dongtrader_get_product_color($role)
 
 /* dong order export form */
 
+/**
+ * It creates a form and inserts the data into the database.
+ */
 function dongtraders_order_export_form()
 {
 ?>
@@ -674,11 +677,13 @@ function dongtraders_order_export_form()
 
                     $loop = new WP_Query($args);
                     //var_dump($loop);
+                    $product_ids = array();
                     while ($loop->have_posts()) : $loop->the_post();
                         $product = new WC_Product_Variable(get_the_ID());
                         $terms = get_the_terms($product->get_id(), 'product_type');
                         $product_type = (!empty($terms)) ? sanitize_title(current($terms)->name) : 'simple';
                         echo '<option data-productType="' . $product_type . '" value="' . get_the_ID() . '">' . get_the_title() . '</option>';
+                        $product_ids[] = $product->get_id();
                     endwhile;
 
                     wp_reset_query();
@@ -691,24 +696,39 @@ function dongtraders_order_export_form()
             <label for="">Select Variation Product</label>
             <div class="form-control-wrap">
                 <?php
+                foreach ($product_ids as $product_id) {
+                    $product = new WC_Product_Variable($product_id);
+                    $terms = get_the_terms($product_id, 'product_type');
+                    $product_type = (!empty($terms)) ? sanitize_title(current($terms)->name) : 'simple';
 
-                $product = wc_get_product(1521);
-                $current_products = $product->get_children();
-                //var_dump($current_products);
+                    if ($product_type == 'variable') {
+                        # code...
+                        $product = wc_get_product($product_id);
+                        $current_products = $product->get_children();
+                ?>
+                        <select name="variation-product" id="varition-<?php echo $product_id; ?>" class="form-control variation-product">
+                            <?php
+                            echo '<option value="">Select Variation Product</option>';
+                            foreach ($current_products as $current_product) {
+                                $variation = wc_get_product($current_product);
+                                $varition_name = $variation->get_name();
+                                echo '<option value="' . $current_product . '">' . $varition_name . '</option>';
+                            }
+
+                            ?>
+                        </select>
+
+                <?php
+
+                    }
+                }
+
+
+                //var_dump($product_ids);
 
 
                 ?>
-                <select name="variation-product" id="" class="form-control variation-product" required="">
-                    <?php
-                    echo '<option value="">Select Variation Product</option>';
-                    foreach ($current_products as $current_product) {
-                        $variation = wc_get_product($current_product);
-                        $varition_name = $variation->get_name();
-                        echo '<option value="' . $current_product . '">' . $varition_name . '</option>';
-                    }
 
-                    ?>
-                </select>
             </div>
         </div>
         <div class="form-group">
@@ -717,21 +737,6 @@ function dongtraders_order_export_form()
                 <input type="hidden" name="affilate-user" class="form-control affilate-user" value="<?php echo $user_ID; ?>">
             </div>
         </div>
-        <div class="form-group">
-
-            <script language="javascript">
-                print_country("country");
-                jQuery('#country').val('USA');
-                print_state('state', jQuery('#country')[0].selectedIndex);
-
-                jQuery(".select-product").change(function() {
-                    var get_p_id = jQuery(this).val();
-                    //alert(get_p_id);
-                });
-            </script>
-        </div>
-
-
         <div class="form-group">
             <input class="cpm-btn submit real-button" type="submit" value="Add Custom Order" name="set-order_export">
         </div>
@@ -959,5 +964,3 @@ if (!function_exists('dong_custom_order_exporter_csv_files')) {
 
     add_action('wp_ajax_dong_custom_order_exporter_csv_files', 'dong_custom_order_exporter_csv_files');
 }
-
-

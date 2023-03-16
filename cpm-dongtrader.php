@@ -37,19 +37,23 @@ function dongtrader_scripts()
 	wp_enqueue_script('dongtrader-scripts', plugin_dir_url(__FILE__) . 'assets/js/plugin-scripts.js', array('jquery'), '1.0.0', true);
 	wp_enqueue_script('dongtrader-admin-scripts', plugin_dir_url(__FILE__) . 'assets/js/admin-script.js', array('jquery'), '1.0.0', true);
 	wp_enqueue_script('dongtrader-admin-select-scripts', plugin_dir_url(__FILE__) . 'assets/js/select2.min.js', array('jquery'), '1.0.0', true);
-	wp_enqueue_script('dongtrader-countries-scripts', plugin_dir_url(__FILE__) . 'assets/js/dong-get-countries.js', array('jquery'), '', false);
 	wp_add_inline_script('dongtrader-admin-scripts', 'const dongScript = ' . json_encode(array(
 		'ajaxUrl' => admin_url('admin-ajax.php'),
 	)), 'before');
 
-	wp_enqueue_script('dongtrader-public-scripts', plugin_dir_url(__FILE__) . 'assets/js/dongtraders-public.js', array('jquery'), '', true);
+
 	wp_enqueue_script('dong-custom-order-exporter', plugin_dir_url(__FILE__) . 'assets/js/dong-custom-order-exporter.js', array('jquery'), '', true);
 	wp_localize_script('dong-custom-order-exporter', 'exporterajax', array('ajaxurl' => admin_url('admin-ajax.php')));
 }
 add_action('admin_enqueue_scripts', 'dongtrader_scripts');
 
-
-
+function dongtraders_enquee_frontend()
+{
+	wp_enqueue_style('dongtrader-frontend-style', plugin_dir_url(__FILE__) . 'assets/css/dongtraders-frontend.css', array(), false, 'all');
+	wp_enqueue_script('dongtrader-countries-scripts', plugin_dir_url(__FILE__) . 'assets/js/dong-get-countries.js', array('jquery'), '', false);
+	wp_enqueue_script('dongtrader-public-scripts', plugin_dir_url(__FILE__) . 'assets/js/dongtraders-public.js', array('jquery'), '', true);
+}
+add_action('wp_enqueue_scripts', 'dongtraders_enquee_frontend');
 
 
 add_action('admin_menu', 'register_dongtraders_setting_menu_page');
@@ -73,7 +77,3 @@ function dongtraders_api_register_settings()
 }
 
 add_action('admin_init', 'dongtraders_api_register_settings');
-
-
-
-// update_user_meta(2, 'dong_user_qr_vals', '');

@@ -53,7 +53,7 @@ function cpm_dong_my_membership_vcard_endpoint_content()
     if (!empty($user_meta_qrs)) {
         echo '<div class="qr_vcard_section">
         <div class="card card-1">
-        <img src="' . $user_meta_qrs . '" alt="Invalid QR Image">
+        <img style="height:auto; width:50%;" src="' . $user_meta_qrs . '" alt="Invalid QR Image">
         </div>
         <p id="copy_url_id" style="display:none;">' . $user_meta_qrs . '</p>
         </div>
