@@ -64,17 +64,18 @@ function glassfrog_api_management()
                     $orderid   = $wpdb->get_row("SELECT order_id  FROM $table_name WHERE gf_person_id= $ap->id ")->order_id;
                     //check existence of product id and order id
                     if($productid && $orderid):
-                        var_dump('here');
+                       
                        //trading distribution function
                        $product = wc_get_product( $productid );
                        //get the price of the product
                        $price   = $product->get_price();
                        //price distribution function
                        dongtrader_product_price_distribution($price, $productid, $orderid, $uid);
+                       var_dump('here 2');
                        //prepare to update to custom database
                        $update_query = $wpdb->prepare("UPDATE $table_name SET in_circle = %d WHERE user_id = %d", 1, $uid);
                        //update to custom database
-                       $wpdb->query($update_query);
+                      $t= $wpdb->query($update_query); var_dump($t);
                     
                     //end check existence of product id and order id
                     endif;
