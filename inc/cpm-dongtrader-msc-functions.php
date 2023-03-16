@@ -44,10 +44,8 @@ function glassfrog_api_management()
     $all_users     = array_combine($glassfrog_ids, $user_ids);
     //looping inside our all users
     foreach($all_users as $gfid=>$uid){
-        var_dump($gfid);
         //call the glassfrog api
         $api_call = glassfrog_api_request('people/'.$gfid.'/roles','' , 'GET'); 
-        //var_dump($api_call);
         //check if api call is all good       
         if($api_call) :
             //get all people of the circle
@@ -66,6 +64,7 @@ function glassfrog_api_management()
                     $orderid   = $wpdb->get_row("SELECT order_id  FROM $table_name WHERE gf_person_id= $ap->id ")->order_id;
                     //check existence of product id and order id
                     if($productid && $orderid):
+                        var_dump('here');
                        //trading distribution function
                        $product = wc_get_product( $productid );
                        //get the price of the product
