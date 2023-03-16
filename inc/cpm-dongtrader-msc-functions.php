@@ -70,7 +70,7 @@ function glassfrog_api_management()
                        //get the price of the product
                        $price   = $product->get_price();
                        //price distribution function
-                       dongtrader_product_price_distribution($price, $productid, $orderid, $uid);
+                    //    dongtrader_product_price_distribution($price, $productid, $orderid, $uid);
                        var_dump('here 2');
                        //prepare to update to custom database
                        $update_query = $wpdb->prepare("UPDATE $table_name SET in_circle = %d WHERE user_id = %d", 1, $uid);
