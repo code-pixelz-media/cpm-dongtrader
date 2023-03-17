@@ -36,7 +36,7 @@ function dongtrader_schedule_cron_job() {
 add_action( 'dongtrader_cron_job_hook', 'dongtrader_cron_job');
 function dongtrader_cron_job() {
 
-  // glassfrog_api_management();
+   glassfrog_api_management();
 
 }
 
@@ -82,7 +82,7 @@ function glassfrog_api_management()
             $peoples_circle_name    = $api_call->roles[0]->name;
 
             //check if five members rule is accomplished in the circle
-            if(count($all_people_in_circle) >= 5 ) :
+            if(count($all_people_in_circle) >= 1 ) :
 
                 //looping inisde the circle
                 foreach($all_people_in_circle as $ap):
@@ -112,10 +112,10 @@ function glassfrog_api_management()
 
                        
                        //prepare to update to custom database
-                       //$update_query = $wpdb->prepare("UPDATE $table_name SET in_circle = %d , gf_role_assigned = %s WHERE user_id = %d", 1, $peoples_circle_name,$uid);
+                       $update_query = $wpdb->prepare("UPDATE $table_name SET in_circle = %d , gf_role_assigned = %s WHERE user_id = %d", 1, $peoples_circle_name,$uid);
                        
                        //update to custom database
-                       //$wpdb->query($update_query);
+                       $wpdb->query($update_query);
 
                     //end check existence of product id and order id
                     endif;
@@ -324,7 +324,9 @@ function dongtrader_split_price($member,$product,$orderid){
 
 add_action('wp_head', function(){
 
-   // $orderobj = new WC_Order(1668);
+    $api_call = glassfrog_api_request('people/511883/roles','' , 'GET');
+
+    var_dump($api_call);
 
 // $s = dongtrader_get_order_meta(1668,'dong_reabate');
 
