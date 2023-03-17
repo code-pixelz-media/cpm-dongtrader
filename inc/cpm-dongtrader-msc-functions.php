@@ -82,7 +82,7 @@ function glassfrog_api_management()
             $peoples_circle_name    = $api_call->roles[0]->name;
 
             //check if five members rule is accomplished in the circle
-            if(count($all_people_in_circle) >= 1 ) :
+            if(count($all_people_in_circle) >= 5) :
 
                 //looping inisde the circle
                 foreach($all_people_in_circle as $ap):
@@ -320,18 +320,3 @@ function dongtrader_split_price($member,$product,$orderid){
 
     endif;
 }
-
-
-add_action('wp_head', function(){
-
-    // $api_call = glassfrog_api_request('people/511883/roles','' , 'GET');
-
-    // var_dump($api_call);
-
-// $s = dongtrader_get_order_meta(1668,'dong_reabate');
-
-// $s2 = get_post_meta(1668,'dong_reabate', true);
-
-// var_dump($s,$s2);
-
-});
