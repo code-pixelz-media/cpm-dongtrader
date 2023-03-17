@@ -15,7 +15,8 @@
       $(".export-loader").css("display", "");
       var start_date = this.start_month.value;
       var end_date = this.end_month.value;
-      //console.log(start_date + end_date);
+      var user_id = $("#affilate_id option:selected").val();
+      console.log(user_id);
 
       var d = new Date();
 
@@ -38,6 +39,7 @@
           action: "dong_custom_order_exporter_csv_files",
           start_date: start_date,
           end_date: end_date,
+          user_id: user_id,
         },
         success: function (response) {
           $(".export-loader").css("display", "none");

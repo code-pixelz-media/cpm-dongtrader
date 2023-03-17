@@ -386,7 +386,7 @@ function dongtrader_delete_qr_fields()
 function dongtrader_create_dbtable()
 {
 
-  
+
     global $wpdb;
     $table_name = $wpdb->prefix . 'manage_users_gf';
     $charset_collate = $wpdb->get_charset_collate();
@@ -693,7 +693,7 @@ function dongtraders_order_export_form()
             </div>
         </div>
         <div class="form-group">
-            <label for="">Select Variation Product</label>
+            <!--  <label for="">Select Variation Product</label> -->
             <div class="form-control-wrap">
                 <?php
                 foreach ($product_ids as $product_id) {
@@ -706,17 +706,19 @@ function dongtraders_order_export_form()
                         $product = wc_get_product($product_id);
                         $current_products = $product->get_children();
                 ?>
-                        <select name="variation-product" id="varition-<?php echo $product_id; ?>" class="form-control variation-product">
-                            <?php
-                            echo '<option value="">Select Variation Product</option>';
-                            foreach ($current_products as $current_product) {
-                                $variation = wc_get_product($current_product);
-                                $varition_name = $variation->get_name();
-                                echo '<option value="' . $current_product . '">' . $varition_name . '</option>';
-                            }
+                        <div id="varition-<?php echo $product_id; ?>" class="export_variation_product_hide">
+                            <select name="variation-product" class="form-control variation-product">
+                                <?php
+                                echo '<option value="">Select Variation Product</option>';
+                                foreach ($current_products as $current_product) {
+                                    $variation = wc_get_product($current_product);
+                                    $varition_name = $variation->get_name();
+                                    echo '<option value="' . $current_product . '">' . $varition_name . '</option>';
+                                }
 
-                            ?>
-                        </select>
+                                ?>
+                            </select>
+                        </div>
 
                 <?php
 
@@ -799,11 +801,11 @@ function dongtraders_order_export_form()
             )
         );
         if ($order_insert) {
-            echo '<div class="success-box">Order Data inserted Sucessfully. Please Refresh Order Table.</div>';
+            echo '<div class="success-box">Affiliate Order Data inserted Sucessfully</div>';
         } else {
             echo '<div class="error-box">Order Data could not inserted ! Please Try again</div>';
         }
-        wp_redirect($current_page);
+        /* wp_redirect($current_page); */
     }
 }
 
@@ -824,6 +826,16 @@ function dongtraders_custom_order_created_list()
                 <input id="start-month" name="start_month" type="date" size="2" required>
                 <span id="to">To</span>
                 <input id="end-month" name="end_month" type="date" size="2" required>
+                <select name="affilate_id" id="affilate_id">
+                    <?php
+                    $get_all_users = get_users();
+                    //var_dump($get_all_users);
+                    echo '<option value="0">Select Affilate User</option>';
+                    foreach ($get_all_users as $get_all_user) {
+                        echo '<option value="' . $get_all_user->ID . '">' . $get_all_user->user_login . '</option>';
+                    }
+                    ?>
+                </select>
                 <button type="submit" class="button button-primary buttonload">Export CSV<i class="fa fa-spinner fa-spin export-loader"></i></button>
             </form>
         </div>
@@ -922,12 +934,18 @@ if (!function_exists('dong_custom_order_exporter_csv_files')) {
 
         $get_start_date = $_POST['start_date'];
         $get_end_date = $_POST['end_date'];
-        // echo $get_table_name;
+        $get_affilate_user_id = $_POST['user_id'];
 
         global $wpdb;
         $get_table_name = $wpdb->prefix . 'dong_order_export_table';
-        //$get_custom_orders = $wpdb->get_results("SELECT *  FROM $get_table_name ORDER BYorderC", ARRAY_A);
-        $get_custom_orders = $wpdb->get_results("SELECT * FROM $get_table_name WHERE created_at BETWEEN  '$get_start_date' AND '$get_end_date'", ARRAY_A);
+
+        if (!empty($get_start_date) && !empty($get_end_date && $get_affilate_user_id == 0)) {
+            $get_custom_orders = $wpdb->get_results("SELECT * FROM $get_table_name WHERE created_at BETWEEN  '$get_start_date' AND '$get_end_date'", ARRAY_A);
+        } elseif (!empty($get_start_date) && !empty($get_end_date) && $get_affilate_user_id > 0) {
+            $get_custom_orders = $wpdb->get_results("SELECT * FROM $get_table_name WHERE affilate_user_id = 
+            '$get_affilate_user_id' ", ARRAY_A);
+        }
+
         //var_dump($get_custom_orders);
         $cpm_order_exporter_generate_csv_filename =  'dongtraders-custom-orders' . date('Ymd_His') . '-export.csv';
         header('Content-Type: application/csv');

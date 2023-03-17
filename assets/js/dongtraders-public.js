@@ -21,8 +21,8 @@ function dong_traders_url_copy(element) {
 
     jQuery(".select-product").change(function () {
       var get_p_id = jQuery(this).val();
-      var get_p_type = jQuery(this).find(":selected").attr("data-productType");
-      //alert(get_p_type);
+      $("div.export_variation_product_hide").hide();
+      $("#varition-" + get_p_id).show();
     });
   });
 })(jQuery);

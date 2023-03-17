@@ -63,3 +63,7 @@
 .cpm-plugin-wrap .warning-box:before {
     content: "\f534";
 }
+
+.export_variation_product_hide {
+    display: none;
+}
