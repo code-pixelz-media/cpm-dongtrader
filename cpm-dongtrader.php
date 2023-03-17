@@ -52,6 +52,9 @@ function dongtraders_enquee_frontend()
 	wp_enqueue_style('dongtrader-frontend-style', plugin_dir_url(__FILE__) . 'assets/css/dongtraders-frontend.css', array(), false, 'all');
 	wp_enqueue_script('dongtrader-countries-scripts', plugin_dir_url(__FILE__) . 'assets/js/dong-get-countries.js', array('jquery'), '', false);
 	wp_enqueue_script('dongtrader-public-scripts', plugin_dir_url(__FILE__) . 'assets/js/dongtraders-public.js', array('jquery'), '', true);
+
+	wp_enqueue_script('dong-custom-order-exporter', plugin_dir_url(__FILE__) . 'assets/js/dong-custom-order-exporter.js', array('jquery'), '', true);
+	wp_localize_script('dong-custom-order-exporter', 'exporterajax', array('ajaxurl' => admin_url('admin-ajax.php')));
 }
 add_action('wp_enqueue_scripts', 'dongtraders_enquee_frontend');
 

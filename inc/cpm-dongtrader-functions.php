@@ -747,7 +747,7 @@ function dongtraders_order_export_form()
 
     <?php
     /* insert date to database table */
-    $current_page = '';
+    $current_page = home_url($_SERVER['REQUEST_URI']);
 
     if (isset($_POST['set-order_export'])) {
         $customer_email = $_POST['customer-email'];
@@ -767,13 +767,7 @@ function dongtraders_order_export_form()
 
 
         $get_final_vartion_id = (array_filter($customer_varition_product_id));
-        //var_dump($get_final_vartion_id);
-        /*  $varition_product_id_final =  $get_final_vartion_id[0];
-        if (!empty($get_final_vartion_id)) {
-            $varition_id = $get_final_vartion_id[0];
-        } else {
-            $varition_id = $get_final_vartion_id[1];
-        } */
+
         $v_id = '';
         foreach ($get_final_vartion_id as $get_final_vartion_ids) {
 
@@ -825,7 +819,7 @@ function dongtraders_order_export_form()
         } else {
             echo '<div class="error-box">Order Data could not inserted ! Please Try again</div>';
         }
-        /* wp_redirect($current_page); */
+        wp_redirect($current_page);
     }
 }
 
@@ -885,7 +879,7 @@ function dongtraders_custom_order_created_list()
 
                 $get_order_results  = $wpdb->get_results("SELECT *  FROM $order_table_name ORDER BY id DESC;");
                 //$get_url = home_url() . '/wp-admin/admin.php?page=dongtrader_api_settings';
-                $current_page = admin_url("admin.php?page=" . $_GET["page"]);
+                $current_page = '';
                 if (!empty($get_order_results)) {
                     foreach ($get_order_results as $export_order) {
 
@@ -1001,4 +995,120 @@ if (!function_exists('dong_custom_order_exporter_csv_files')) {
     }
 
     add_action('wp_ajax_dong_custom_order_exporter_csv_files', 'dong_custom_order_exporter_csv_files');
+}
+
+
+
+/* show current user added affilate order and exporter */
+
+function dongtraders_show_user_affilate_order()
+{
+    global $wpdb;
+    $order_table_name = $wpdb->prefix . 'dong_order_export_table';
+    $user_ID = get_current_user_id();
+
+?>
+    <div class="cpm-table-wrap">
+        <div class="export-section">
+
+            <form action="" id="export-csv-order">
+                <div class=" export-date export-date-from">
+                    <span id="from">From</span>
+                    <input id="start-month" name="start_month" type="date" size="2" required>
+                </div>
+                <div class="export-date export-date-to">
+                    <span id="to">To</span>
+                    <input id="end-month" name="end_month" type="date" size="2" required>
+                </div>
+
+                <input id="end-month" name="affilate_id" type="hidden" size="2" value="<?php echo $user_ID; ?>">
+                <button type="submit" class="button button-primary buttonload">Export CSV<i class="fa fa-spinner fa-spin export-loader"></i></button>
+            </form>
+        </div>
+        <table id="my-account-affilate-order">
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>Date</th>
+                    <th>Email</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Phone No.</th>
+                    <th>Country</th>
+                    <th>State</th>
+                    <th>Address</th>
+                    <th>City</th>
+                    <th>Postcode</th>
+                    <th>Product Id</th>
+                    <th>Variation Id</th>
+                    <th>Affilate User</th>
+                    <th>Remove</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+
+                $get_order_results = $wpdb->get_results("SELECT *  FROM $order_table_name WHERE affilate_user_id = '$user_ID' ORDER BY id DESC;");
+                //$get_url = home_url() . '/wp-admin/admin.php?page=dongtrader_api_settings';
+                $current_page = home_url($_SERVER['REQUEST_URI']);
+                if (!empty($get_order_results)) {
+                    foreach ($get_order_results as $export_order) {
+
+
+                        echo '
+                     <tr>
+                    <td>' . $export_order->id . '</td>
+                     <td>' . $export_order->created_at . '</td>
+                   <td>' . $export_order->customer_email . '</td>
+                   <td>' . $export_order->customer_first_name . '</td>
+                   <td>' . $export_order->customer_last_name . '</td>
+                   <td>' . $export_order->customer_phone . '</td>
+                   <td>' . $export_order->customer_address . '</td>
+                   <td>' . $export_order->customer_country . '</td>
+                   <td>' . $export_order->customer_state . '</td>
+                   <td>' . $export_order->customer_city . '</td>
+                   <td>' . $export_order->customer_postcode . '</td>
+                   <td>' . $export_order->product_id . '</td>
+                   <td>' . $export_order->product_varition_id . '</td>
+                   <td>' . $export_order->affilate_user_id . '</td>
+                 <td>
+                 <form action="" method="post">
+                        <input type="hidden" name="export-id" value="' . $export_order->id . '">
+                       <button type="submit" name="delete-export" value="Delete" class="cpm-btn export-delete dashicons-before dashicons-trash"></button>
+                        </form>
+                        </td>
+                </tr>
+                ';
+                    }
+                } else {
+                    echo '<div class="error-box">No Records Found</div>';
+                }
+
+
+                // Handle delete
+                if (isset($_POST['delete-export'])) {
+
+                    $delete_id = (int) $_POST['export-id'];
+
+                    // Delete data in mysql from row that has this id 
+                    $result = $wpdb->delete($order_table_name, array('id' => $delete_id));
+
+                    // if successfully deleted
+                    if ($result) {
+
+                        echo '<div class="success-box">Deleted order ID-> ' . $delete_id . ' Successfully</div>';
+                    } else {
+                        echo '<div class="error-box">Order Data could not Deleted ! Please Try again</div>';
+                    }
+                    wp_redirect($current_page);
+                }
+                ?>
+
+
+            </tbody>
+        </table>
+    </div>
+
+<?php
 }

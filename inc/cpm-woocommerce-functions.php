@@ -173,7 +173,7 @@ function cpm_dong_show_custom_order_form($menu_links)
 {
 
     $menu_links = array_slice($menu_links, 0, 5, true)
-        + array('show-order-form' => 'Add Order')
+        + array('show-order-form' => 'Add Your Affiliate Order')
         + array_slice($menu_links, 5, NULL, true);
 
     return $menu_links;
@@ -200,6 +200,44 @@ function cpm_dong_custom_order_form_endpoint_content()
 
 <?php
 }
+
+
+
+/* show custom order exporter on woocommerce tab */
+
+add_filter('woocommerce_account_menu_items', 'cpm_dong_show_custom_order_csv_exporter', 60);
+function cpm_dong_show_custom_order_csv_exporter($menu_links)
+{
+
+    $menu_links = array_slice($menu_links, 0, 5, true)
+        + array('export-affiliate-order' => 'Export Your Affiliate Order')
+        + array_slice($menu_links, 5, NULL, true);
+
+    return $menu_links;
+}
+// register permalink endpoint
+add_action('init', 'dong_exporter_order_csv_endpoint');
+function dong_exporter_order_csv_endpoint()
+{
+
+    add_rewrite_endpoint('export-affiliate-order', EP_PAGES);
+}
+// content for the new page in My Account, woocommerce_account_{ENDPOINT NAME}_endpoint
+add_action('woocommerce_account_export-affiliate-order_endpoint', 'dong_exporter_order_csv_endpoint_content');
+function dong_exporter_order_csv_endpoint_content()
+{
+
+    // of course you can print dynamic content here, one of the most useful functions here is get_current_user_id()
+?>
+    <div class='dongtraders_order_export'>
+
+        <?php dongtraders_show_user_affilate_order();
+        ?>
+    </div>
+
+<?php
+}
+
 
 /**
  * Automatically add product to cart on visit
@@ -542,13 +580,13 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
     foreach ($order_items as $k => $v) {
         update_post_meta($oid, $k, wc_clean($v));
     }
-    $update_check = get_post_meta($oid,'distributn_succed',true);
+    $update_check = get_post_meta($oid, 'distributn_succed', true);
     if ($cid && $update_check != 'yes' && !$checkgf) :
 
         $not_gf_trading_details_user_meta = get_user_meta($cid, '_user_trading_details', true);
-    
+
         $not_gf_trading_details_user_metas = !empty($not_gf_trading_details_user_meta) ? $not_gf_trading_details_user_meta : [];
-    
+
         $not_gf_trading_details_user_metas[] = [
             'order_id' => $oid,
             'rebate' => $rebate_amount,
@@ -557,7 +595,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
             'dong_comm_dg' => 0,
             'dong_comm_cdi' => 0,
             'dong_total'  => $rebate_amount
-    
+
         ];
         if (update_user_meta($cid, '_user_trading_details', $not_gf_trading_details_user_metas)) {
             update_post_meta($oid, 'distributn_succed', 'yes');
