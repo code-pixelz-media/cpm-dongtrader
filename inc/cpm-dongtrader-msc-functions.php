@@ -151,7 +151,7 @@ function dongtrader_split_price($member,$product,$orderid){
     $order_obj = new WC_Order($orderid);
 
     //get  rebate amount
-    $rebate          = dongtrader_get_order_meta($orderid , 'dong_rebate');
+    $rebate          = dongtrader_get_order_meta($orderid , 'dong_reabate');
 
     //get process amount
     $dong_processamt = dongtrader_get_order_meta($orderid , 'dong_processamt');
@@ -192,12 +192,6 @@ function dongtrader_split_price($member,$product,$orderid){
     //affiliate id saved in order meta
     $dong_affid      = dongtrader_get_order_meta($orderid,'dong_affid') ;
 
-    //get previous data if it exists
-    $user_trading_meta  = get_user_meta($member, '_user_trading_details', true);
-
-    //if $user_trading_meta is empty assign an empty array to it
-    $trading_details_user_meta = !empty($user_trading_meta) ? $user_trading_meta : [];
-
     //get site owner 
     $site_owner = 1;
 
@@ -227,7 +221,28 @@ function dongtrader_split_price($member,$product,$orderid){
 
         //if user exists
         if($user_check) :
-            /**Update to affiliate member */
+
+             //check if data is stored previously on member meta
+            $aff_user_trading_meta = get_user_meta($affiliate_id, '_user_trading_details', true);
+
+            //if data is previously stored if not set empty array
+            $aff_trading_details_user_meta = !empty($aff_user_trading_meta) ? $aff_user_trading_meta : [];
+           
+            //meta update array
+            $aff_trading_details_user_meta[] = [
+                'order_id' => $orderid,
+                'rebate' => 0,
+                'dong_profit_dg' => 0,
+                'dong_profit_di' => $dong_profit_di,
+                'dong_comm_dg' => 0,
+                'dong_comm_cdi' => $dong_comm_cdi,
+                'dong_total'  => $dong_profit_di + $dong_comm_cdi
+
+            ];
+
+            //update to affiliate
+            update_user_meta($affiliate_id,'_user_trading_details',$aff_user_trading_meta);
+
         endif;
 
     //end 148
@@ -239,24 +254,76 @@ function dongtrader_split_price($member,$product,$orderid){
     //if customer is member of same circle
     if($customer_id == $member) :
 
-       
-     
+        //get previous member data
+        $customer_and_member_meta = get_user_meta($customer_id, '_user_trading_details', true);
+
+        //if previous meta is empty assign an empty array
+        $customer_and_member_metas = !empty($customer_and_member_meta) ? $customer_and_member_meta : [];
+
+        //profit distributed to group
+        $p_d_g = $dong_profit_dg / 5;
+
+        //commision amount distributed to group
+        $c_d_g = $dong_comm_cdg / 5;
+
+        //apend to previous array to update in  user meta
+        $customer_and_member_metas[] = [
+            'order_id' => $orderid,
+            'rebate' => $rebate,
+            'dong_profit_dg' => $p_d_g,
+            'dong_profit_di' => 0,
+            'dong_comm_dg' => $c_d_g,
+            'dong_comm_cdi' => 0,
+            'dong_total'  => $rebate + $p_d_g + $c_d_g
+        ];
+
+        //update array to user
+        update_user_meta($member,'_user_trading_details',$customer_and_member_metas);
+
     //end customer exists check
     endif;
 
     //if customer is not the member of same circle rebate amount is empty
     if($customer_id != $member) :
 
+        //get prev user meta
+        $customer_not_mem_meta = get_user_meta($customer_id, '_user_trading_details', true);
+
+        //if previous meta is empty assign an empty array
+        $customer_not_mem_metas = !empty($customer_not_mem_meta) ? $customer_not_mem_meta : [];
+
+        //profit amount that must be distributed to circle
+        $p_a_d_c = $dong_profit_dg / 5;
+
+        //commission amount that must be distributed to group
+        $c_a_t_c = $dong_comm_cdg / 5;
+
+        //apend to previous array to update in  user meta
+        $customer_not_mem_metas[] = [
+            'order_id' => $orderid,
+            'rebate' => 0,
+            'dong_profit_dg' => $p_a_d_c,
+            'dong_profit_di' => 0,
+            'dong_comm_dg' => $c_a_t_c,
+            'dong_comm_cdi' => 0,
+            'dong_total'  => 0 + $p_a_d_c + $c_a_t_c
+        ];
+
+        //update array to user meta
+        update_user_meta($member,'_user_trading_details',$customer_not_mem_metas);
+
     endif;
 }
 
 
-// add_action('wp_head', function(){
+add_action('wp_head', function(){
 
-// $var = '0';
+   // $orderobj = new WC_Order(1668);
 
-// $sar = !empty($var) ? $var : 0;
+// $s = dongtrader_get_order_meta(1668,'dong_reabate');
 
-// var_dump($sar);
+// $s2 = get_post_meta(1668,'dong_reabate', true);
 
-// });
+// var_dump($s,$s2);
+
+});
