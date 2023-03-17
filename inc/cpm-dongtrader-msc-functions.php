@@ -324,9 +324,9 @@ function dongtrader_split_price($member,$product,$orderid){
 
 add_action('wp_head', function(){
 
-    $api_call = glassfrog_api_request('people/511883/roles','' , 'GET');
+    // $api_call = glassfrog_api_request('people/511883/roles','' , 'GET');
 
-    var_dump($api_call);
+    // var_dump($api_call);
 
 // $s = dongtrader_get_order_meta(1668,'dong_reabate');
 
