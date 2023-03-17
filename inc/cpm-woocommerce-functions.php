@@ -542,123 +542,13 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
     foreach ($order_items as $k => $v) {
         update_post_meta($oid, $k, wc_clean($v));
     }
-    //check if customer exists
-    $customer = get_user_by('ID', $cid);
-    //check if distribution is already done
-    $update_check   =  get_post_meta($oid, 'distributn_succed', true);
-    //get affiliate id
-    if ($customer && $update_check != 'yes' && $checkgf) :
-        global $wpdb;
-        //our custom table
-        $table_name = $wpdb->prefix . 'manage_users_gf';
-        //get circle name
-        $circle_name  = $wpdb->get_row(
-            "SELECT gf_circle_name  
-            FROM $table_name 
-            WHERE user_id= $cid 
-            ORDER BY id 
-            DESC LIMIT 1;"
-        );
-
-        $gf_circle_name = $circle_name->gf_circle_name;
-
-        //Select All members for the circle name
-        $members = $wpdb->get_results(
-            "SELECT user_id
-            FROM $table_name
-            WHERE gf_circle_name = $gf_circle_name ",
-            ARRAY_A
-        );
-
-
-        //Restucture members array received from database
-        $mem_array = array_column($members, 'user_id');
-
-        $aff_check = get_post_meta($oid, 'aff_distributn_succed', true);
-        //push affiliate id members array
-        if (!in_array($aid, $mem_array) && $aff_check != 'yes') {
-
-            //check if data is stored previously on member meta
-            $aff_user_trading_meta = get_user_meta($aid, '_user_trading_details', true);
-
-            //if data is previously stored if not set empty array
-            $aff_trading_details_user_meta = !empty($aff_user_trading_meta) ? $aff_user_trading_meta : [];
-            $p_a_d_a = $profit_amt_individual;
-            $c_a_d_a = $commission_amt_to_individual;
-            $aff_trading_details_user_meta[] = [
-                'order_id' => $oid,
-                'rebate' => 0,
-                'dong_profit_dg' => 0,
-                'dong_profit_di' => $p_a_d_a,
-                'dong_comm_dg' => 0,
-                'dong_comm_cdi' => $c_a_d_a,
-                'dong_total'  => $p_a_d_a + $c_a_d_a
-
-            ];
-
-            if (update_user_meta($aid, '_user_trading_details', $aff_trading_details_user_meta)) {
-                update_post_meta($oid, 'aff_distributn_succed', 'yes');
-            }
-        }
-        //loop inside each members and update receiveables data
-        foreach ($mem_array as $ma) {
-            //check if data is stored previously on member meta
-            $user_trading_meta = get_user_meta($ma, '_user_trading_details', true);
-
-            //if data is previously stored if not set empty array
-            $trading_details_user_meta = !empty($user_trading_meta) ? $user_trading_meta : [];
-
-            //check if current customer is the member of the circle
-            if ($ma != $cid) {
-                //profit amount that must be distributed to circle
-                $p_a_d_c = $profit_amt_group / 5;
-                //commission amount that must be distributed to group
-                $c_a_t_c = $commission_amt_to_group / 5;
-                //receiveables details array
-                $trading_details_user_meta[] = [
-                    'order_id' => $oid,
-                    'rebate' => 0,
-                    'dong_profit_dg' => $p_a_d_c,
-                    'dong_profit_di' => 0,
-                    'dong_comm_dg' => $c_a_t_c,
-                    'dong_comm_cdi' => 0,
-                    'dong_total'  => 0 + $p_a_d_c + $c_a_t_c
-
-                ];
-            }
-            //check if member is equal to customer then add rebate amount
-            if ($ma == $cid) {
-                //profit amount that must be distributed to circle
-                $p_a_d_c = $profit_amt_group / 5;
-                //commission amount that must be distributed to group
-                $c_a_t_c = $commission_amt_to_group / 5;
-                //receiveables details array
-                $trading_details_user_meta[] = [
-                    'order_id' => $oid,
-                    'rebate' => $rebate_amount,
-                    'dong_profit_dg' => $profit_amt_group / 5,
-                    'dong_profit_di' => 0,
-                    'dong_comm_dg' => $commission_amt_to_group / 5,
-                    'dong_comm_cdi' => 0,
-                    'dong_total'  => $rebate_amount + $p_a_d_c + $c_a_t_c
-
-                ];
-            }
-
-
-            // update array to members meta
-            if (update_user_meta($ma, '_user_trading_details', $trading_details_user_meta)) {
-                update_post_meta($oid, 'distributn_succed', 'yes');
-            }
-        }
-    endif;
-
-    if ($customer && $update_check != 'yes' && !$checkgf) :
+    $update_check = get_post_meta($oid,'distributn_succed',true);
+    if ($cid && $update_check != 'yes' && !$checkgf) :
 
         $not_gf_trading_details_user_meta = get_user_meta($cid, '_user_trading_details', true);
-
-        $not_gf_trading_details_user_metas = !empty($user_trading_meta) ? $user_trading_meta : [];
-
+    
+        $not_gf_trading_details_user_metas = !empty($not_gf_trading_details_user_meta) ? $not_gf_trading_details_user_meta : [];
+    
         $not_gf_trading_details_user_metas[] = [
             'order_id' => $oid,
             'rebate' => $rebate_amount,
@@ -667,9 +557,9 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
             'dong_comm_dg' => 0,
             'dong_comm_cdi' => 0,
             'dong_total'  => $rebate_amount
-
+    
         ];
-        if (update_user_meta($ma, '_user_trading_details', $not_gf_trading_details_user_metas)) {
+        if (update_user_meta($cid, '_user_trading_details', $not_gf_trading_details_user_metas)) {
             update_post_meta($oid, 'distributn_succed', 'yes');
         }
     endif;

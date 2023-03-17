@@ -82,7 +82,7 @@ function glassfrog_api_management()
             $peoples_circle_name    = $api_call->roles[0]->name;
 
             //check if five members rule is accomplished in the circle
-            if(count($all_people_in_circle) >= 5 ) :
+            if(count($all_people_in_circle) >= 5) :
 
                 //looping inisde the circle
                 foreach($all_people_in_circle as $ap):
@@ -92,6 +92,8 @@ function glassfrog_api_management()
                     
                     //get order id from table
                     $orderid   = $wpdb->get_row("SELECT order_id  FROM $table_name WHERE gf_person_id= $ap->id ")->order_id;
+
+                    //get user id from table
                     
                     //check existence of product id and order id
                     if($productid && $orderid):
@@ -103,7 +105,11 @@ function glassfrog_api_management()
                        $price   = $product->get_price();
                        
                        //price distribution function
-                       dongtrader_product_price_distribution($price, $productid, $orderid, $uid);
+                       //dongtrader_product_price_distribution($price, $productid, $orderid, $uid);
+
+                       //price split function
+                       dongtrader_split_price($uid,$productid,$orderid);
+
                        
                        //prepare to update to custom database
                        $update_query = $wpdb->prepare("UPDATE $table_name SET in_circle = %d , gf_role_assigned = %s WHERE user_id = %d", 1, $peoples_circle_name,$uid);
@@ -211,19 +217,19 @@ function dongtrader_split_price($member,$product,$orderid){
     endif;
 
     //get affiliate id
-    $affiliate_id = get_post_meta($orderid,'dong_affid', true);
+    
 
     //check the value of affiliate
-    if(!empty($affiliate_id)) :
+    if(!empty($dong_affid)) :
 
         //check if user exists
-        $user_check = get_user_by( 'id', $affiliate_id );
+        $user_check = get_user_by( 'id', $dong_affid );
 
         //if user exists
         if($user_check) :
 
              //check if data is stored previously on member meta
-            $aff_user_trading_meta = get_user_meta($affiliate_id, '_user_trading_details', true);
+            $aff_user_trading_meta = get_user_meta($dong_affid, '_user_trading_details', true);
 
             //if data is previously stored if not set empty array
             $aff_trading_details_user_meta = !empty($aff_user_trading_meta) ? $aff_user_trading_meta : [];
@@ -241,7 +247,7 @@ function dongtrader_split_price($member,$product,$orderid){
             ];
 
             //update to affiliate
-            update_user_meta($affiliate_id,'_user_trading_details',$aff_user_trading_meta);
+            update_user_meta($dong_affid,'_user_trading_details',$aff_user_trading_meta);
 
         endif;
 
@@ -314,16 +320,3 @@ function dongtrader_split_price($member,$product,$orderid){
 
     endif;
 }
-
-
-add_action('wp_head', function(){
-
-   // $orderobj = new WC_Order(1668);
-
-// $s = dongtrader_get_order_meta(1668,'dong_reabate');
-
-// $s2 = get_post_meta(1668,'dong_reabate', true);
-
-// var_dump($s,$s2);
-
-});
