@@ -695,6 +695,7 @@ function dongtraders_order_export_form()
         <div class="form-group">
             <!--  <label for="">Select Variation Product</label> -->
             <div class="form-control-wrap">
+                <input type="hidden" name="get_product_id" value="<?php echo serialize($product_ids); ?>">
                 <?php
                 foreach ($product_ids as $product_id) {
                     $product = new WC_Product_Variable($product_id);
@@ -707,7 +708,7 @@ function dongtraders_order_export_form()
                         $current_products = $product->get_children();
                 ?>
                         <div id="varition-<?php echo $product_id; ?>" class="export_variation_product_hide">
-                            <select name="variation-product" class="form-control variation-product">
+                            <select name="variation-product[]" class="form-control variation-product">
                                 <?php
                                 echo '<option value="">Select Variation Product</option>';
                                 foreach ($current_products as $current_product) {
@@ -759,9 +760,28 @@ function dongtraders_order_export_form()
         $customer_postcode = $_POST['customer-postcode'];
         $customer_city = $_POST['customer-city'];
         $customer_product_id = $_POST['select-product'];
-        $customer_varition_product_id = $_POST['variation-product'];
+
         $customer_affilate_user = $_POST['affilate-user'];
         $created_date = date("Y-m-d");
+        $customer_varition_product_id = $_POST['variation-product'];
+
+
+        $get_final_vartion_id = (array_filter($customer_varition_product_id));
+        //var_dump($get_final_vartion_id);
+        /*  $varition_product_id_final =  $get_final_vartion_id[0];
+        if (!empty($get_final_vartion_id)) {
+            $varition_id = $get_final_vartion_id[0];
+        } else {
+            $varition_id = $get_final_vartion_id[1];
+        } */
+        $v_id = '';
+        foreach ($get_final_vartion_id as $get_final_vartion_ids) {
+
+            $v_id .= $get_final_vartion_ids;
+            # code...
+        }
+        $varition_product_id_final = $v_id;
+
 
         global $wpdb;
         $order_table_name = $wpdb->prefix . 'dong_order_export_table';
@@ -794,7 +814,7 @@ function dongtraders_order_export_form()
                 esc_attr($customer_postcode),
                 esc_attr($customer_city),
                 esc_attr($customer_product_id),
-                esc_attr($customer_varition_product_id),
+                esc_attr($varition_product_id_final),
                 esc_attr($customer_affilate_user),
                 $created_date
 
@@ -830,7 +850,7 @@ function dongtraders_custom_order_created_list()
                     <?php
                     $get_all_users = get_users();
                     //var_dump($get_all_users);
-                    echo '<option value="0">Select Affilate User</option>';
+                    echo '<option value="">Select Affilate User</option>';
                     foreach ($get_all_users as $get_all_user) {
                         echo '<option value="' . $get_all_user->ID . '">' . $get_all_user->user_login . '</option>';
                     }

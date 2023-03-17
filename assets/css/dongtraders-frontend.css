@@ -3,10 +3,10 @@
  *--------------------------------------------------------------
  */
 
-.cpm-plugin-wrap .success-box,
-.cpm-plugin-wrap .error-box,
-.cpm-plugin-wrap .info-box,
-.cpm-plugin-wrap .warning-box {
+.success-box,
+.error-box,
+.info-box,
+.warning-box {
     border-radius: 2px;
     font-size: 16px;
     margin: 10px 0;
@@ -14,10 +14,10 @@
     position: relative;
 }
 
-.cpm-plugin-wrap .success-box:before,
-.cpm-plugin-wrap .error-box:before,
-.cpm-plugin-wrap .info-box:before,
-.cpm-plugin-wrap .warning-box:before {
+.success-box:before,
+.error-box:before,
+.info-box:before,
+.warning-box:before {
     display: inline-block;
     font-family: "dashicons";
     font-size: 18px;
@@ -28,39 +28,39 @@
     vertical-align: top;
 }
 
-.cpm-plugin-wrap .success-box {
+.success-box {
     background-color: #dff2bf;
     color: #4f8a10;
 }
 
-.cpm-plugin-wrap .success-box:before {
+.success-box:before {
     content: "\f12a";
 }
 
-.cpm-plugin-wrap .error-box {
+.error-box {
     background-color: #ffbaba;
     color: #d8000c;
 }
 
-.cpm-plugin-wrap .error-box:before {
+.error-box:before {
     content: "\f153";
 }
 
-.cpm-plugin-wrap .info-box {
+.info-box {
     background-color: #d9edf7;
     color: #31708f;
 }
 
-.cpm-plugin-wrap .info-box:before {
+.info-box:before {
     content: "\f348";
 }
 
-.cpm-plugin-wrap .warning-box {
+.warning-box {
     background-color: #feefb3;
     color: #9f6000;
 }
 
-.cpm-plugin-wrap .warning-box:before {
+.warning-box:before {
     content: "\f534";
 }
 
