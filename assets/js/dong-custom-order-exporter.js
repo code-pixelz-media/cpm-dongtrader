@@ -15,7 +15,12 @@
       $(".export-loader").css("display", "");
       var start_date = this.start_month.value;
       var end_date = this.end_month.value;
-      var user_id = $("#affilate_id option:selected").val();
+      //var user_id = $("#affilate_id option:selected").val();
+      if ($("#affilate_id option:selected").val() == "") {
+        var user_id = $("#affilate_id option:selected").val();
+      } else {
+        var user_id = this.affilate_id.value;
+      }
       console.log(user_id);
 
       var d = new Date();

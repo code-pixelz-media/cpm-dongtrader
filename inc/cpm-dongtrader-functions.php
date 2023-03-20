@@ -961,14 +961,15 @@ if (!function_exists('dong_custom_order_exporter_csv_files')) {
         }
 
         //var_dump($get_custom_orders);
-        $cpm_order_exporter_generate_csv_filename =  'dongtraders-custom-orders' . date('Ymd_His') . '-export.csv';
-        header('Content-Type: application/csv');
-        header('Content-Disposition: attachment; filename={$cpm_comment_exporter_generate_csv_filename}');
-        $output = fopen('php://output', 'w');
-
-        fputcsv($output, ['csv_id', 'customer_email',   'billing_first_name', 'billing_last_name', 'billing_phone',   'billing_address_1',   'billing_postcode',   'billing_city', 'billing_state', 'billing_country', 'product_id', 'variation_id',   'affilate_user_id']);
-
         if (!empty($get_custom_orders)) {
+            $cpm_order_exporter_generate_csv_filename =  'dongtraders-custom-orders' . date('Ymd_His') . '-export.csv';
+            header('Content-Type: application/csv');
+            header('Content-Disposition: attachment; filename={$cpm_comment_exporter_generate_csv_filename}');
+            $output = fopen('php://output', 'w');
+
+            fputcsv($output, ['csv_id', 'customer_email',   'billing_first_name', 'billing_last_name', 'billing_phone',   'billing_address_1',   'billing_postcode',   'billing_city', 'billing_state', 'billing_country', 'product_id', 'variation_id',   'affilate_user_id']);
+
+
             foreach ($get_custom_orders as $get_custom_order) {
                 $export_id = $get_custom_order['id'];
                 $export_customer_email = $get_custom_order['customer_email'];
