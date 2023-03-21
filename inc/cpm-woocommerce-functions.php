@@ -866,13 +866,11 @@ function dongtraders_csv_order_importer()
                 $variation_id = $get_order['variation_id'];
                 $customer_email = $get_order['customer_email'];
                 $affiliate_user_id = $get_order['affilate_user_id'];
+                // echo $product_id . 'this is product id';
 
                 if ($variation_id == '0') {
-
-                    $product_name = get_the_title($product_id);
                     $product_id_csv =  $product_id;
                 } else {
-                    $product_name = get_the_title($variation_id);
                     $product_id_csv = $variation_id;
                 }
 
@@ -899,44 +897,45 @@ function dongtraders_csv_order_importer()
                         'postcode'   => $billing_postcode,
                         'country'    => $billing_country
                     );
+                    if (get_post_status($product_id_csv)) {
+                        $order = wc_create_order();
+                        $order->set_customer_id($user_id);
+                        $order->update_meta_data('dong_affid', $affiliate_user_id);
+                        // add products
+                        $order->add_product(wc_get_product($product_id_csv), 1);
 
-                    $order = wc_create_order();
-                    $order->set_customer_id($user_id);
-                    $order->update_meta_data('dong_affid', $affiliate_user_id);
-                    // add products
-                    $order->add_product(wc_get_product($product_id_csv), 1);
+                        // add shipping
+                        $shipping = new WC_Order_Item_Shipping();
+                        $shipping->set_method_title('Free shipping');
+                        $shipping->set_method_id('free_shipping:1'); // set an existing Shipping method ID
+                        $shipping->set_total(0); // optional
+                        $order->add_item($shipping);
 
-                    // add shipping
-                    $shipping = new WC_Order_Item_Shipping();
-                    $shipping->set_method_title('Free shipping');
-                    $shipping->set_method_id('free_shipping:1'); // set an existing Shipping method ID
-                    $shipping->set_total(0); // optional
-                    $order->add_item($shipping);
+                        $order->set_address($address, 'billing');
+                        $order->set_address($address, 'shipping');
 
-                    $order->set_address($address, 'billing');
-                    $order->set_address($address, 'shipping');
+                        // add payment method
+                        $order->set_payment_method('cod');
+                        //$order->set_payment_method_title('Credit/Debit card');
 
-                    // add payment method
-                    $order->set_payment_method('cod');
-                    //$order->set_payment_method_title('Credit/Debit card');
+                        // order status
+                        $order->set_status('wc-completed', 'Order is created From Importer');
+                        // calculate and save
+                        $order->calculate_totals();
 
-                    // order status
-                    $order->set_status('wc-completed', 'Order is created From Importer');
-                    // calculate and save
-                    $order->calculate_totals();
+                        $order->save();
 
-                    $order->save();
+                        $product = wc_get_product($product_id_csv);
+                        $product_price =  $product->get_price();
+                        /*  echo $product_price . '-product price'; */
 
-                    $product = wc_get_product($product_id);
-                    $product_price =  $product->get_price();
-                    /*  echo $product_price . '-product price'; */
-
-                    $order_id = $order->get_id();
-                    if ($order_id) {
-                        $order_status_msg = '<div class="success-box">Order Data Imported Sucessfully. Please Refresh Order Table.</div>';
+                        $order_id = $order->get_id();
+                        if ($order_id) {
+                            $order_status_msg = '<div class="success-box">Order Data Imported Sucessfully. Please Refresh Order Table.</div>';
+                        }
+                        dongtrader_user_registration_hook($user_id, $product_id, $order_id);
+                        dongtrader_product_price_distribution($product_price, $product_id, $order_id, $user_id);
                     }
-                    dongtrader_user_registration_hook($user_id, $product_id, $order_id);
-                    dongtrader_product_price_distribution($product_price, $product_id, $order_id, $user_id);
                 }
             }
             echo $order_status_msg;
