@@ -812,6 +812,13 @@ function custom_user_profile_fields($user)
 <?php
 }
 
+/* check if provided product id from csv is on product */
+if (!function_exists('is_product_check')) {
+    function is_product_check($mixed = null)
+    {
+        return 'product' === get_post_type($mixed);
+    }
+}
 /* uploader order csv  */
 function dongtraders_csv_order_importer()
 {
@@ -874,6 +881,7 @@ function dongtraders_csv_order_importer()
                     $product_id_csv = $variation_id;
                 }
 
+
                 if (!email_exists($customer_email)) {
                     $random_password = wp_generate_password();
                     $get_product_membership_level = get_post_meta($product_id, '_membership_product_level', true);
@@ -897,7 +905,7 @@ function dongtraders_csv_order_importer()
                         'postcode'   => $billing_postcode,
                         'country'    => $billing_country
                     );
-                    if (get_post_status($product_id_csv)) {
+                    if (is_product_check($product_id_csv)) {
                         $order = wc_create_order();
                         $order->set_customer_id($user_id);
                         $order->update_meta_data('dong_affid', $affiliate_user_id);
