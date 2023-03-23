@@ -82,7 +82,7 @@ function glassfrog_api_management()
             $peoples_circle_name    = $api_call->roles[0]->name;
 
             //check if five members rule is accomplished in the circle
-            if(count($all_people_in_circle) >= 5) :
+            if(count($all_people_in_circle) == 1) :
 
                 //looping inisde the circle
                 foreach($all_people_in_circle as $ap):
