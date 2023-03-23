@@ -597,6 +597,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
             'dong_total'  => $rebate_amount
 
         ];
+
         if (update_user_meta($cid, '_user_trading_details', $not_gf_trading_details_user_metas)) {
             update_post_meta($oid, 'distributn_succed', 'yes');
         }
@@ -612,13 +613,24 @@ add_action('woocommerce_thankyou', 'dongtrader_after_order_received_process', 10
 function dongtrader_after_order_received_process($order_id)
 {
     $order = wc_get_order($order_id);
+
+    
     $customer_id = $order->get_user_id();
 
     $items =  $order->get_items();
+
+    // var_dump($items);
     $p_id = [];
     foreach ($items as $item) {
+        
+        //check if order is variable item
+     
         $p_id[] = $item->get_product_id();
+        
     }
+
+    
+    
     $gf_checkbox = get_post_meta($p_id[0], '_glassfrog_checkbox', true);
     if ($gf_checkbox == 'on') {
         dongtrader_user_registration_hook($customer_id, $p_id[0], $order_id);
