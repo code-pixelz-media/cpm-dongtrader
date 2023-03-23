@@ -682,6 +682,7 @@ function dongtraders_order_export_form()
                         $product = new WC_Product_Variable(get_the_ID());
                         $terms = get_the_terms($product->get_id(), 'product_type');
                         $product_type = (!empty($terms)) ? sanitize_title(current($terms)->name) : 'simple';
+
                         echo '<option data-productType="' . $product_type . '" value="' . get_the_ID() . '">' . get_the_title() . '</option>';
                         $product_ids[] = $product->get_id();
                     endwhile;
@@ -695,7 +696,6 @@ function dongtraders_order_export_form()
         <div class="form-group">
             <!--  <label for="">Select Variation Product</label> -->
             <div class="form-control-wrap">
-                <input type="hidden" name="get_product_id" value="<?php echo serialize($product_ids); ?>">
                 <?php
                 foreach ($product_ids as $product_id) {
                     $product = new WC_Product_Variable($product_id);
@@ -708,17 +708,20 @@ function dongtraders_order_export_form()
                         $current_products = $product->get_children();
                 ?>
                         <div id="varition-<?php echo $product_id; ?>" class="export_variation_product_hide">
-                            <select name="variation-product[]" class="form-control variation-product">
-                                <?php
-                                echo '<option value="">Select Variation Product</option>';
-                                foreach ($current_products as $current_product) {
-                                    $variation = wc_get_product($current_product);
-                                    $varition_name = $variation->get_name();
-                                    echo '<option value="' . $current_product . '">' . $varition_name . '</option>';
-                                }
+                            <label for="">Select Variation Product</label>
+                            <div class="form-control-wrap">
+                                <select name="variation-product[]" class="form-control variation-product">
+                                    <?php
+                                    echo '<option value="0">Choose Variation Product</option>';
+                                    foreach ($current_products as $current_product) {
+                                        $variation = wc_get_product($current_product);
+                                        $varition_name = $variation->get_name();
+                                        echo '<option value="' . $current_product . '">' . $varition_name . '</option>';
+                                    }
 
-                                ?>
-                            </select>
+                                    ?>
+                                </select>
+                            </div>
                         </div>
 
                 <?php
@@ -748,6 +751,7 @@ function dongtraders_order_export_form()
     <?php
     /* insert date to database table */
     $current_page = home_url($_SERVER['REQUEST_URI']);
+    //echo $current_page;
 
     if (isset($_POST['set-order_export'])) {
         $customer_email = $_POST['customer-email'];
@@ -760,8 +764,9 @@ function dongtraders_order_export_form()
         $customer_postcode = $_POST['customer-postcode'];
         $customer_city = $_POST['customer-city'];
         $customer_product_id = $_POST['select-product'];
+        $customer_affilate_user_final = $_POST['affilate-user'];
 
-        $customer_affilate_user = $_POST['affilate-user'];
+
         $created_date = date("Y-m-d");
         $customer_varition_product_id = $_POST['variation-product'];
 
@@ -775,7 +780,15 @@ function dongtraders_order_export_form()
             # code...
         }
         $varition_product_id_final = $v_id;
+        if (!empty($varition_product_id_final)) {
 
+            $final_v_id = $varition_product_id_final;
+        } else {
+            $final_v_id = 0;
+        }
+        /* echo $customer_product_id . '-Affiliate User<br>';
+        echo $final_v_id . '-Varition ID<br>';
+        print_r($_POST); */
 
         global $wpdb;
         $order_table_name = $wpdb->prefix . 'dong_order_export_table';
@@ -808,8 +821,8 @@ function dongtraders_order_export_form()
                 esc_attr($customer_postcode),
                 esc_attr($customer_city),
                 esc_attr($customer_product_id),
-                esc_attr($varition_product_id_final),
-                esc_attr($customer_affilate_user),
+                esc_attr($final_v_id),
+                esc_attr($customer_affilate_user_final),
                 $created_date
 
             )
@@ -819,7 +832,6 @@ function dongtraders_order_export_form()
         } else {
             echo '<div class="error-box">Order Data could not inserted ! Please Try again</div>';
         }
-        wp_redirect($current_page);
     }
 }
 
@@ -878,8 +890,9 @@ function dongtraders_custom_order_created_list()
                 <?php
 
                 $get_order_results  = $wpdb->get_results("SELECT *  FROM $order_table_name ORDER BY id DESC;");
+
                 //$get_url = home_url() . '/wp-admin/admin.php?page=dongtrader_api_settings';
-                $current_page = '';
+                /* $current_page = ''; */
                 if (!empty($get_order_results)) {
                     foreach ($get_order_results as $export_order) {
 
@@ -929,7 +942,7 @@ function dongtraders_custom_order_created_list()
                     } else {
                         echo '<div class="error-box">Order Data could not Deleted ! Please Try again</div>';
                     }
-                    wp_redirect($current_page);
+                    /*  wp_redirect($current_page); */
                 }
                 ?>
 
@@ -953,11 +966,11 @@ if (!function_exists('dong_custom_order_exporter_csv_files')) {
         global $wpdb;
         $get_table_name = $wpdb->prefix . 'dong_order_export_table';
 
-        if (!empty($get_start_date) && !empty($get_end_date && $get_affilate_user_id == 0)) {
-            $get_custom_orders = $wpdb->get_results("SELECT * FROM $get_table_name WHERE created_at BETWEEN  '$get_start_date' AND '$get_end_date'", ARRAY_A);
-        } elseif (!empty($get_start_date) && !empty($get_end_date) && $get_affilate_user_id > 0) {
-            $get_custom_orders = $wpdb->get_results("SELECT * FROM $get_table_name WHERE affilate_user_id = 
+        if (!empty($get_start_date) && !empty($get_end_date) && !empty($get_affilate_user_id)) {
+            $get_custom_orders = $wpdb->get_results("SELECT * FROM $get_table_name WHERE created_at BETWEEN  '$get_start_date' AND '$get_end_date' AND affilate_user_id = 
             '$get_affilate_user_id' ", ARRAY_A);
+        } elseif (!empty($get_start_date) && !empty($get_end_date) && empty($get_affilate_user_id)) {
+            $get_custom_orders = $wpdb->get_results("SELECT * FROM $get_table_name WHERE created_at BETWEEN  '$get_start_date' AND '$get_end_date' ", ARRAY_A);
         }
 
         //var_dump($get_custom_orders);

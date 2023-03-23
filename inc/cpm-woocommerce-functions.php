@@ -814,15 +814,15 @@ function custom_user_profile_fields($user)
 
 /* check if provided product id from csv is on product */
 if (!function_exists('is_product_check')) {
-    function is_product_check($mixed = null)
+    function is_product_check($product_id)
     {
-        return 'product' === get_post_type($mixed);
+        return 'product' === get_post_type($product_id);
     }
 }
 /* uploader order csv  */
 function dongtraders_csv_order_importer()
 {
-    $order_status_msg = '<div class="error-box">Order Data could not Imported ! Please Try again</div>';
+
     if (isset($_POST['import_csv'])) {
 
         $upload_dir = wp_upload_dir();
@@ -858,6 +858,7 @@ function dongtraders_csv_order_importer()
             /* echo "<pre>";
 							var_dump($get_orders);
 							echo "</pre>"; */
+            $order_status_msg = '<div class="error-box">Order Data could not Imported ! Please Try again</div>';
             foreach ($get_orders as $get_order) {
                 # code...
 
@@ -881,8 +882,15 @@ function dongtraders_csv_order_importer()
                     $product_id_csv = $variation_id;
                 }
 
+                if (is_product_check($product_id)) {
 
-                if (!email_exists($customer_email)) {
+                    //echo 'Yes-' . $product_id_csv;
+                } else {
+
+                    echo 'Invalid Product ID: ' . $product_id_csv . '<br>';
+                }
+
+                if (is_product_check($product_id) && !email_exists($customer_email)) {
                     $random_password = wp_generate_password();
                     $get_product_membership_level = get_post_meta($product_id, '_membership_product_level', true);
 
@@ -892,6 +900,7 @@ function dongtraders_csv_order_importer()
 
                     // dongtrader_user_registration_hook($user_id);
                     // add billing and shipping addresses
+
                     $address = array(
                         'first_name' => $billing_first_name,
                         'last_name'  => $billing_last_name,
@@ -905,46 +914,47 @@ function dongtraders_csv_order_importer()
                         'postcode'   => $billing_postcode,
                         'country'    => $billing_country
                     );
-                    if (is_product_check($product_id_csv)) {
-                        $order = wc_create_order();
-                        $order->set_customer_id($user_id);
-                        $order->update_meta_data('dong_affid', $affiliate_user_id);
-                        // add products
-                        $order->add_product(wc_get_product($product_id_csv), 1);
 
-                        // add shipping
-                        $shipping = new WC_Order_Item_Shipping();
-                        $shipping->set_method_title('Free shipping');
-                        $shipping->set_method_id('free_shipping:1'); // set an existing Shipping method ID
-                        $shipping->set_total(0); // optional
-                        $order->add_item($shipping);
+                    $order = wc_create_order();
+                    //var_dump($order);
+                    $order->set_customer_id($user_id);
+                    $order->update_meta_data('dong_affid', $affiliate_user_id);
+                    // add products
+                    $order->add_product(wc_get_product($product_id_csv), 1);
 
-                        $order->set_address($address, 'billing');
-                        $order->set_address($address, 'shipping');
+                    // add shipping
+                    $shipping = new WC_Order_Item_Shipping();
+                    $shipping->set_method_title('Free shipping');
+                    $shipping->set_method_id('free_shipping:1'); // set an existing Shipping method ID
+                    $shipping->set_total(0); // optional
+                    $order->add_item($shipping);
 
-                        // add payment method
-                        $order->set_payment_method('cod');
-                        //$order->set_payment_method_title('Credit/Debit card');
+                    $order->set_address($address, 'billing');
+                    $order->set_address($address, 'shipping');
 
-                        // order status
-                        $order->set_status('wc-completed', 'Order is created From Importer');
-                        // calculate and save
-                        $order->calculate_totals();
+                    // add payment method
+                    $order->set_payment_method('cod');
+                    //$order->set_payment_method_title('Credit/Debit card');
 
-                        $order->save();
+                    // order status
+                    $order->set_status('wc-completed', 'Order is created From Importer');
+                    // calculate and save
+                    $order->calculate_totals();
 
-                        $product = wc_get_product($product_id_csv);
-                        $product_price =  $product->get_price();
-                        /*  echo $product_price . '-product price'; */
+                    $order->save();
 
-                        $order_id = $order->get_id();
-                        if ($order_id) {
-                            $order_status_msg = '<div class="success-box">Order Data Imported Sucessfully. Please Refresh Order Table.</div>';
-                        }
-                        dongtrader_user_registration_hook($user_id, $product_id, $order_id);
-                        dongtrader_product_price_distribution($product_price, $product_id, $order_id, $user_id);
+                    $product = wc_get_product($product_id_csv);
+                    $product_price =  $product->get_price();
+                    /*  echo $product_price . '-product price'; */
+
+                    $order_id = $order->get_id();
+                    if ($order_id) {
+                        $order_status_msg = '<div class="success-box">Order Data Imported Sucessfully. Please Refresh Order Table.</div>';
                     }
+                    dongtrader_user_registration_hook($user_id, $product_id, $order_id);
+                    dongtrader_product_price_distribution($product_price, $product_id, $order_id, $user_id);
                 }
+                //}
             }
             echo $order_status_msg;
         }
