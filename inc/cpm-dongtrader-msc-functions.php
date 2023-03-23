@@ -92,8 +92,6 @@ function glassfrog_api_management()
                     
                     //get order id from table
                     $orderid   = $wpdb->get_row("SELECT order_id  FROM $table_name WHERE gf_person_id= $ap->id ")->order_id;
-
-                    //get user id from table
                     
                     //check existence of product id and order id
                     if($productid && $orderid):
@@ -101,16 +99,12 @@ function glassfrog_api_management()
                        //trading distribution function
                        $product = wc_get_product( $productid );
                        
-                       //get the price of the product
-                       $price   = $product->get_price();
-                       
-                       //price distribution function
+                       //price distribution function older one
                        //dongtrader_product_price_distribution($price, $productid, $orderid, $uid);
 
                        //price split function
                        dongtrader_split_price($uid,$productid,$orderid);
 
-                       
                        //prepare to update to custom database
                        $update_query = $wpdb->prepare("UPDATE $table_name SET in_circle = %d , gf_role_assigned = %s WHERE user_id = %d", 1, $peoples_circle_name,$uid);
                        
