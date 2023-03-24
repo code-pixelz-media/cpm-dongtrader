@@ -705,7 +705,7 @@ function custom_user_profile_fields($user)
                 foreach ($items_for_current_page as $utm) :
                     $order = new WC_Order($utm['order_id']);
 
-                    var_dump($order);
+                    var_dump($order->get_date_created());
                     // $order_date = $order->order_date;
                     $order_backend_link = admin_url('post.php?post=' . $utm['order_id'] . '&action=edit');
                 ?>
