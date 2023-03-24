@@ -704,7 +704,9 @@ function custom_user_profile_fields($user)
                 $price_symbol = get_woocommerce_currency_symbol();
                 foreach ($items_for_current_page as $utm) :
                     $order = new WC_Order($utm['order_id']);
-                    $order_date = $order->order_date;
+
+                    var_dump($order);
+                    // $order_date = $order->order_date;
                     $order_backend_link = admin_url('post.php?post=' . $utm['order_id'] . '&action=edit');
                 ?>
                     <tr class="enable-sorting">
