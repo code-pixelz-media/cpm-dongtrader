@@ -209,21 +209,21 @@ function dongtrader_delete_qr()
 function dongtrader_variable_color_to_rgb_color($color)
 {
     switch ($color) {
-        case 'Orange':
+        case 'orange':
             $color = 'rgb(255, 51, 0)';
             break;
-        case 'Purple':
+        case 'purple':
             $color = 'rgb(245,66,245)';
             break;
-        case 'Red':
+        case 'red':
             $color = 'rgb(255, 0, 0)';
             break;
 
-        case 'Blue':
+        case 'blue':
             $color = 'rgb(36, 36, 143)';
             break;
 
-        case 'Green':
+        case 'green':
             $color = 'rgb(0, 204, 0)';
             break;
 
@@ -334,7 +334,8 @@ function dongtrader_meta_qr_generator()
             $get_url = get_permalink($variations);
             $html = '';
             $modfied_url = $get_url . '&varid=' . $variations;
-            $attr_color = get_post_meta($variations, 'attribute_color', true);
+            $attr_color = get_post_meta($variations, 'attribute_pa_color', true);
+            //echo $attr_color . '-color';
             $current__array = dongtrader_ajax_helper(dongtrader_variable_color_to_rgb_color($attr_color), $modfied_url);
             if ($current__array) {
                 $update_data = json_encode($current__array);
