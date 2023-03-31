@@ -289,12 +289,14 @@ function glassfrog_api_get_persons_of_circles()
                     $update_query = $wpdb->prepare("UPDATE $table_name SET in_circle = %d , gf_role_assigned = %s WHERE user_id = %d", 1, $peoples_circle_name, $uid);
 
                     //update to custom database
-                    if($ap->external_id == $uid)
+                    if($ap->external_id == $uid) :
                         $wpdb->query($update_query);
+                        $members[] = $ap->external_id;
+
+                    endif;
 
                     //get wp user id stored as external id from the api
-                    $members[] = $ap->external_id;
-
+                   
                     //end foreach loop started for looping inside circle members
                 endforeach;
 
