@@ -42,12 +42,15 @@ function dongtrader_cron_job()
 
     dongtrader_distribute_product_prices_to_circle_members();
 
+    // delete_user_meta( 119, '_user_trading_details' );
+    // delete_user_meta( 118, '_user_trading_details' );
+
 }
 
 
 function dongtrader_distribute_product_prices_to_circle_members(){
 
-
+   
    //get all members from user id
    $members = glassfrog_api_get_persons_of_circles();
 
@@ -62,6 +65,7 @@ function dongtrader_distribute_product_prices_to_circle_members(){
    //looping through all members
    foreach($members as $m) :
 
+   
     //if m is null continue to next loop
     if(!isset($m)) continue;
 
@@ -284,7 +288,7 @@ function glassfrog_api_get_persons_of_circles()
                     $update_query = $wpdb->prepare("UPDATE $table_name SET in_circle = %d , gf_role_assigned = %s WHERE user_id = %d", 1, $peoples_circle_name, $uid);
 
                     //update to custom database
-                    //$wpdb->query($update_query);
+                    $wpdb->query($update_query);
 
                     //get wp user id stored as external id from the api
                     $members[] = $ap->external_id;
