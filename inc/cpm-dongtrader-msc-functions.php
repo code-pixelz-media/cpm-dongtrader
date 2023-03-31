@@ -247,6 +247,7 @@ function glassfrog_api_get_persons_of_circles()
     //get glassfrog id and user id from custom table manage_users_gf
     $results = $wpdb->get_results("SELECT gf_person_id , user_id FROM $table_name WHERE in_circle = 0 LIMIT 5", ARRAY_A);
 
+
     //if not results exit
     if (!$results) return;
 
@@ -275,11 +276,11 @@ function glassfrog_api_get_persons_of_circles()
             $all_people_in_circle = $api_call->linked->people;
 
             //exact circle name in the api from api obj
-            $peoples_circle_name = $api_call->roles[0]->name;
+            $peoples_circle_name = $api_call->roles[2]->name;
 
             //check if five members rule is accomplished in the circle
 
-            if (count($all_people_in_circle) == 2):
+            if (count($all_people_in_circle) == 3):
 
                 //looping inisde the circle
                 foreach ($all_people_in_circle as $ap):
@@ -288,7 +289,8 @@ function glassfrog_api_get_persons_of_circles()
                     $update_query = $wpdb->prepare("UPDATE $table_name SET in_circle = %d , gf_role_assigned = %s WHERE user_id = %d", 1, $peoples_circle_name, $uid);
 
                     //update to custom database
-                    $wpdb->query($update_query);
+                    if($ap->external_id == $uid)
+                        $wpdb->query($update_query);
 
                     //get wp user id stored as external id from the api
                     $members[] = $ap->external_id;
