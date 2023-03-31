@@ -276,11 +276,11 @@ function glassfrog_api_get_persons_of_circles()
             $all_people_in_circle = $api_call->linked->people;
 
             //exact circle name in the api from api obj
-            $peoples_circle_name = $api_call->roles[2]->name;
+            $peoples_circle_name = $api_call->roles[0]->name;
 
             //check if five members rule is accomplished in the circle
 
-            if (count($all_people_in_circle) == 3):
+            if (count($all_people_in_circle) == 5):
 
                 //looping inisde the circle
                 foreach ($all_people_in_circle as $ap):
@@ -291,11 +291,12 @@ function glassfrog_api_get_persons_of_circles()
                     //update to custom database
                     if($ap->external_id == $uid) :
                         $wpdb->query($update_query);
+                        //get wp user id stored as external id from the api
                         $members[] = $ap->external_id;
 
                     endif;
 
-                    //get wp user id stored as external id from the api
+                 
                    
                     //end foreach loop started for looping inside circle members
                 endforeach;
