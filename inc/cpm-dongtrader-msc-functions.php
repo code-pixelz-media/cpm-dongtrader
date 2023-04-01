@@ -2,17 +2,21 @@
 
 /**
  * @author a2code 
- * The cron job functionality
- *
+ * All about cron job which is used for price distribution
  */
 
-
+/**
+ * Interval Settings filters For the cron job
+ *
+ * @param [array] $schedules
+ * @return array
+ */
 function dongtrader_one_minutes_interval($schedules)
 {
 
     $schedules['1_minutes'] = array(
         'interval' => 3 * 60,
-        'display'  => __('Every 1 minutes', 'cpm-dongtrader'),
+        'display'  => __('Every 3 minutes', 'cpm-dongtrader'),
     );
 
     return $schedules;
@@ -144,13 +148,13 @@ function dongtrader_split_price_parent($parent_user_id , $order_id){
 
     //append to previous array to update in user meta 
     $customer_and_member_metas[] = [
-        'order_id' => $order_id,
-        'rebate' => $rebate,
-        'dong_profit_dg' => $p_d_g,
-        'dong_profit_di' => 0,
-        'dong_comm_dg' => $c_d_g,
+        'order_id'      => $order_id,
+        'rebate'        => $rebate,
+        'dong_profit_dg'=> $p_d_g,
+        'dong_profit_di'=> 0,
+        'dong_comm_dg'  => $c_d_g,
         'dong_comm_cdi' => 0,
-        'dong_total' => $rebate + $p_d_g + $c_d_g,
+        'dong_total'    => $rebate + $p_d_g + $c_d_g,
     ];
 
     //update array to user meta 
@@ -178,7 +182,7 @@ function dongtrader_split_price_childrens($childrens ){
         //parent order
         $parent_order = $string_array[2];
 
-        //parent user id
+        //parent user id (might be required for later)
         $parent_user  = $string_array[1];
 
         //looping inside all childrens
@@ -204,13 +208,13 @@ function dongtrader_split_price_childrens($childrens ){
     
             //apend to previous array to update in  user meta
             $customer_not_mem_metas[] = [
-                'order_id' => $parent_order,
-                'rebate' => 0,
-                'dong_profit_dg' => $p_a_d_c,
-                'dong_profit_di' => 0,
-                'dong_comm_dg' => $c_a_t_c,
+                'order_id'      => $parent_order,
+                'rebate'        => 0,
+                'dong_profit_dg'=> $p_a_d_c,
+                'dong_profit_di'=> 0,
+                'dong_comm_dg'  => $c_a_t_c,
                 'dong_comm_cdi' => 0,
-                'dong_total' => 0 + $p_a_d_c + $c_a_t_c,
+                'dong_total'    => 0 + $p_a_d_c + $c_a_t_c,
             ];
 
             //update array to user meta
@@ -243,20 +247,20 @@ function dongtrader_split_price_affiliates($aid , $oid){
         $aff_trading_details_user_meta = !empty($aff_user_trading_meta) ? $aff_user_trading_meta : [];
 
         //commission distributed to individual
-        $dong_comm_cdi = dongtrader_get_order_meta($oid, 'dong_comm_cdi');
+        $dong_comm_cdi  = dongtrader_get_order_meta($oid, 'dong_comm_cdi');
 
         //get profit distributed to individual
         $dong_profit_di = dongtrader_get_order_meta($oid, 'dong_profit_di');
 
         //meta update array
         $aff_trading_details_user_meta[] = [
-            'order_id' => $oid,
-            'rebate' => 0,
-            'dong_profit_dg' => 0,
-            'dong_profit_di' => $dong_profit_di,
-            'dong_comm_dg' => 0,
+            'order_id'      => $oid,
+            'rebate'        => 0,
+            'dong_profit_dg'=> 0,
+            'dong_profit_di'=> $dong_profit_di,
+            'dong_comm_dg'  => 0,
             'dong_comm_cdi' => $dong_comm_cdi,
-            'dong_total' => $dong_profit_di + $dong_comm_cdi,
+            'dong_total'    => $dong_profit_di + $dong_comm_cdi,
 
         ];
 
@@ -318,14 +322,15 @@ function glassfrog_api_get_persons_of_circles()
 
                     //update to custom database
                     if($ap->external_id == $uid) :
+
+                        //updated
                         $wpdb->query($update_query);
+                        
                         //get wp user id stored as external id from the api
                         $members[] = $ap->external_id;
 
                     endif;
-
-                 
-                   
+  
                     //end foreach loop started for looping inside circle members
                 endforeach;
 
@@ -339,13 +344,19 @@ function glassfrog_api_get_persons_of_circles()
 
     if(!empty($members)):
 
+        //intilized empty array
         $new_array = array();
 
+        //remove duplicates in an array
         $unique_members = array_unique($members);
 
         // Loop through each user_id
         foreach ($unique_members as $index => $user_id) {
+
+            // Removing the current user from the array of users.
             $related = array_diff($unique_members, [$user_id]);
+
+            // Creating an array of user_id and related users.
             $new_array[] = [
                 'user_id' => $user_id,
                 'related' => array_values($related)
