@@ -2,13 +2,11 @@
 
 /**
  * @author a2code 
- * 
- * It adds a new schedule to the list of schedules that WordPress uses.
- * 
- * @schedules This is the name of the hook that will be used to schedule the event.
- * 
- * @return @the  array.
+ * The cron job functionality
+ *
  */
+
+
 function dongtrader_one_minutes_interval($schedules)
 {
 
@@ -29,7 +27,9 @@ add_action('wp', 'dongtrader_schedule_cron_job');
 function dongtrader_schedule_cron_job()
 {
     if (!wp_next_scheduled('dongtrader_cron_job_hook')) {
+
         wp_schedule_event(time(), '1_minutes', 'dongtrader_cron_job_hook');
+
     }
 }
 
@@ -39,22 +39,22 @@ function dongtrader_schedule_cron_job()
 add_action('dongtrader_cron_job_hook', 'dongtrader_cron_job');
 function dongtrader_cron_job()
 {
-
+    //price distributing function
     dongtrader_distribute_product_prices_to_circle_members();
-
-    // delete_user_meta( 119, '_user_trading_details' );
-    // delete_user_meta( 118, '_user_trading_details' );
 
 }
 
-
+/**
+ * Cron job function to excute distribution process
+ *
+ * @return void
+ */
 function dongtrader_distribute_product_prices_to_circle_members(){
 
-   
    //get all members from user id
    $members = glassfrog_api_get_persons_of_circles();
 
-   //exit if false
+   //exit if there are no members
    if(!$members) return;
 
    global $wpdb;
@@ -63,39 +63,47 @@ function dongtrader_distribute_product_prices_to_circle_members(){
    $table_name = $wpdb->prefix . 'manage_users_gf';
 
    //looping through all members
-   foreach($members as $m) :
+    foreach($members as $m) :
 
-   
-    //if m is null continue to next loop
-    if(!isset($m)) continue;
+        //if m is null continue to next loop
+        if(!isset($m)) continue;
 
-    //query to get order id by user id
-    $order_id =  $wpdb->get_var("SELECT order_id FROM $table_name WHERE user_id= $m[user_id] ");
+        //query to get order id by user id
+        $order_id =  $wpdb->get_var("SELECT order_id FROM $table_name WHERE user_id= $m[user_id] ");
 
-    //parent userid
-    $parent_user_id = intval($m['user_id']);
+        //parent userid
+        $parent_user_id = intval($m['user_id']);
 
-    //get affiliate id 
-    $dong_affid = dongtrader_get_order_meta($order_id, 'dong_affid');
+        //get affiliate id 
+        $dong_affid = dongtrader_get_order_meta($order_id, 'dong_affid');
 
-    //childrens user ids
-    $children_users_id = ['related-'.$parent_user_id .'-'.$order_id => $m['related'] ];
+        //childrens user ids
+        $children_users_id = ['related-'.$parent_user_id .'-'.$order_id => $m['related'] ];
 
-    dongtrader_split_price_parent($parent_user_id, $order_id);
-    
-    dongtrader_split_price_childrens($children_users_id );
+        //save distributed amount to current customer
+        dongtrader_split_price_parent($parent_user_id, $order_id);
+        
+        //save distributed amount to current customers group members
+        dongtrader_split_price_childrens($children_users_id );
 
-    dongtrader_split_price_affiliates($dong_affid , $order_id);
+        //Saves distributed amount to affiliates
+        dongtrader_split_price_affiliates($dong_affid , $order_id);
 
-   endforeach;
+    //end looping for all members
+    endforeach;
 
 
 }
 
-
+/**
+ * Retrieves meta values from order . If meta is empty returns 0 otherwise returns value
+ *
+ * @param [string] $orderid id of the order
+ * @param [string] $key order's meta key
+ * @return [meta_value]
+ */
 function dongtrader_get_order_meta($orderid, $key)
 {
-
     //get order objects
     $orderobj = new WC_Order($orderid);
 
@@ -104,8 +112,13 @@ function dongtrader_get_order_meta($orderid, $key)
 
 }
 
-
-
+/**
+ * Price distrubution to current or exact customer
+ *
+ * @param [string] $parent_user_id main user id whom has created the order
+ * @param [String] $order_id The order id
+ * @return void
+ */
 function dongtrader_split_price_parent($parent_user_id , $order_id){
 
     //get previous member data
@@ -145,10 +158,18 @@ function dongtrader_split_price_parent($parent_user_id , $order_id){
 
   
 }
-
+/**
+ * Price Distribution to group members
+ *
+ * @param [array] $childrens Childrens are other members of the circle 
+ * @return void
+ */
 function dongtrader_split_price_childrens($childrens ){
-   
   
+    //if children array is empty dont do anything
+   if(empty($childrens)) return;
+   
+   //looping inside the childrens array
    foreach($childrens as $k=>$v){
 
         //explode key into array to get parent order id and parent user id
@@ -200,8 +221,16 @@ function dongtrader_split_price_childrens($childrens ){
 
 }
 
+/**
+ * Price distribution for affiliate users
+ *
+ * @param [ string ] $aid:Affilate id that was stored in order meta
+ * @param [ string ] $oid:Order id
+ * @return void
+ */
 function dongtrader_split_price_affiliates($aid , $oid){
 
+    //get user object
     $user_check = get_user_by('id', $aid);
 
     //if user exists
@@ -246,7 +275,6 @@ function glassfrog_api_get_persons_of_circles()
 
     //get glassfrog id and user id from custom table manage_users_gf
     $results = $wpdb->get_results("SELECT gf_person_id , user_id FROM $table_name WHERE in_circle = 0 LIMIT 5", ARRAY_A);
-
 
     //if not results exit
     if (!$results) return;
