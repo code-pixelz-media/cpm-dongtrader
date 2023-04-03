@@ -780,7 +780,10 @@ function custom_user_profile_fields($user)
     </div>
     <script>
         jQuery(document).ready(function($) {
-            const paginationParam = /[?&]listpaged=([^&#]*)/.exec(window.location.href)[1];
+            // const queryString = window.location.search;
+            // const paginationParam = urlParams.get('product')
+            const match = /[?&]listpaged=([^&#]*)/.exec(window.location.href);
+            const paginationParam = match ? match[1] : null;
             if (paginationParam) {
                 $('html, body').animate({
                     scrollTop: $('#member-history-orders').offset().top
