@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @author a2code 
+ * @author anil 
  * All about cron job which is used for price distribution
  */
 
@@ -93,6 +93,9 @@ function dongtrader_distribute_product_prices_to_circle_members(){
         //Saves distributed amount to affiliates
         dongtrader_split_price_affiliates($dong_affid , $order_id);
 
+        //Saves process amount to site owner
+        split_process_charges_to_siteowner(1,$order_id);
+
     //end looping for all members
     endforeach;
 
@@ -150,6 +153,7 @@ function dongtrader_split_price_parent($parent_user_id , $order_id){
     $customer_and_member_metas[] = [
         'order_id'      => $order_id,
         'rebate'        => $rebate,
+        'procees_amount'=> 0,
         'dong_profit_dg'=> $p_d_g,
         'dong_profit_di'=> 0,
         'dong_comm_dg'  => $c_d_g,
@@ -210,6 +214,7 @@ function dongtrader_split_price_childrens($childrens ){
             $customer_not_mem_metas[] = [
                 'order_id'      => $parent_order,
                 'rebate'        => 0,
+                'procees_amount'=> 0,
                 'dong_profit_dg'=> $p_a_d_c,
                 'dong_profit_di'=> 0,
                 'dong_comm_dg'  => $c_a_t_c,
@@ -223,6 +228,38 @@ function dongtrader_split_price_childrens($childrens ){
         }
    }
 
+}
+/**
+ * This function distributes prices to the siteowner . 
+ *
+ * @param integer $siteownerid
+ * @return void
+ */
+function split_process_charges_to_siteowner($siteownerid = 1 , $order_id){
+
+    //get previous stored data
+    $site_owner = get_user_meta($siteownerid, '_user_trading_details', true);
+
+    //Process Amount Site owner
+    $dong_process_amt = dongtrader_get_order_meta($siteownerid, 'dong_processamt');
+
+    //if previous meta is empty assign an empty array
+    $site_owners_metas = !empty($site_owner) ? $site_owner : [];
+
+    //apend to previous array to update in  user meta
+    $site_owners_metas[] = [
+        'order_id'      => $order_id,
+        'rebate'        => 0,
+        'procees_amount'=> $dong_process_amt,
+        'dong_profit_dg'=> 0,
+        'dong_profit_di'=> 0,
+        'dong_comm_dg'  => 0,
+        'dong_comm_cdi' => 0,
+        'dong_total'    => $dong_process_amt,
+    ];
+
+    //update array to user meta
+    update_user_meta($siteownerid, '_user_trading_details', $site_owners_metas);
 }
 
 /**
@@ -256,6 +293,7 @@ function dongtrader_split_price_affiliates($aid , $oid){
         $aff_trading_details_user_meta[] = [
             'order_id'      => $oid,
             'rebate'        => 0,
+            'procees_amount'=> 0,
             'dong_profit_dg'=> 0,
             'dong_profit_di'=> $dong_profit_di,
             'dong_comm_dg'  => 0,
@@ -268,7 +306,6 @@ function dongtrader_split_price_affiliates($aid , $oid){
         update_user_meta($aid, '_user_trading_details', $aff_trading_details_user_meta);
     endif;
 }
-
 
 function glassfrog_api_get_persons_of_circles()
 {
@@ -372,3 +409,4 @@ function glassfrog_api_get_persons_of_circles()
     endif;
 
 }
+

@@ -681,8 +681,9 @@ function custom_user_profile_fields($user)
         <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
             <thead>
                 <tr>
-                    <th><?php esc_html_e('S.N.', 'cpm-dongtrader'); ?><span class="sorting-indicator"></span></th>
+                   
                     <th><?php esc_html_e('Order ID', 'cpm-dongtrader'); ?><span class="sorting-indicator"></span></th>
+                    <th><?php esc_html_e('Initiator', 'cpm-dongtrader'); ?><span class="sorting-indicator"></span></th>
                     <th><?php esc_html_e('Created Date', 'cpm-dongtrader'); ?></th>
                     <th><?php esc_html_e('Rebate', 'cpm-dongtrader'); ?></th>
                     <th><?php esc_html_e('Profit', 'cpm-dongtrader'); ?></th>
@@ -704,16 +705,22 @@ function custom_user_profile_fields($user)
                 $price_symbol = get_woocommerce_currency_symbol();
                 foreach ($items_for_current_page as $utm) :
                     $order = new WC_Order($utm['order_id']);
-                    $formatted_order_date = wc_format_datetime( $order->get_date_created(), 'F j, Y' );
+                    $formatted_order_date = wc_format_datetime( $order->get_date_created(),get_option('date_format') . ' ' . get_option('time_format') );
                     $order_backend_link = admin_url('post.php?post=' . $utm['order_id'] . '&action=edit');
+                    $user_id = $order->get_customer_id();
+                    $user_details = get_userdata($user_id);
+                    $user_display_name = $user_details->data->display_name;
+                    $user_backend_edit_url = get_edit_user_link($user_id);
                 ?>
                     <tr class="enable-sorting">
                         <td>
-                            <?php echo $i; ?>
-                        </td>
-                        <td>
                             <a href="<?php echo $order_backend_link; ?>">
                                 <?php echo $utm['order_id'] ?>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="<?php echo $user_backend_edit_url; ?>">
+                                <?php echo $user_display_name; ?>
                             </a>
                         </td>
                         <td>
