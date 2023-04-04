@@ -435,7 +435,7 @@ function dong_display_trading_details($user_id){
     ?>
     <div class="user-trading-details">
         <strong><?php esc_html_e('Your Trading Details', 'cpm-dongtrader');?></strong>
-        <div id="member-history-orders" class="widgets-holder-wrap">
+        <div id="member-history-orders" class="widgets-holder-wrap cpm-table-wrap">
             <table class="affilate-data" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <thead>
                     <tr>
