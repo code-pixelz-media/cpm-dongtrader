@@ -1265,3 +1265,12 @@ function filter_wc_available_variation_price_html($data, $product, $variation)
 
     return $data;
 }
+function dongtraders_set_product_quantity($product_id)
+{
+    $get_qty = get_post_meta($product_id, '_qty_args', true);
+    if (!empty($get_qty)) {
+        $get_qty_no = $get_qty['qty_min'];
+        return $get_qty_no;
+    }
+    //return 0;
+}

@@ -9,8 +9,8 @@ function cpm_dong_show_membership_vcard($menu_links)
 {
 
     $menu_links = array_slice($menu_links, 0, 5, true)
-     + array('show-membership-v-card' => 'My VCard')
-     + array_slice($menu_links, 5, null, true);
+        + array('show-membership-v-card' => 'My VCard')
+        + array_slice($menu_links, 5, NULL, true);
 
     return $menu_links;
 }
@@ -27,13 +27,13 @@ function cpm_dong_my_membership_vcard_endpoint_content()
 {
 
     // of course you can print dynamic content here, one of the most useful functions here is get_current_user_id()
-    ?>
+?>
     <div class='qr-tiger-vcard-code-generator'>
-        <h2><?php _e('My Vcard ', 'cpm-dongtrader')?></h2>
+        <h2><?php _e('My Vcard ', 'cpm-dongtrader') ?></h2>
         <form action="" method="post">
-            <label for="vcard-url"><?php _e('Enter VCard', 'cpm-dongtrader')?></label>
+            <label for="vcard-url"><?php _e('Enter VCard', 'cpm-dongtrader') ?></label>
             <div class="input-form-dong">
-                <input type="url" class="vcard-url" name="vcard-url" placeholder="<?php _e('Enter Vcard Url', 'cpm-dongtrader')?>" required><input type="submit" value="Update Vcard" name="add_vcard">
+                <input type="url" class="vcard-url" name="vcard-url" placeholder="<?php _e('Enter Vcard Url', 'cpm-dongtrader') ?>" required><input type="submit" value="Update Vcard" name="add_vcard">
             </div>
         </form>
     </div>
@@ -62,12 +62,12 @@ function cpm_dong_my_membership_vcard_endpoint_content()
 		display: none;
 	}
 </style>';
-        ?>
+    ?>
         <div class="vcards_buttons">
             <a href="JavaScript:Void(0);" class="copy_qr_image_url" onclick="dong_traders_url_copy('#copy_url_id')">Copy QR URL</a> <a class="update_card" href="JavaScript:Void(0);">Update Vcard</a>
         </div>
     <?php
-} else {
+    } else {
         echo '<style>
 	.qr-tiger-vcard-code-generator{
 		display: block;
@@ -76,6 +76,8 @@ function cpm_dong_my_membership_vcard_endpoint_content()
     }
 }
 
+
+
 /* Show affiliate referrals menu  */
 
 add_filter('woocommerce_account_menu_items', 'cpm_dong_show_membership_affilate_Data', 40);
@@ -83,8 +85,8 @@ function cpm_dong_show_membership_affilate_Data($menu_links)
 {
 
     $menu_links = array_slice($menu_links, 0, 5, true)
-     + array('show-membership-affiliate-data' => 'Affiliate Referrals')
-     + array_slice($menu_links, 5, null, true);
+        + array('show-membership-affiliate-data' => 'Affiliate Referrals')
+        + array_slice($menu_links, 5, NULL, true);
 
     return $menu_links;
 }
@@ -102,7 +104,30 @@ function cpm_dong_my_membership_affilate_data_endpoint_content()
     $user_ID = get_current_user_id();
     $get_user_affilates = pmpro_affiliates_getAffiliatesForUser($user_ID);
     //var_dump($get_user_affilates);
-    do_action( 'dong_display_distribution_table', $user_ID );
+
+    ?>
+    <table class="affilate-data">
+        <tr>
+            <th>
+                Referral Code
+            </th>
+            <th>
+                Commission Rate
+            </th>
+        </tr>
+        <tr>
+            <?php
+            foreach ($get_user_affilates as $get_user_affilate) {
+
+                echo '<td>' . $get_user_affilate->code . '</td>';
+                echo '<td>' . $get_user_affilate->commissionrate . '</td>';
+            }
+
+            ?>
+        </tr>
+    </table>
+
+<?php
 
 }
 
@@ -113,8 +138,8 @@ function cpm_dong_show_membership_data($menu_links)
 {
 
     $menu_links = array_slice($menu_links, 0, 5, true)
-     + array('show-membership-data' => 'My Memberships')
-     + array_slice($menu_links, 5, null, true);
+        + array('show-membership-data' => 'My Memberships')
+        + array_slice($menu_links, 5, NULL, true);
 
     return $menu_links;
 }
@@ -131,11 +156,11 @@ function cpm_dong_my_membership_endpoint_content()
 {
 
     // of course you can print dynamic content here, one of the most useful functions here is get_current_user_id()
-    ?>
+?>
     <div class='qr-tiger-code-generator'>
-        <p><?php _e('My Memberships ', 'cpm-dongtrader')?></p>
+        <p><?php _e('My Memberships ', 'cpm-dongtrader') ?></p>
         <?php echo do_shortcode('[pmpro_account]');
-    ?>
+        ?>
     </div>
 
 <?php
@@ -148,8 +173,8 @@ function cpm_dong_show_custom_order_form($menu_links)
 {
 
     $menu_links = array_slice($menu_links, 0, 5, true)
-     + array('show-order-form' => 'Add Your Affiliate Order')
-     + array_slice($menu_links, 5, null, true);
+        + array('show-order-form' => 'Add Your Affiliate Order')
+        + array_slice($menu_links, 5, NULL, true);
 
     return $menu_links;
 }
@@ -166,15 +191,17 @@ function cpm_dong_custom_order_form_endpoint_content()
 {
 
     // of course you can print dynamic content here, one of the most useful functions here is get_current_user_id()
-    ?>
+?>
     <div class='dongtraders_order_export'>
 
         <?php dongtraders_order_export_form();
-    ?>
+        ?>
     </div>
 
 <?php
 }
+
+
 
 /* show custom order exporter on woocommerce tab */
 
@@ -183,8 +210,8 @@ function cpm_dong_show_custom_order_csv_exporter($menu_links)
 {
 
     $menu_links = array_slice($menu_links, 0, 5, true)
-     + array('export-affiliate-order' => 'Export Your Affiliate Order')
-     + array_slice($menu_links, 5, null, true);
+        + array('export-affiliate-order' => 'Export Your Affiliate Order')
+        + array_slice($menu_links, 5, NULL, true);
 
     return $menu_links;
 }
@@ -201,15 +228,16 @@ function dong_exporter_order_csv_endpoint_content()
 {
 
     // of course you can print dynamic content here, one of the most useful functions here is get_current_user_id()
-    ?>
+?>
     <div class='dongtraders_order_export'>
 
         <?php dongtraders_show_user_affilate_order();
-    ?>
+        ?>
     </div>
 
 <?php
 }
+
 
 /**
  * Automatically add product to cart on visit
@@ -244,7 +272,21 @@ function dongtraders_product_link_with_membership_goes_checkoutpage()
 
             if (isset($_GET['varid'])) {
                 $check_add_varition_product = $_GET['varid'];
-                WC()->cart->add_to_cart($check_add_varition_product);
+
+                $variation = wc_get_product($check_add_varition_product);
+                $product = wc_get_product($variation->get_parent_id());
+                $parent_id = $product->id;
+
+                $get_quantity_yam =  dongtraders_set_product_quantity($parent_id);
+
+                if (!empty($get_quantity_yam)) {
+                    WC()->cart->add_to_cart($check_add_varition_product, $get_quantity_yam);
+                } else {
+                    WC()->cart->add_to_cart($check_add_varition_product);
+                }
+
+
+
                 wp_redirect($checkout_url);
                 exit();
             }
@@ -253,6 +295,12 @@ function dongtraders_product_link_with_membership_goes_checkoutpage()
     return;
 }
 
+
+
+
+
+
+
 // add_action('woocommerce_before_checkout_form', 'dongtraders_check_user_bought_product_already_bought', 12);
 add_action('woocommerce_after_shop_loop_item', 'dongtraders_check_user_bought_product_already_bought', 30);
 add_action('woocommerce_before_add_to_cart_quantity', 'dongtraders_check_user_bought_product_already_bought', 30);
@@ -260,10 +308,7 @@ add_action('woocommerce_before_add_to_cart_quantity', 'dongtraders_check_user_bo
 function dongtraders_check_user_bought_product_already_bought()
 {
     global $product;
-    if (!is_user_logged_in()) {
-        return;
-    }
-
+    if (!is_user_logged_in()) return;
     if (!empty(dongtraders_get_membership_link_product($product->get_id()))) {
         $accountpage = get_permalink(wc_get_page_id('myaccount'));
         echo '<div>Your Account is already register As Membership. Please Visit <a href="' . $accountpage . '">Account page</a></div>';
@@ -274,10 +319,11 @@ function dongtraders_check_user_bought_product_already_bought()
         table.variations {
         display: none;
         }
-
+    
         </style>';
     }
 }
+
 
 /* Checking if the user is logged in and has a membership level. */
 function dongtraders_check_user_membership_level()
@@ -290,40 +336,43 @@ function dongtraders_check_user_membership_level()
     }
 }
 
+
+
 /* Getting the membership level of the product. */
 function dongtraders_get_membership_link_product($product_id)
 {
-    $get_product_member_level = get_post_meta($product_id, '_membership_product_level', true);
+    $get_product_member_level =  get_post_meta($product_id, '_membership_product_level', true);
     return $get_product_member_level;
 }
+
 
 function dongtraders_has_bought_product_items($product_id)
 {
     global $woocommerce;
     $user_id = get_current_user_id();
-    if (0 == $user_id) {
-        return false;
-    }
+    if (0 == $user_id) return false;
 
     // $current_user = wp_get_current_user();
     // $customer_email = $current_user->email;
 
     $customer_orders = get_posts(array(
         'numberposts' => -1,
-        'meta_key' => '_customer_user',
-        'meta_value' => $user_id,
-        'post_type' => wc_get_order_types(),
-        'post_status' => array_keys(wc_get_is_paid_statuses()),
+        'meta_key'    => '_customer_user',
+        'meta_value'  => $user_id,
+        'post_type'   => wc_get_order_types(),
+        'post_status' => array_keys(wc_get_is_paid_statuses())
     ));
 
-    $get_product_member_level = get_post_meta($product_id, '_membership_product_level', true);
+    $get_product_member_level =  get_post_meta($product_id, '_membership_product_level', true);
 
-    if (count($customer_orders) > 1 && (bool) $get_product_member_level) {
+    if (count($customer_orders) > 1 && (bool)$get_product_member_level) {
         return true;
     } else {
         return false;
     }
 }
+
+
 
 // Dongtrader fields used in both pmpro settings and order meta
 
@@ -334,23 +383,23 @@ function dongtrader_membership_level_fields($f, $type)
     //$type must be true or false if pmpro true else if order false
     $display_text = $type ? __('Rate (%):', 'cpm-dongtrader') : __('Total Amount:', 'cpm-dongtrader');
     $fields = array(
-        'dong_reabate' => sprintf(__('Rebate  %s', 'cpm-dongtrader'), $display_text),
-        'dong_processamt' => sprintf(__('Process %s', 'cpm-dongtrader'), $display_text),
+        'dong_reabate'      => sprintf(__('Rebate  %s', 'cpm-dongtrader'), $display_text),
+        'dong_processamt'   => sprintf(__('Process %s', 'cpm-dongtrader'), $display_text),
         //Is used only for orders meta
-        'dong_profitamt' => sprintf(__('Profit %s', 'cpm-dongtrader'), $display_text),
-        'dong_reserve' => sprintf(__('Reserve Amount: ', 'cpm-dongtrader')),
-        'dong_earning_amt' => sprintf(__('Earnings Amount: ', 'cpm-dongtrader')),
+        'dong_profitamt'    => sprintf(__('Profit %s', 'cpm-dongtrader'), $display_text),
+        'dong_reserve'      => sprintf(__('Reserve Amount: ', 'cpm-dongtrader')),
+        'dong_earning_amt'   => sprintf(__('Earnings Amount: ', 'cpm-dongtrader')),
         //Extra Fields Ends
-        'dong_cost' => sprintf(__('Total Cost: ', 'cpm-dongtrader')),
-        'dong_profit_di' => sprintf(__('Profit To Individual %s', 'cpm-dongtrader'), $display_text),
-        'dong_profit_dg' => sprintf(__('Profit To Group  %s', 'cpm-dongtrader'), $display_text),
-        'dong_profit_dca' => sprintf(__('Commision From Profit %s', 'cpm-dongtrader'), $display_text),
-        'dong_comm_cdi' => sprintf(__('Commision To Individual %s', 'cpm-dongtrader'), $display_text),
-        'dong_comm_cdg' => sprintf(__('Commision To Group %s', 'cpm-dongtrader'), $display_text),
-        'dong_earning_per' => sprintf(__('Earning %s', 'cpm-dongtrader'), $display_text),
-        'dong_discounts' => sprintf(__('Discount %s', 'cpm-dongtrader'), $display_text),
+        'dong_cost'         => sprintf(__('Total Cost: ', 'cpm-dongtrader')),
+        'dong_profit_di'    => sprintf(__('Profit To Individual %s', 'cpm-dongtrader'), $display_text),
+        'dong_profit_dg'    => sprintf(__('Profit To Group  %s', 'cpm-dongtrader'), $display_text),
+        'dong_profit_dca'   => sprintf(__('Commision From Profit %s', 'cpm-dongtrader'), $display_text),
+        'dong_comm_cdi'     => sprintf(__('Commision To Individual %s', 'cpm-dongtrader'), $display_text),
+        'dong_comm_cdg'     => sprintf(__('Commision To Group %s', 'cpm-dongtrader'), $display_text),
+        'dong_earning_per'  => sprintf(__('Earning %s', 'cpm-dongtrader'), $display_text),
+        'dong_discounts'    => sprintf(__('Discount %s', 'cpm-dongtrader'), $display_text),
         //dong_affiliates
-        'dong_affid' => sprintf(__('Refferal Id :', 'cpm-dongtrader')),
+        'dong_affid'        => sprintf(__('Refferal Id :', 'cpm-dongtrader'))
 
     );
     if ($type) {
@@ -366,43 +415,44 @@ function dongtrader_membership_level_fields($f, $type)
     return $fields;
 }
 
+
 // Adds new field for order metas backend
 add_action('woocommerce_admin_order_data_after_order_details', 'dong_editable_order_meta_general');
 
 function dong_editable_order_meta_general($order)
 {
 
-    ?>
+?>
     <br class="clear" />
     <h3>
-        <?php _e('Display Order Trading Details', 'cpm-dongtrader')?>
-        <a href="#" class="edit_address"><?php _e('Edit More Trading Details', 'cpm-dongtrader')?></a>
+        <?php _e('Display Order Trading Details', 'cpm-dongtrader') ?>
+        <a href="#" class="edit_address"><?php _e('Edit More Trading Details', 'cpm-dongtrader') ?></a>
     </h3>
     <?php
-$fields = apply_filters('membership_level_fields', array(), false);
+    $fields = apply_filters('membership_level_fields', array(), false);
     ?>
     <div class="address">
         <!-- Items Here will appear on blur -->
         <?php
-foreach ($fields as $key => $value) {
-        $meta_val = !empty($order->get_meta($key)) ? $order->get_meta($key) : 0;
-        $printables = $key != 'dong_affid' ? '<p>' . $value . ' $' . $meta_val . '</p>' : '<p>' . $value . ' ' . $meta_val . '</p>';
-        echo $printables;
-    }
-    ?>
+        foreach ($fields as $key => $value) {
+            $meta_val = !empty($order->get_meta($key)) ? $order->get_meta($key) : 0;
+            $printables = $key != 'dong_affid' ? '<p>' . $value . ' $' . $meta_val . '</p>' : '<p>' . $value . ' ' . $meta_val . '</p>';
+            echo $printables;
+        }
+        ?>
     </div>
     <div class="edit_address">
         <?php
-foreach ($fields as $key => $value) {
-        $meta_vals = $order->get_meta($key);
-        woocommerce_wp_text_input(array(
-            'id' => $key,
-            'label' => $value,
-            'value' => $meta_vals,
-            'wrapper_class' => 'form-field-wide',
-        ));
-    }
-    ?>
+        foreach ($fields as $key => $value) {
+            $meta_vals = $order->get_meta($key);
+            woocommerce_wp_text_input(array(
+                'id' => $key,
+                'label' => $value,
+                'value' => $meta_vals,
+                'wrapper_class' => 'form-field-wide'
+            ));
+        }
+        ?>
     </div>
 <?php
 }
@@ -426,21 +476,21 @@ add_action('pmpro_membership_level_before_billing_information', 'dongtrader_pmpr
 function dongtrader_pmpro_memberships_custom_fields($lv)
 {
     $fields = apply_filters('membership_level_fields', array(), true);
-    ?>
+?>
     <div id="membreship-extra-details" class="pmpro_section" data-visibility="shown" data-activated="true">
         <div class="pmpro_section_toggle">
             <button class="pmpro_section-toggle-button" type="button" aria-expanded="true">
                 <span class="dashicons dashicons-arrow-up-alt2"></span>
-                <?php esc_html_e('Membership Extra Settings', 'cpm-dongtrader');?>
+                <?php esc_html_e('Membership Extra Settings', 'cpm-dongtrader'); ?>
             </button>
         </div>
         <div class="pmpro_section_inside">
             <table class="form-table">
                 <tbody>
                     <?php foreach ($fields as $value => $key) {
-        $current_saved_val = get_pmpro_membership_level_meta($lv->id, $value, true);
+                        $current_saved_val = get_pmpro_membership_level_meta($lv->id, $value, true);
 
-        ?>
+                    ?>
                         <tr>
                             <th scope="row" valign="top">
                                 <label for="<?php echo $value ?>"><?php echo $key; ?></label>
@@ -449,7 +499,7 @@ function dongtrader_pmpro_memberships_custom_fields($lv)
                                 <input name="<?php echo $value ?>" type="number" value="<?php echo $current_saved_val; ?>" class="regular-text" autocomplete="off" step="0.01" />
                             </td>
                         </tr>
-                    <?php }?>
+                    <?php } ?>
                 </tbody>
             </table>
         </div>
@@ -471,7 +521,7 @@ function dongtrader_save_membership_level_custom_fields($id)
 
 function get_pmpro_extrafields_meta($memId)
 {
-    $pm_fields = apply_filters('membership_level_fields', array(), true);
+    $pm_fields      = apply_filters('membership_level_fields', array(), true);
     $new_pm_vals = [];
     foreach (array_keys($pm_fields) as $p) {
         $new_pm_vals[$p] = get_pmpro_membership_level_meta($memId, $p, true);
@@ -480,12 +530,14 @@ function get_pmpro_extrafields_meta($memId)
     return $new_pm_vals;
 }
 
+
+
 /**
  * Step 1 :When Order is received get mebership level id from product meta
  * Step 2 :From  the membership level id above get all values of membership extra details
  * Step 3 : Make the money distibution functionality from the membership level data
- * Step 4 : Update to order meta
- * Distribution Formula : rebate=7 process=3 profit(50i , 40g ,10c) comm(50i,40g,10t) , fmla for profit calculation second case reserve+cost+earning- total price
+ * Step 4 : Update to order meta 
+ * Distribution Formula : rebate=7 process=3 profit(50i , 40g ,10c) comm(50i,40g,10t) , fmla for profit calculation second case reserve+cost+earning- total price 
  */
 function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
 {
@@ -494,11 +546,11 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
     // Get boolean by checking checkbox
     $checkgf = $gf_membership_checkbox == 'on' ? true : false;
     // $pm_fields      = apply_filters('membership_level_fields', array(), true);
-    $member_level = get_post_meta($proId, '_membership_product_level', true);
+    $member_level   = get_post_meta($proId, '_membership_product_level', true);
     // $order_fields   = apply_filters('membership_level_fields', array(), true);
-    $pm_meta_vals = get_pmpro_extrafields_meta($member_level);
+    $pm_meta_vals   = get_pmpro_extrafields_meta($member_level);
     /*Rebate Calculation */
-    $rebate_amount = $pm_meta_vals['dong_reabate'] / 100 * $price;
+    $rebate_amount  = $pm_meta_vals['dong_reabate'] / 100 * $price;
     /*Process Amount */
     $process_amount = $pm_meta_vals['dong_processamt'] / 100 * $price;
     /**Sum of data recieved from pmpro membership levels */
@@ -506,39 +558,39 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
     /*Profit after deduction from rebate and process */
     $remining_profit_amount = $checkgf ? $price - $constant_sum : $price - $rebate_amount - $process_amount;
     /*Total Profit that must be distributed to individual */
-    $profit_amt_individual = $remining_profit_amount * $pm_meta_vals['dong_profit_di'] / 100;
+    $profit_amt_individual  = $remining_profit_amount * $pm_meta_vals['dong_profit_di'] / 100;
     /*Total Profit that must be distributed to group */
-    $profit_amt_group = $remining_profit_amount * $pm_meta_vals['dong_profit_dg'] / 100;
+    $profit_amt_group       = $remining_profit_amount * $pm_meta_vals['dong_profit_dg'] / 100;
     /*commision amount from profit */
-    $profit_commission_amt = $remining_profit_amount * $pm_meta_vals['dong_profit_dca'] / 100;
+    $profit_commission_amt  = $remining_profit_amount * $pm_meta_vals['dong_profit_dca'] / 100;
     /*commision amount from individual */
     $commission_amt_to_individual = $profit_commission_amt * $pm_meta_vals['dong_comm_cdi'] / 100;
     /*commision amount from individual */
-    $commission_amt_to_group = $profit_commission_amt * $pm_meta_vals['dong_comm_cdg'] / 100;
+    $commission_amt_to_group      = $profit_commission_amt * $pm_meta_vals['dong_comm_cdg'] / 100;
     /*Treasury Amount Calculation */
     $treasury_amount = $checkgf ? '0' : $remining_profit_amount;
     /*Discount Amount */
-    $early_discount = $pm_meta_vals['dong_discounts'] / 100 * $remining_profit_amount;
+    $early_discount = $pm_meta_vals['dong_discounts'] / 100  * $remining_profit_amount;
     /**Earnings */
     $earnings = $checkgf ? $pm_meta_vals['dong_earning_per'] / 100 * $pm_meta_vals['dong_earning_amt'] : '0';
 
     $aid = get_post_meta($oid, 'dong_affid', true);
 
     $order_items = [
-        'dong_reabate' => $rebate_amount,
+        'dong_reabate'   => $rebate_amount,
         'dong_processamt' => $process_amount,
         'dong_profitamt' => $remining_profit_amount,
         'dong_profit_di' => $profit_amt_individual,
         'dong_profit_dg' => $profit_amt_group,
         'dong_profit_dca' => $profit_commission_amt,
-        'dong_comm_cdi' => $commission_amt_to_individual,
-        'dong_comm_cdg' => $commission_amt_to_group,
-        'dong_treasury' => $treasury_amount,
-        'dong_earning_amt' => $earnings,
+        'dong_comm_cdi'  => $commission_amt_to_individual,
+        'dong_comm_cdg'  => $commission_amt_to_group,
+        'dong_treasury'  => $treasury_amount,
+        'dong_earning_amt'  => $earnings,
         'dong_discounts' => $early_discount,
-        'dong_reserve' => $pm_meta_vals['dong_reserve'],
-        'dong_cost' => $pm_meta_vals['dong_cost'],
-        'dong_affid' => $aid,
+        'dong_reserve'   => $pm_meta_vals['dong_reserve'],
+        'dong_cost'      => $pm_meta_vals['dong_cost'],
+        'dong_affid'        => $aid
 
     ];
 
@@ -547,7 +599,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
         update_post_meta($oid, $k, wc_clean($v));
     }
     $update_check = get_post_meta($oid, 'distributn_succed', true);
-    if ($cid && $update_check != 'yes' && !$checkgf):
+    if ($cid && $update_check != 'yes' && !$checkgf) :
 
         $not_gf_trading_details_user_meta = get_user_meta($cid, '_user_trading_details', true);
 
@@ -560,7 +612,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
             'dong_profit_di' => 0,
             'dong_comm_dg' => 0,
             'dong_comm_cdi' => 0,
-            'dong_total' => $rebate_amount,
+            'dong_total'  => $rebate_amount
 
         ];
 
@@ -572,7 +624,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
 
 /**
  * Save User data to glassfrog api from orderid
- *
+ *  
  */
 add_action('woocommerce_thankyou', 'dongtrader_after_order_received_process', 10);
 
@@ -580,21 +632,21 @@ function dongtrader_after_order_received_process($order_id)
 {
     $order = wc_get_order($order_id);
 
+
     $customer_id = $order->get_user_id();
 
-    $items = $order->get_items();
+    $items =  $order->get_items();
 
     // var_dump($items);
     $p_id = [];
     foreach ($items as $item) {
 
-
         //check if order is variable item
 
-
         $p_id[] = $item->get_product_id();
-
     }
+
+
 
     $gf_checkbox = get_post_meta($p_id[0], '_glassfrog_checkbox', true);
     if ($gf_checkbox == 'on') {
@@ -608,6 +660,7 @@ function dongtrader_after_order_received_process($order_id)
     dong_set_user_role($customer_id, $p_id[0]);
 }
 
+
 add_action('show_user_profile', 'custom_user_profile_fields');
 add_action('edit_user_profile', 'custom_user_profile_fields');
 
@@ -615,35 +668,7 @@ function custom_user_profile_fields($user)
 {
     $user_trading_metas = get_user_meta($user->ID, '_user_trading_details', true);
 
-    if (empty($user_trading_metas)) {
-        return;
-    }
-
-    if (isset($_REQUEST['filter'])) {
-        $get_filter = sanitize_text_field($_REQUEST['filter']);
-
-        if ($get_filter == "all") {
-
-            /*   $start = '2019-12-20';
-            $enddate = date("Y-m-d"); */
-            $all_selected = "selected";
-            $date_selected = "";
-
-            /*  echo "filter all"; */
-        } elseif ($get_filter == "within-a-date-range") {
-
-            $start = sanitize_text_field($_REQUEST['start-month']);
-            $enddate = sanitize_text_field($_REQUEST['end-month']);
-            $date_selected = "selected";
-            $all_selected = "";
-            /* echo "filter with date"; */
-        }
-    } else {
-        $start = "";
-        $enddate = "";
-        $date_selected = "";
-        $all_selected = "";
-    }
+    if (empty($user_trading_metas)) return;
     //reverse array
     array_reverse($user_trading_metas);
     // determine number of items per page
@@ -660,174 +685,122 @@ function custom_user_profile_fields($user)
     $items_for_current_page = array_slice($user_trading_metas, $start_index, $items_per_page);
 
     // $current_page_loop = array_slice($user_trading_metas);
-    ?>
+?>
     <hr />
-    <h3><?php esc_html_e('Receiveable Amounts', 'cpm-dongtrader');?></h3>
+    <h3><?php esc_html_e('Receiveable Amounts', 'cpm-dongtrader'); ?></h3>
     <p>
         <strong>
-            <?php esc_html_e('All of the trading status are listed here', 'cpm-dongtrader');?>
+            <?php esc_html_e('All of the trading status are listed here', 'cpm-dongtrader'); ?>
         </strong>
     </p>
+    <br class="clear" />
+    <div id="member-history-orders" class="widgets-holder-wrap">
+        <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <thead>
+                <tr>
 
-   
-        <div class="tablenav top">
-            <div class="post_filter">
-                <?php _e('Show','cpm-dongtrader') ?>
-                <select id="filter" name="filter">
-                    <option value="all" <?php echo $all_selected; ?>>All</option>
-                    <option value="within-a-date-range" <?php echo $date_selected; ?>>Within a Date Range</option>
-                </select>
-                <span id="from" style="display: none;">From</span>
-                <input id="start-month" name="start-month" type="date" size="2" value="<?php echo $start; ?>" style="display: none;">
-                <span id="to" style="display: none;">To</span>
-                <input id="end-month" name="end-month" type="date" size="2" value="<?php echo $enddate; ?>" style="display: none;">
-                <span id="filterby" style="display: none;">filter by </span>
-                <input id="submit" class="button" type="submit" value="Filter">
-                <br>
-                <script>
-                    //update month/year when period dropdown is changed
-                    jQuery(document).ready(function() {
-                        jQuery('#filter').change(function() {
-                            pmpro_ShowMonthOrYear();
-                        });
-                    });
-
-                    function pmpro_ShowMonthOrYear() {
-                        var filter = jQuery('#filter').val();
-                        if (filter == 'all') {
-                            jQuery('#start-month').hide();
-                            jQuery('#start-day').hide();
-                            jQuery('#start-year').hide();
-                            jQuery('#end-month').hide();
-                            jQuery('#end-day').hide();
-                            jQuery('#end-year').hide();
-                            jQuery('#predefined-date').hide();
-
-                        } else if (filter == 'within-a-date-range') {
-                            jQuery('#start-month').show();
-                            jQuery('#start-day').show();
-                            jQuery('#start-year').show();
-                            jQuery('#end-month').show();
-                            jQuery('#end-day').show();
-                            jQuery('#end-year').show();
-                            jQuery('#predefined-date').hide();
-                        
-                        }
-                    }
-
-                    pmpro_ShowMonthOrYear();
-                </script>
-            </div>
-        </div> <!-- end tablenav -->
- 
-        <br class="clear" />
-        <div id="member-history-orders" class="widgets-holder-wrap">
-            <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
-                <thead>
-                    <tr>
-
-                        <th><?php esc_html_e('Order ID', 'cpm-dongtrader');?><span class="sorting-indicator"></span></th>
-                        <th><?php esc_html_e('Initiator', 'cpm-dongtrader');?><span class="sorting-indicator"></span></th>
-                        <th><?php esc_html_e('Created Date', 'cpm-dongtrader');?></th>
-                        <th><?php esc_html_e('Rebate', 'cpm-dongtrader');?></th>
-                        <th><?php esc_html_e('Profit', 'cpm-dongtrader');?></th>
-                        <th><?php esc_html_e('Individual Profit', 'cpm-dongtrader');?></th>
-                        <th><?php esc_html_e('Commission', 'cpm-dongtrader');?></th>
-                        <th><?php esc_html_e('Individual Commission', 'cpm-dongtrader');?></th>
-                        <th><?php esc_html_e('Total Amount', 'cpm-dongtrader');?></th>
-                    </tr>
-                </thead>
-                <tbody>
+                    <th><?php esc_html_e('Order ID', 'cpm-dongtrader'); ?><span class="sorting-indicator"></span></th>
+                    <th><?php esc_html_e('Initiator', 'cpm-dongtrader'); ?><span class="sorting-indicator"></span></th>
+                    <th><?php esc_html_e('Created Date', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Rebate', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Profit', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Individual Profit', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Commission', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Individual Commission', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Total Amount', 'cpm-dongtrader'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
                 <?php
-                    $rebate_arr = array_column($user_trading_metas, 'rebate');
-                    $dong_profit_dg_arr = array_column($user_trading_metas, 'dong_profit_dg');
-                    $dong_profit_di_arr = array_column($user_trading_metas, 'dong_profit_di');
-                    $dong_comm_dg_arr = array_column($user_trading_metas, 'dong_comm_dg');
-                    $dong_comm_cdi_arr = array_column($user_trading_metas, 'dong_comm_cdi');
-                    $dong_total_arr = array_column($user_trading_metas, 'dong_total');
-                    $i = 1;
-                    $price_symbol = get_woocommerce_currency_symbol();
-                    foreach ($items_for_current_page as $utm):
-                        $order = new WC_Order($utm['order_id']);
-                        $formatted_order_date = wc_format_datetime($order->get_date_created(), get_option('date_format') . ' ' . get_option('time_format'));
-                        $order_backend_link = admin_url('post.php?post=' . $utm['order_id'] . '&action=edit');
-                        $user_id = $order->get_customer_id();
-                        $user_details = get_userdata($user_id);
-                        $user_display_name = $user_details->data->display_name;
-                        $user_backend_edit_url = get_edit_user_link($user_id);
+                $rebate_arr         = array_column($user_trading_metas, 'rebate');
+                $dong_profit_dg_arr = array_column($user_trading_metas, 'dong_profit_dg');
+                $dong_profit_di_arr = array_column($user_trading_metas, 'dong_profit_di');
+                $dong_comm_dg_arr   = array_column($user_trading_metas, 'dong_comm_dg');
+                $dong_comm_cdi_arr  = array_column($user_trading_metas, 'dong_comm_cdi');
+                $dong_total_arr     = array_column($user_trading_metas, 'dong_total');
+                $i = 1;
+                $price_symbol = get_woocommerce_currency_symbol();
+                foreach ($items_for_current_page as $utm) :
+                    $order = new WC_Order($utm['order_id']);
+                    $formatted_order_date = wc_format_datetime($order->get_date_created(), get_option('date_format') . ' ' . get_option('time_format'));
+                    $order_backend_link = admin_url('post.php?post=' . $utm['order_id'] . '&action=edit');
+                    $user_id = $order->get_customer_id();
+                    $user_details = get_userdata($user_id);
+                    $user_display_name = $user_details->data->display_name;
+                    $user_backend_edit_url = get_edit_user_link($user_id);
                 ?>
-                        <tr class="enable-sorting">
-                            <td>
-                                <a href="<?php echo $order_backend_link; ?>">
-                                    <?php echo $utm['order_id'] ?>
-                                </a>
-                            </td>
-                            <td>
-                                <a href="<?php echo $user_backend_edit_url; ?>">
-                                    <?php echo $user_display_name; ?>
-                                </a>
-                            </td>
-                            <td>
-                                <?php echo $formatted_order_date; ?>
-                            </td>
-                            <td>
-                                <?php echo $price_symbol . $utm['rebate'] ?>
-                            </td>
-                            <!-- Profit -->
-                            <td>
-                                <?php echo $price_symbol . $utm['dong_profit_dg'] ?>
-                            </td>
-                            <td>
-                                <?php echo $price_symbol . $utm['dong_profit_di']; ?>
-                            </td>
-                            <!-- Commission -->
-                            <td>
-                                <?php echo $price_symbol . $utm['dong_comm_dg'] ?>
-                            </td>
-                            <td>
-                                <?php echo $price_symbol . $utm['dong_comm_cdi']; ?>
-                            </td>
-                            <td>
-                                <?php echo $price_symbol . $utm['dong_total'] ?>
-                            </td>
-                        </tr>
-                    <?php $i++; endforeach;?>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="3">All Totals</td>
-                        <td><?php echo $price_symbol . array_sum($rebate_arr); ?></td>
-                        <td><?php echo $price_symbol . array_sum($dong_profit_dg_arr); ?></td>
-                        <td><?php echo $price_symbol . array_sum($dong_profit_di_arr); ?></td>
-                        <td><?php echo $price_symbol . array_sum($dong_comm_dg_arr); ?></td>
-                        <td><?php echo $price_symbol . array_sum($dong_comm_cdi_arr); ?></td>
-                        <td><?php echo $price_symbol . array_sum($dong_total_arr); ?></td>
+                    <tr class="enable-sorting">
+                        <td>
+                            <a href="<?php echo $order_backend_link; ?>">
+                                <?php echo $utm['order_id'] ?>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="<?php echo $user_backend_edit_url; ?>">
+                                <?php echo $user_display_name; ?>
+                            </a>
+                        </td>
+                        <td>
+                            <?php echo $formatted_order_date; ?>
+                        </td>
+                        <td>
+                            <?php echo $price_symbol . $utm['rebate'] ?>
+                        </td>
+                        <!-- Profit -->
+                        <td>
+                            <?php echo $price_symbol . $utm['dong_profit_dg'] ?>
+                        </td>
+                        <td>
+                            <?php echo $price_symbol . $utm['dong_profit_di']; ?>
+                        </td>
+                        <!-- Commission -->
+                        <td>
+                            <?php echo $price_symbol . $utm['dong_comm_dg'] ?>
+                        </td>
+                        <td>
+                            <?php echo $price_symbol . $utm['dong_comm_cdi']; ?>
+                        </td>
+                        <td>
+                            <?php echo $price_symbol . $utm['dong_total'] ?>
+                        </td>
                     </tr>
-                </tfoot>
-            </table>
-        </div>
-        <div class="dong-pagination user-trading-list-paginate" style="float:right">
+
+                <?php $i++;
+                endforeach; ?>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3">All Totals</td>
+                    <td><?php echo $price_symbol . array_sum($rebate_arr); ?></td>
+                    <td><?php echo $price_symbol . array_sum($dong_profit_dg_arr); ?></td>
+                    <td><?php echo $price_symbol . array_sum($dong_profit_di_arr); ?></td>
+                    <td><?php echo $price_symbol . array_sum($dong_comm_dg_arr); ?></td>
+                    <td><?php echo $price_symbol . array_sum($dong_comm_cdi_arr); ?></td>
+                    <td><?php echo $price_symbol . array_sum($dong_total_arr); ?></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <div class="user-trading-list-paginate" style="float:right">
         <?php
-            $num_items = count($user_trading_metas);
-            $num_pages = ceil($num_items / $items_per_page);
-            echo paginate_links(array(
-                'base' => add_query_arg('listpaged', '%#%'),
-                'format' => 'list',
-                'prev_text' => __('&laquo; Previous', 'cpm-dongtrader'),
-                'next_text' => __('Next &raquo;', 'cpm-dongtrader'),
-                'total' => $num_pages,
-                'current' => $current_page,
-            ));
+        $num_items = count($user_trading_metas);
+        $num_pages = ceil($num_items / $items_per_page);
+        echo paginate_links(array(
+            'base' => add_query_arg('listpaged', '%#%'),
+            'format' => 'list',
+            'prev_text' => __('&laquo; Previous'),
+            'next_text' => __('Next &raquo;'),
+            'total' => $num_pages,
+            'current' => $current_page
+        ));
         ?>
     </div>
-
-    <br class="clear">
     <script>
         jQuery(document).ready(function($) {
             // const queryString = window.location.search;
             // const paginationParam = urlParams.get('product')
             const match = /[?&]listpaged=([^&#]*)/.exec(window.location.href);
-            const paginationParam = match ? match[1] : false;
+            const paginationParam = match ? match[1] : null;
             if (paginationParam) {
                 $('html, body').animate({
                     scrollTop: $('#member-history-orders').offset().top
@@ -902,14 +875,14 @@ function dongtraders_csv_order_importer()
             print_r('Failed to move uploaded file.');
         }
 
-        if (($open = fopen($fileurl, "r")) !== false) {
+        if (($open = fopen($fileurl, "r")) !== FALSE) {
             // var_dump('file-open');
             // Skip the first line
             $first_row = true;
             $get_orders = array();
             $headers = array();
 
-            while (($data = fgetcsv($open, 1000, ",")) !== false) {
+            while (($data = fgetcsv($open, 1000, ",")) !== FALSE) {
 
                 if ($first_row) {
                     $headers = $data;
@@ -919,10 +892,11 @@ function dongtraders_csv_order_importer()
                 }
             }
 
+
             fclose($open);
             /* echo "<pre>";
-            var_dump($get_orders);
-            echo "</pre>"; */
+							var_dump($get_orders);
+							echo "</pre>"; */
             $order_status_msg = '<div class="error-box">Order Data could not Imported ! Please Try again</div>';
             foreach ($get_orders as $get_order) {
                 # code...
@@ -942,7 +916,7 @@ function dongtraders_csv_order_importer()
                 // echo $product_id . 'this is product id';
 
                 if ($variation_id == '0') {
-                    $product_id_csv = $product_id;
+                    $product_id_csv =  $product_id;
                 } else {
                     $product_id_csv = $variation_id;
                 }
@@ -959,6 +933,7 @@ function dongtraders_csv_order_importer()
                     $random_password = wp_generate_password();
                     $get_product_membership_level = get_post_meta($product_id, '_membership_product_level', true);
 
+
                     $user_id = wc_create_new_customer($customer_email, $billing_first_name . rand(10, 100), $random_password);
                     pmpro_changeMembershipLevel($get_product_membership_level, $user_id);
 
@@ -967,16 +942,16 @@ function dongtraders_csv_order_importer()
 
                     $address = array(
                         'first_name' => $billing_first_name,
-                        'last_name' => $billing_last_name,
-                        'company' => '',
-                        'email' => $customer_email,
-                        'phone' => $billing_phone,
-                        'address_1' => $billing_address_1,
-                        'address_2' => '',
-                        'city' => $billing_city,
-                        'state' => $billing_state,
-                        'postcode' => $billing_postcode,
-                        'country' => $billing_country,
+                        'last_name'  => $billing_last_name,
+                        'company'    => '',
+                        'email'      => $customer_email,
+                        'phone'      => $billing_phone,
+                        'address_1'  => $billing_address_1,
+                        'address_2'  => '',
+                        'city'       => $billing_city,
+                        'state'      => $billing_state,
+                        'postcode'   => $billing_postcode,
+                        'country'    => $billing_country
                     );
 
                     $order = wc_create_order();
@@ -986,7 +961,8 @@ function dongtraders_csv_order_importer()
                     // add products
                     $get_quantity_yam = get_post_meta($product_id, '_qty_args', true);
                     if (is_array($get_quantity_yam)) {
-                        $order->add_product(wc_get_product($product_id_csv), 10);
+                        $get_quantity_yam_no = dongtraders_set_product_quantity($product_id);
+                        $order->add_product(wc_get_product($product_id_csv), $get_quantity_yam_no);
                     } else {
                         $order->add_product(wc_get_product($product_id_csv), 1);
                     }
@@ -1014,7 +990,7 @@ function dongtraders_csv_order_importer()
                     $order->save();
 
                     $product = wc_get_product($product_id_csv);
-                    $product_price = $product->get_price();
+                    $product_price =  $product->get_price();
                     /*  echo $product_price . '-product price'; */
 
                     $order_id = $order->get_id();
