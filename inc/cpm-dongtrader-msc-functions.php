@@ -471,14 +471,14 @@ function dong_display_trading_details($user_id){
                 ?>
                         <tr class="enable-sorting">
                             <td>
-                                <a href="<?php echo $order_backend_link; ?>">
+                               
                                     <?php echo $utm['order_id'] ?>
-                                </a>
+                               
                             </td>
                             <td>
-                                <a href="">
+                               
                                     <?php echo $user_display_name; ?>
-                                </a>
+                               
                             </td>
                             <td>
                                 <?php echo $formatted_order_date; ?>
