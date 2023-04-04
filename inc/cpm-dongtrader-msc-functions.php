@@ -415,7 +415,7 @@ function dong_display_trading_details($user_id){
     $user_trading_metas = get_user_meta($user_id, '_user_trading_details', true);
 
     //reverse array
-    array_reverse($user_trading_metas);
+    // array_reverse($user_trading_metas);
 
     // determine number of items per page
     $items_per_page = 5;
@@ -431,7 +431,7 @@ function dong_display_trading_details($user_id){
     // slice the array to get items for current page
     $items_for_current_page = array_slice($user_trading_metas, $start_index, $items_per_page);
     
-    if(!empty($user_trading_metas)) :
+    if(!empty($items_for_current_page)) :
     ?>
     <div class="user-trading-details">
         <strong><?php esc_html_e('Your Trading Details', 'cpm-dongtrader');?></strong>
@@ -439,7 +439,6 @@ function dong_display_trading_details($user_id){
             <table class="affilate-data" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <thead>
                     <tr>
-
                         <th><?php esc_html_e('Order ID', 'cpm-dongtrader');?><span class="sorting-indicator"></span></th>
                         <th><?php esc_html_e('Initiator', 'cpm-dongtrader');?><span class="sorting-indicator"></span></th>
                         <th><?php esc_html_e('Created Date', 'cpm-dongtrader');?></th>
