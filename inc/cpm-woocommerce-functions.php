@@ -611,7 +611,9 @@ function dongtrader_after_order_received_process($order_id)
     $p_id = [];
     foreach ($items as $item) {
 
+
         //check if order is variable item
+
 
         $p_id[] = $item->get_product_id();
 
@@ -1005,7 +1007,13 @@ function dongtraders_csv_order_importer()
                     $order->set_customer_id($user_id);
                     $order->update_meta_data('dong_affid', $affiliate_user_id);
                     // add products
-                    $order->add_product(wc_get_product($product_id_csv), 1);
+                    $get_quantity_yam = get_post_meta($product_id, '_qty_args', true);
+                    if (is_array($get_quantity_yam)) {
+                        $order->add_product(wc_get_product($product_id_csv), 10);
+                    } else {
+                        $order->add_product(wc_get_product($product_id_csv), 1);
+                    }
+
 
                     // add shipping
                     $shipping = new WC_Order_Item_Shipping();
