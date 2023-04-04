@@ -430,10 +430,13 @@ function dong_display_trading_details($user_id){
 
     // slice the array to get items for current page
     $items_for_current_page = array_slice($user_trading_metas, $start_index, $items_per_page);
-
+    
+    if(!empty($user_trading_metas)) :
     ?>
+    <div class="user-trading-details">
+        <strong><?php esc_html_e('Your Trading Details', 'cpm-dongtrader');?></strong>
         <div id="member-history-orders" class="widgets-holder-wrap">
-            <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <table class="affilate-data" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <thead>
                     <tr>
 
@@ -460,7 +463,7 @@ function dong_display_trading_details($user_id){
                     $price_symbol = get_woocommerce_currency_symbol();
                     foreach ($items_for_current_page as $utm):
                         $order                  = new WC_Order($utm['order_id']);
-                        $formatted_order_date   = wc_format_datetime($order->get_date_created(), get_option('date_format') . ' ' . get_option('time_format'));
+                        $formatted_order_date   = wc_format_datetime($order->get_date_created(), 'Y-m-d');
                         $order_backend_link     = admin_url('post.php?post=' . $utm['order_id'] . '&action=edit');
                         $user_id                = $order->get_customer_id();
                         $user_details           = get_userdata($user_id);
@@ -474,7 +477,7 @@ function dong_display_trading_details($user_id){
                                 </a>
                             </td>
                             <td>
-                                <a href="<?php echo $user_backend_edit_url; ?>">
+                                <a href="">
                                     <?php echo $user_display_name; ?>
                                 </a>
                             </td>
@@ -531,7 +534,13 @@ function dong_display_trading_details($user_id){
                 ));
             ?>
         </div>
-    <?php
+        <?php
+        else:
+            echo '<strong>Trading Details Not Found</strong>';
 
+        endif;
+        ?>
+    </div>
+<?php
 }
 add_action('dong_display_distribution_table', 'dong_display_trading_details');
