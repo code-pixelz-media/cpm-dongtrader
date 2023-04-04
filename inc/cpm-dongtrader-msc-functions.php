@@ -410,4 +410,128 @@ function glassfrog_api_get_persons_of_circles()
 
 }
 
-//do_action( 'dong_display_distribution_table', $user_ID );
+function dong_display_trading_details($user_id){
+
+    $user_trading_metas = get_user_meta($user_id, '_user_trading_details', true);
+
+    //reverse array
+    array_reverse($user_trading_metas);
+
+    // determine number of items per page
+    $items_per_page = 5;
+
+    // determine current page number from query parameter
+    $current_page = isset($_GET['listpaged']) ? intval($_GET['listpaged']) : 1;
+
+    // calculate start and end indices for items on current page
+    $start_index = ($current_page - 1) * $items_per_page;
+
+    $end_index = $start_index + $items_per_page;
+
+    // slice the array to get items for current page
+    $items_for_current_page = array_slice($user_trading_metas, $start_index, $items_per_page);
+
+    ?>
+        <div id="member-history-orders" class="widgets-holder-wrap">
+            <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <thead>
+                    <tr>
+
+                        <th><?php esc_html_e('Order ID', 'cpm-dongtrader');?><span class="sorting-indicator"></span></th>
+                        <th><?php esc_html_e('Initiator', 'cpm-dongtrader');?><span class="sorting-indicator"></span></th>
+                        <th><?php esc_html_e('Created Date', 'cpm-dongtrader');?></th>
+                        <th><?php esc_html_e('Rebate', 'cpm-dongtrader');?></th>
+                        <th><?php esc_html_e('Profit', 'cpm-dongtrader');?></th>
+                        <th><?php esc_html_e('Individual Profit', 'cpm-dongtrader');?></th>
+                        <th><?php esc_html_e('Commission', 'cpm-dongtrader');?></th>
+                        <th><?php esc_html_e('Individual Commission', 'cpm-dongtrader');?></th>
+                        <th><?php esc_html_e('Total Amount', 'cpm-dongtrader');?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php
+                    $rebate_arr         = array_column($user_trading_metas, 'rebate');
+                    $dong_profit_dg_arr = array_column($user_trading_metas, 'dong_profit_dg');
+                    $dong_profit_di_arr = array_column($user_trading_metas, 'dong_profit_di');
+                    $dong_comm_dg_arr   = array_column($user_trading_metas, 'dong_comm_dg');
+                    $dong_comm_cdi_arr  = array_column($user_trading_metas, 'dong_comm_cdi');
+                    $dong_total_arr     = array_column($user_trading_metas, 'dong_total');
+                    $i = 1;
+                    $price_symbol = get_woocommerce_currency_symbol();
+                    foreach ($items_for_current_page as $utm):
+                        $order                  = new WC_Order($utm['order_id']);
+                        $formatted_order_date   = wc_format_datetime($order->get_date_created(), get_option('date_format') . ' ' . get_option('time_format'));
+                        $order_backend_link     = admin_url('post.php?post=' . $utm['order_id'] . '&action=edit');
+                        $user_id                = $order->get_customer_id();
+                        $user_details           = get_userdata($user_id);
+                        $user_display_name      = $user_details->data->display_name;
+                        $user_backend_edit_url  = get_edit_user_link($user_id);
+                ?>
+                        <tr class="enable-sorting">
+                            <td>
+                                <a href="<?php echo $order_backend_link; ?>">
+                                    <?php echo $utm['order_id'] ?>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="<?php echo $user_backend_edit_url; ?>">
+                                    <?php echo $user_display_name; ?>
+                                </a>
+                            </td>
+                            <td>
+                                <?php echo $formatted_order_date; ?>
+                            </td>
+                            <td>
+                                <?php echo $price_symbol . $utm['rebate'] ?>
+                            </td>
+                            <!-- Profit -->
+                            <td>
+                                <?php echo $price_symbol . $utm['dong_profit_dg'] ?>
+                            </td>
+                            <td>
+                                <?php echo $price_symbol . $utm['dong_profit_di']; ?>
+                            </td>
+                            <!-- Commission -->
+                            <td>
+                                <?php echo $price_symbol . $utm['dong_comm_dg'] ?>
+                            </td>
+                            <td>
+                                <?php echo $price_symbol . $utm['dong_comm_cdi']; ?>
+                            </td>
+                            <td>
+                                <?php echo $price_symbol . $utm['dong_total'] ?>
+                            </td>
+                        </tr>
+                    <?php $i++; endforeach;?>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3">All Totals</td>
+                        <td><?php echo $price_symbol . array_sum($rebate_arr); ?></td>
+                        <td><?php echo $price_symbol . array_sum($dong_profit_dg_arr); ?></td>
+                        <td><?php echo $price_symbol . array_sum($dong_profit_di_arr); ?></td>
+                        <td><?php echo $price_symbol . array_sum($dong_comm_dg_arr); ?></td>
+                        <td><?php echo $price_symbol . array_sum($dong_comm_cdi_arr); ?></td>
+                        <td><?php echo $price_symbol . array_sum($dong_total_arr); ?></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div class="dong-pagination user-trading-list-paginate" style="float:right">
+            <?php
+                $num_items = count($user_trading_metas);
+                $num_pages = ceil($num_items / $items_per_page);
+                echo paginate_links(array(
+                    'base' => add_query_arg('listpaged', '%#%'),
+                    'format' => 'list',
+                    'prev_text' => __('&laquo; Previous', 'cpm-dongtrader'),
+                    'next_text' => __('Next &raquo;', 'cpm-dongtrader'),
+                    'total' => $num_pages,
+                    'current' => $current_page,
+                ));
+            ?>
+        </div>
+    <?php
+
+}
+add_action('dong_display_distribution_table', 'dong_display_trading_details');
