@@ -614,7 +614,7 @@ function dongtrader_after_order_received_process($order_id)
 {
     $order = wc_get_order($order_id);
 
-    
+
     $customer_id = $order->get_user_id();
 
     $items =  $order->get_items();
@@ -622,15 +622,14 @@ function dongtrader_after_order_received_process($order_id)
     // var_dump($items);
     $p_id = [];
     foreach ($items as $item) {
-        
+
         //check if order is variable item
-     
+
         $p_id[] = $item->get_product_id();
-        
     }
 
-    
-    
+
+
     $gf_checkbox = get_post_meta($p_id[0], '_glassfrog_checkbox', true);
     if ($gf_checkbox == 'on') {
         dongtrader_user_registration_hook($customer_id, $p_id[0], $order_id);
@@ -681,7 +680,7 @@ function custom_user_profile_fields($user)
         <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
             <thead>
                 <tr>
-                   
+
                     <th><?php esc_html_e('Order ID', 'cpm-dongtrader'); ?><span class="sorting-indicator"></span></th>
                     <th><?php esc_html_e('Initiator', 'cpm-dongtrader'); ?><span class="sorting-indicator"></span></th>
                     <th><?php esc_html_e('Created Date', 'cpm-dongtrader'); ?></th>
@@ -705,7 +704,7 @@ function custom_user_profile_fields($user)
                 $price_symbol = get_woocommerce_currency_symbol();
                 foreach ($items_for_current_page as $utm) :
                     $order = new WC_Order($utm['order_id']);
-                    $formatted_order_date = wc_format_datetime( $order->get_date_created(),get_option('date_format') . ' ' . get_option('time_format') );
+                    $formatted_order_date = wc_format_datetime($order->get_date_created(), get_option('date_format') . ' ' . get_option('time_format'));
                     $order_backend_link = admin_url('post.php?post=' . $utm['order_id'] . '&action=edit');
                     $user_id = $order->get_customer_id();
                     $user_details = get_userdata($user_id);
@@ -942,7 +941,13 @@ function dongtraders_csv_order_importer()
                     $order->set_customer_id($user_id);
                     $order->update_meta_data('dong_affid', $affiliate_user_id);
                     // add products
-                    $order->add_product(wc_get_product($product_id_csv), 1);
+                    $get_quantity_yam = get_post_meta($product_id, '_qty_args', true);
+                    if (is_array($get_quantity_yam)) {
+                        $order->add_product(wc_get_product($product_id_csv), 10);
+                    } else {
+                        $order->add_product(wc_get_product($product_id_csv), 1);
+                    }
+
 
                     // add shipping
                     $shipping = new WC_Order_Item_Shipping();
