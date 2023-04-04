@@ -102,30 +102,7 @@ function cpm_dong_my_membership_affilate_data_endpoint_content()
     $user_ID = get_current_user_id();
     $get_user_affilates = pmpro_affiliates_getAffiliatesForUser($user_ID);
     //var_dump($get_user_affilates);
-
-    ?>
-    <table class="affilate-data">
-        <tr>
-            <th>
-                Referral Code
-            </th>
-            <th>
-                Commission Rate
-            </th>
-        </tr>
-        <tr>
-            <?php
-foreach ($get_user_affilates as $get_user_affilate) {
-
-        echo '<td>' . $get_user_affilate->code . '</td>';
-        echo '<td>' . $get_user_affilate->commissionrate . '</td>';
-    }
-
-    ?>
-        </tr>
-    </table>
-
-<?php
+    do_action( 'dong_display_distribution_table', $user_ID );
 
 }
 
