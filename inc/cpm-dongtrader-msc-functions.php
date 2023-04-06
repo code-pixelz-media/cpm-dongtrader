@@ -412,30 +412,146 @@ function glassfrog_api_get_persons_of_circles()
 
 function dong_display_trading_details($user_id){
 
+    //get user trading details 
     $user_trading_metas = get_user_meta($user_id, '_user_trading_details', true);
 
-    //reverse array
-    // array_reverse($user_trading_metas);
-
-    // determine number of items per page
-    $items_per_page = 5;
-
-    // determine current page number from query parameter
-    $current_page = isset($_GET['listpaged']) ? intval($_GET['listpaged']) : 1;
-
-    // calculate start and end indices for items on current page
-    $start_index = ($current_page - 1) * $items_per_page;
-
-    $end_index = $start_index + $items_per_page;
-
-    // slice the array to get items for current page
-    $items_for_current_page = array_slice($user_trading_metas, $start_index, $items_per_page);
+    // $user_trading_meta = 'a:5:{i:0;a:7:{s:8:"order_id";s:4:"2016";s:6:"rebate";s:3:"2.1";s:14:"dong_profit_dg";d:0.8;s:14:"dong_profit_di";i:0;s:12:"dong_comm_dg";d:0.08;s:13:"dong_comm_cdi";i:0;s:10:"dong_total";d:2.9800000000000004;}i:1;a:7:{s:8:"order_id";s:4:"2015";s:6:"rebate";i:0;s:14:"dong_profit_dg";d:0.8;s:14:"dong_profit_di";i:0;s:12:"dong_comm_dg";d:0.08;s:13:"dong_comm_cdi";i:0;s:10:"dong_total";d:0.88;}i:2;a:7:{s:8:"order_id";s:4:"2015";s:6:"rebate";i:0;s:14:"dong_profit_dg";d:0.8;s:14:"dong_profit_di";i:0;s:12:"dong_comm_dg";d:0.08;s:13:"dong_comm_cdi";i:0;s:10:"dong_total";d:0.88;}i:3;a:7:{s:8:"order_id";s:4:"2013";s:6:"rebate";i:0;s:14:"dong_profit_dg";d:0.8;s:14:"dong_profit_di";i:0;s:12:"dong_comm_dg";d:0.08;s:13:"dong_comm_cdi";i:0;s:10:"dong_total";d:0.88;}i:4;a:7:{s:8:"order_id";s:4:"2013";s:6:"rebate";i:0;s:14:"dong_profit_dg";d:0.8;s:14:"dong_profit_di";i:0;s:12:"dong_comm_dg";d:0.08;s:13:"dong_comm_cdi";i:0;s:10:"dong_total";d:0.88;}}';
     
-    if(!empty($items_for_current_page)) :
+    // $user_trading_metas = unserialize($user_trading_meta);
+    //if trading details are not empty
+    if(!empty($user_trading_metas)) :
+
+        // determine number of items per page
+        $items_per_page = 5;
+
+        // determine current page number from query parameter
+        $current_page = isset($_GET['listpaged']) ? intval($_GET['listpaged']) : 1;
+
+        // calculate start and end indices for items on current page
+        $start_index = ($current_page - 1) * $items_per_page;
+
+        if (isset($_REQUEST['filter'])) {
+
+            //get filter data from url parameters
+            $get_filter = sanitize_text_field($_REQUEST['filter']);
+    
+            if ($get_filter == "all") {
+    
+
+                $all_selected = "selected";
+                $date_selected = "";
+
+            } elseif ($get_filter == "within-a-date-range") {
+
+                //get start date
+                $start      = sanitize_text_field($_REQUEST['start-month']);
+
+                //get end date
+                $enddate    = sanitize_text_field($_REQUEST['end-month']);
+                $date_selected  = "selected";
+                $all_selected   = "";
+
+                if (strtotime($start) > strtotime($enddate)) {
+                    $temp_date = $start;
+                    $start = $enddate;
+                    $enddate = $temp_date;
+                }
+
+                
+                $start_date_obj = strtotime($start);
+                $end_date_obj = strtotime($enddate);
+
+                if($start_date_obj && $end_date_obj){
+                    
+                    $results = array_filter($user_trading_metas, function($item) use ($start_date_obj, $end_date_obj) {
+                        $order = new WC_Order($item['order_id']);
+                        $item_date = strtotime($order->get_date_created()->date('Y-m-d'));
+                    
+                       return ($item_date >= $start_date_obj && $item_date <= $end_date_obj);
+                    });
+
+                    $user_trading_metas = $results;
+                    $start_index =0;
+                    
+
+                }
+            }
+        } else {
+            $start = "";
+            $enddate = "";
+            $date_selected = "";
+            $all_selected = "";
+
+          
+        }
+    
+
+        $items_for_current_page = array_slice($user_trading_metas, $start_index, $items_per_page);
+        // slice the array to get items for current page
+       
     ?>
     <div class="user-trading-details">
         <strong><?php esc_html_e('Your Trading Details', 'cpm-dongtrader');?></strong>
         <div id="member-history-orders" class="widgets-holder-wrap cpm-table-wrap">
+        <form id="posts-filter" method="get" action="">
+            <label for="filter"><?php _e("Show",'cpm-dongtrader'); ?></label>
+            <select id="filter" name="filter">
+                <option value="all" <?php echo $all_selected; ?>>All</option>
+                <option value="within-a-date-range" <?php echo $date_selected; ?>>Within a Date Range</option>
+            </select>
+            <span id="from" style="display: none;">From</span>
+            <input id="start-month" name="start-month" type="date" size="2" value="<?php echo $start; ?>" style="display: none;">
+            <span id="to" style="display: none;">To</span>
+            <input id="end-month" name="end-month" type="date" size="2" value="<?php echo $enddate; ?>" style="display: none;">
+            <span id="filterby" style="display: none;">filter by </span>
+            <input id="submit" class="button" type="submit" value="Filter">
+            <script>
+                    //update month/year when period dropdown is changed
+                jQuery(document).ready(function() {
+                    jQuery('#filter').change(function() {
+                        pmpro_ShowMonthOrYear();
+                    });
+                });
+
+                function pmpro_ShowMonthOrYear() {
+                    var filter = jQuery('#filter').val();
+                    if (filter == 'all') {
+                        jQuery('#start-month').hide();
+                        jQuery('#start-day').hide();
+                        jQuery('#start-year').hide();
+                        jQuery('#end-month').hide();
+                        jQuery('#end-day').hide();
+                        jQuery('#end-year').hide();
+                        jQuery('#predefined-date').hide();
+                        jQuery('#status').hide();
+                        jQuery('#l').hide();
+                        jQuery('#discount-code').hide();
+                        jQuery('#from').hide();
+                        jQuery('#to').hide();
+                        jQuery('#submit').show();
+                        jQuery('#filterby').hide();
+                    } else if (filter == 'within-a-date-range') {
+                        jQuery('#start-month').show();
+                        jQuery('#start-day').show();
+                        jQuery('#start-year').show();
+                        jQuery('#end-month').show();
+                        jQuery('#end-day').show();
+                        jQuery('#end-year').show();
+                        jQuery('#predefined-date').hide();
+                        jQuery('#status').hide();
+                        jQuery('#l').hide();
+                        jQuery('#discount-code').hide();
+                        jQuery('#submit').show();
+                        jQuery('#from').show();
+                        jQuery('#to').show();
+                        jQuery('#filterby').hide();
+                    }
+                }
+
+                pmpro_ShowMonthOrYear();
+            </script>
+        </form>
+            
             <table class="affilate-data" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <thead>
                     <tr>
@@ -452,6 +568,7 @@ function dong_display_trading_details($user_id){
                 </thead>
                 <tbody>
                 <?php
+                if(!empty($items_for_current_page)):
                     $rebate_arr         = array_column($user_trading_metas, 'rebate');
                     $dong_profit_dg_arr = array_column($user_trading_metas, 'dong_profit_dg');
                     $dong_profit_di_arr = array_column($user_trading_metas, 'dong_profit_di');
@@ -471,14 +588,10 @@ function dong_display_trading_details($user_id){
                 ?>
                         <tr class="enable-sorting">
                             <td>
-                               
-                                    <?php echo $utm['order_id'] ?>
-                               
+                                <?php echo $utm['order_id']; ?>
                             </td>
                             <td>
-                               
-                                    <?php echo $user_display_name; ?>
-                               
+                                <?php echo $user_display_name; ?>
                             </td>
                             <td>
                                 <?php echo $formatted_order_date; ?>
@@ -504,8 +617,13 @@ function dong_display_trading_details($user_id){
                                 <?php echo $price_symbol . $utm['dong_total'] ?>
                             </td>
                         </tr>
-                    <?php $i++; endforeach;?>
+                    <?php $i++; endforeach; else :?>
+                        <tr>
+                            <td colspan="9"><strong><?php _e('Results Not Found', 'cpm-dongtrader') ?></strong></td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
+                <?php if(!empty($items_for_current_page)) : ?>
                 <tfoot>
                     <tr>
                         <td colspan="3">All Totals</td>
@@ -517,6 +635,7 @@ function dong_display_trading_details($user_id){
                         <td><?php echo $price_symbol . array_sum($dong_total_arr); ?></td>
                     </tr>
                 </tfoot>
+                <?php endif; ?>
             </table>
         </div>
         <div class="dong-pagination user-trading-list-paginate" style="float:right">
