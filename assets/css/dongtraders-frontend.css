@@ -190,3 +190,34 @@ form#export-csv-order p {
 }
 
 /* -----END OF EXPORTER */
+
+/* AFFILIATE REFERRALS */
+
+.cpm-table-wrap #posts-filter{
+    display: block;
+}
+.cpm-table-wrap #posts-filter input, .cpm-table-wrap #posts-filter select{
+    max-width: 100%;
+    width: 100%;
+    margin: 5px 0;
+}
+.cpm-table-wrap #posts-filter input.button{
+    width: 5rem;
+    margin-top: 3px;
+}
+.cpm-table-wrap #posts-filter span{
+    margin: 0;
+}
+.user-trading-details strong{
+    color: var(--white);
+    text-align: center;
+}
+
+/*end of affiliate referrals*/
+
+/* ADD YOUR AFFILIATE ORDER */
+@media (min-width: 768px){
+    .order-export-form input[type="submit"]{
+        margin-top: 20px;
+    } 
+}
