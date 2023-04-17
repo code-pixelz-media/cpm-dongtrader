@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @author anil 
+ * @author anil
  * All about cron job which is used for price distribution
  */
 
@@ -16,7 +16,7 @@ function dongtrader_one_minutes_interval($schedules)
 
     $schedules['1_minutes'] = array(
         'interval' => 3 * 60,
-        'display'  => __('Every 3 minutes', 'cpm-dongtrader'),
+        'display' => __('Every 3 minutes', 'cpm-dongtrader'),
     );
 
     return $schedules;
@@ -53,55 +53,304 @@ function dongtrader_cron_job()
  *
  * @return void
  */
-function dongtrader_distribute_product_prices_to_circle_members(){
+function dongtrader_distribute_product_prices_to_circle_members()
+{
 
-   //get all members from user id
-   $members = glassfrog_api_get_persons_of_circles();
+    //get all members from user id
+    $members = glassfrog_api_get_persons_of_circles();
 
-   //exit if there are no members
-   if(!$members) return;
+    //exit if there are no members
+    if (!$members) {
+        return;
+    }
 
-   global $wpdb;
+    global $wpdb;
 
-   //Our Custom table name from the database.
-   $table_name = $wpdb->prefix . 'manage_users_gf';
+    //Our Custom table name from the database.
+    $table_name = $wpdb->prefix . 'manage_users_gf';
 
-   //looping through all members
-    foreach($members as $m) :
+    //looping through all members
+    foreach ($members as $m):
 
         //if m is null continue to next loop
-        if(!isset($m)) continue;
-
+        if (!isset($m)) continue;
+       
         //query to get order id by user id
-        $order_id =  $wpdb->get_var("SELECT order_id FROM $table_name WHERE user_id= $m[user_id] ");
+        $order_id = intval($wpdb->get_var("SELECT order_id FROM $table_name WHERE user_id= $m[user_id] "));
 
+        $order_obj = wc_get_order($order_id);
         //parent userid
         $parent_user_id = intval($m['user_id']);
 
-        //get affiliate id 
-        $dong_affid = dongtrader_get_order_meta($order_id, 'dong_affid');
+        //get affiliate id
+        $seller_id = dongtrader_get_order_meta($order_id, 'dong_affid');
 
         //childrens user ids
-        $children_users_id = ['related-'.$parent_user_id .'-'.$order_id => $m['related'] ];
+        $children_users_id = ['related-' . $parent_user_id . '-' . $order_id => $m['related']];
 
-        //save distributed amount to current customer
-        dongtrader_split_price_parent($parent_user_id, $order_id);
-        
-        //save distributed amount to current customers group members
-        dongtrader_split_price_childrens($children_users_id );
 
-        //Saves distributed amount to affiliates
-        dongtrader_split_price_affiliates($dong_affid , $order_id);
+ dongtrader_save_myorder_details($parent_user_id,$order_id);
+ dongtrader_save_treasury_details($parent_user_id,$order_id);
+ //dongtrader_save_commission_details($parent_user_id,$order_id);
 
-        //Saves process amount to site owner
-        split_process_charges_to_siteowner(1,$order_id);
+       // dongtrader_save_myorder_details($parent_user_id, $order_id);
+        // //save distributed amount to current customer
+        // dongtrader_split_price_parent($parent_user_id, $order_id);
 
-    //end looping for all members
+        // //save distributed amount to current customers group members
+        // dongtrader_split_price_childrens($children_users_id);
+
+        // //Saves distributed amount to affiliates
+        // dongtrader_split_price_affiliates($dong_affid, $order_id);
+
+        // //Saves process amount to site owner
+        // split_process_charges_to_siteowner(1, $order_id);
+
+        //end looping for all members
     endforeach;
+
+}
+
+
+function dongtrader_get_product($order_id , $name=false){
+
+    $order          = wc_get_order($order_id);
+
+    $items          =  $order->get_items();
+
+    foreach ($items as $item) {
+
+        $product = $item->get_product();
+
+        $product_id[] =  $product->get_id();
+
+        if($name) $product_name[] = $product->get_name();
+
+    }
+
+    return $name ? $product_name[0] : $product_id[0];
 
 
 }
 
+function dongtrader_check_user($uid , $check_only = true ){
+
+    global $wpdb;
+   
+    $table_name =  $wpdb->prefix .'users';
+
+    $user_id_int = intval($uid);
+
+    if($check_only ) :
+
+        $check_user = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE ID = %d AND id !=0 ", $user_id_int));
+
+        $val = intval($check_user) == 1 ? true : false;
+
+    else :
+
+        $user_name = $wpdb->get_var("SELECT display_name FROM $table_name WHERE id = $uid");
+        
+        $val = $user_name;
+
+    endif;
+
+
+    return $val;
+
+}
+
+
+/**
+ * Saves trading details to seller
+ *
+ * @param [int] $b_id buyer user_id
+ * @param [int] $o_id buyer's order_id
+ * @return void
+ */
+
+
+function dongtrader_save_myorder_details($b_id,$o_id){
+
+    //get affiliate id of the seller
+    $seller_id    = dongtrader_get_order_meta($o_id, 'dong_affid');
+
+    //check if buyer user_id exists
+    $check_buyer  = dongtrader_check_user($b_id);
+
+    //check if affiliate user_id exists
+    $check_seller = dongtrader_check_user($seller_id);
+   
+    //if seller and buyer both user exists
+    if($check_buyer ) :
+        
+        //get previous seller trading details saved in user meta
+        $buyer_meta  = get_user_meta($b_id, '_buyer_details', true);
+
+        //assign empty array if $buyer_meta is empty 
+        $buyer_metas = !empty($buyer_meta) ? $buyer_meta : [];
+
+        //get buyer or customer name
+        $buyer_name   = dongtrader_check_user($b_id , false);
+        
+        //get seller or affiliate id we might not need this for instance
+        //$seller_name  = dongtrader_check_user($seller_id , false);
+
+        //rebate amount from order meta distributeable to user whom has brought the product
+        $rebate       = dongtrader_get_order_meta($o_id, 'dong_reabate');
+       
+        //get title of the product
+        $product_name = dongtrader_get_product($o_id,true);
+
+        //get actual process amount from order meta
+        $process_amt  = dongtrader_get_order_meta($o_id,'dong_processamt');
+
+        //get seller or affiliate profit amount from order meta
+        $seller_profit= dongtrader_get_order_meta($o_id,'dong_profit_di'); 
+
+        //if seller is buyer himself compare ids and then set process amount 
+        $process_amount  = $b_id == $seller_id ? $process_amt : 0;
+
+        //new array for new order which we will append to 
+        $buyer_metas[] = [
+            'order_id'      => $o_id,
+            'name'          => $buyer_name,
+            'product_title' => $product_name,
+            'rebate'        => $rebate,
+            'process'       => $process_amount,
+            'seller_profit' => $seller_profit,
+            'total'         => $rebate + $process_amount + $seller_profit
+        ];
+
+       update_user_meta($b_id,'_buyer_details',$buyer_metas);
+
+       
+
+    endif;
+    
+}
+
+
+function dongtrader_save_treasury_details($b_id , $o_id){
+
+        //get previous seller trading details saved in user meta
+        $treasury_meta  = get_user_meta($b_id, '_treasury_details', true);
+
+        //assign empty array if $treasury_meta is empty 
+        $treasury_metas = !empty($treasury_meta) ? $treasury_meta : [];
+
+        //check if buyer user_id exists
+        $check_buyer  = dongtrader_check_user($b_id);
+        
+
+        if($check_buyer) :
+
+            //get title of the product
+            $product_name = dongtrader_get_product($o_id,true);
+
+            //product id
+            $v_product_id = dongtrader_get_product($o_id);
+
+            //get buyer or customer name
+            $buyer_name   = dongtrader_check_user($b_id , false);
+
+            //get product price by id
+            $product_obj = wc_get_product( $v_product_id );
+
+            //variation's parent product id
+
+            $p_p_id = $product_obj->get_parent_id();
+
+            //get product price
+            $product_price = intval($product_obj->get_price());
+
+            //rebate amount from order meta distributeable to user whom has brought the product
+            $rebate       = dongtrader_get_order_meta($o_id, 'dong_reabate');
+
+            //rebate amount from order meta distributeable to user whom has brought the product
+            $process       = dongtrader_get_order_meta($o_id, 'dong_processamt');
+
+            //get membership level
+            $member_level   = get_post_meta($p_p_id, '_membership_product_level', true);
+
+            //paid membership pro extra fields
+            $pm_meta_vals   = get_pmpro_extrafields_meta($member_level);
+
+            //this value is not working
+            $cost           = $pm_meta_vals['dong_cost'];
+
+            $individual_profit = dongtrader_get_order_meta($o_id, 'dong_profit_di'); 
+
+            $distributed_total_amt = $rebate + $process + $individual_profit + $cost;
+
+            $remaining_total_amt   = $product_price - $distributed_total_amt;
+
+
+            $treasury_metas[] = [
+                'order_id'      => $o_id,
+                'name'          => $buyer_name,
+                'product_title' => $product_name,
+                // 'reserve'       => '',
+                // 'cost'          => '',
+                // 'earning'       => '',
+                // 'profit'        => '',
+                'total_amt'     => $product_price,
+                'distrb_amt'    => $distributed_total_amt,
+                'rem_amt'       => $remaining_total_amt,
+            ];
+
+            update_user_meta($b_id,'_treasury_details',$treasury_metas);
+
+        endif;
+}
+
+
+function dongtrader_save_commission_details($b_id,$o_id){
+
+        //get previous seller trading details saved in user meta
+        $commission_meta  = get_user_meta($b_id, '_commission_details', true);
+
+        //assign empty array if $commission_meta is empty 
+        $commission_metas = !empty($commission_meta) ? $commission_meta : [];
+
+        //check if buyer user_id exists
+        $check_buyer  = dongtrader_check_user($b_id);
+
+        //check if buyer exists
+        if($check_buyer) :
+
+            //get title of the product
+            $product_name = dongtrader_get_product($o_id,true);
+
+            //get buyer or customer name
+            $buyer_name   = dongtrader_check_user($b_id , false);
+
+            //seller commission
+            $seller_com = dongtrader_get_order_meta($o_id,'dong_profit_di');
+
+            $group_com  = dongtrader_get_order_meta($o_id,'dong_profit_dg');
+
+            $owner_com = dongtrader_get_order_meta($o_id,'dong_earning_amt');
+
+            $c_d_g = $group_com / 5;
+
+            $total = $seller_com + $group_com + $owner_com;
+
+            $commission_metas[] = [
+                'order_id'      => $o_id,
+                'name'          => $buyer_name,
+                'product_title' => $product_name,
+                'seller_com'    => $seller_com,
+                'group_com'     => $c_d_g,
+                'site_com'      => $owner_com,
+                'total'         => $total
+            ];
+            
+            update_user_meta($b_id,'_commission_details',$commission_metas);
+
+        endif;
+    
+}
 /**
  * Retrieves meta values from order . If meta is empty returns 0 otherwise returns value
  *
@@ -126,7 +375,8 @@ function dongtrader_get_order_meta($orderid, $key)
  * @param [String] $order_id The order id
  * @return void
  */
-function dongtrader_split_price_parent($parent_user_id , $order_id){
+function dongtrader_split_price_parent($parent_user_id, $order_id)
+{
 
     //get previous member data
     $customer_and_member_meta = get_user_meta($parent_user_id, '_user_trading_details', true);
@@ -149,50 +399,52 @@ function dongtrader_split_price_parent($parent_user_id , $order_id){
     //commision amount distributed to group
     $c_d_g = $dong_comm_cdg / 5;
 
-    //append to previous array to update in user meta 
+    //append to previous array to update in user meta
     $customer_and_member_metas[] = [
-        'order_id'      => $order_id,
-        'rebate'        => $rebate,
-        'procees_amount'=> 0,
-        'dong_profit_dg'=> $p_d_g,
-        'dong_profit_di'=> 0,
-        'dong_comm_dg'  => $c_d_g,
+        'order_id' => $order_id,
+        'rebate' => $rebate,
+        'procees_amount' => 0,
+        'dong_profit_dg' => $p_d_g,
+        'dong_profit_di' => 0,
+        'dong_comm_dg' => $c_d_g,
         'dong_comm_cdi' => 0,
-        'dong_total'    => $rebate + $p_d_g + $c_d_g,
+        'dong_total' => $rebate + $p_d_g + $c_d_g,
     ];
 
-    //update array to user meta 
+    //update array to user meta
     update_user_meta($parent_user_id, '_user_trading_details', $customer_and_member_metas);
 
-  
 }
 /**
  * Price Distribution to group members
  *
- * @param [array] $childrens Childrens are other members of the circle 
+ * @param [array] $childrens Childrens are other members of the circle
  * @return void
  */
-function dongtrader_split_price_childrens($childrens ){
-  
+function dongtrader_split_price_childrens($childrens)
+{
+
     //if children array is empty dont do anything
-   if(empty($childrens)) return;
-   
-   //looping inside the childrens array
-   foreach($childrens as $k=>$v){
+    if (empty($childrens)) {
+        return;
+    }
+
+    //looping inside the childrens array
+    foreach ($childrens as $k => $v) {
 
         //explode key into array to get parent order id and parent user id
-        $string_array = explode('-',$k);
+        $string_array = explode('-', $k);
 
         //parent order
         $parent_order = $string_array[2];
 
         //parent user id (might be required for later)
-        $parent_user  = $string_array[1];
+        $parent_user = $string_array[1];
 
         //looping inside all childrens
-        foreach($v as $s){
+        foreach ($v as $s) {
 
-            //profit amount distributable to all members from 
+            //profit amount distributable to all members from
             $dong_profit_dg = dongtrader_get_order_meta($parent_order, 'dong_profit_dg');
 
             //commission distributed to group
@@ -203,39 +455,40 @@ function dongtrader_split_price_childrens($childrens ){
 
             //if previous meta is empty assign an empty array
             $customer_not_mem_metas = !empty($customer_not_mem_meta) ? $customer_not_mem_meta : [];
-    
+
             //profit amount that must be distributed to circle
             $p_a_d_c = $dong_profit_dg / 5;
-    
+
             //commission amount that must be distributed to group
             $c_a_t_c = $dong_comm_cdg / 5;
-    
+
             //apend to previous array to update in  user meta
             $customer_not_mem_metas[] = [
-                'order_id'      => $parent_order,
-                'rebate'        => 0,
-                'procees_amount'=> 0,
-                'dong_profit_dg'=> $p_a_d_c,
-                'dong_profit_di'=> 0,
-                'dong_comm_dg'  => $c_a_t_c,
+                'order_id' => $parent_order,
+                'rebate' => 0,
+                'procees_amount' => 0,
+                'dong_profit_dg' => $p_a_d_c,
+                'dong_profit_di' => 0,
+                'dong_comm_dg' => $c_a_t_c,
                 'dong_comm_cdi' => 0,
-                'dong_total'    => 0 + $p_a_d_c + $c_a_t_c,
+                'dong_total' => 0 + $p_a_d_c + $c_a_t_c,
             ];
 
             //update array to user meta
             update_user_meta($s, '_user_trading_details', $customer_not_mem_metas);
-            
+
         }
-   }
+    }
 
 }
 /**
- * This function distributes prices to the siteowner . 
+ * This function distributes prices to the siteowner .
  *
  * @param integer $siteownerid
  * @return void
  */
-function split_process_charges_to_siteowner($siteownerid = 1 , $order_id){
+function split_process_charges_to_siteowner($siteownerid = 1, $order_id)
+{
 
     //get previous stored data
     $site_owner = get_user_meta($siteownerid, '_user_trading_details', true);
@@ -248,14 +501,14 @@ function split_process_charges_to_siteowner($siteownerid = 1 , $order_id){
 
     //apend to previous array to update in  user meta
     $site_owners_metas[] = [
-        'order_id'      => $order_id,
-        'rebate'        => 0,
-        'procees_amount'=> $dong_process_amt,
-        'dong_profit_dg'=> 0,
-        'dong_profit_di'=> 0,
-        'dong_comm_dg'  => 0,
+        'order_id' => $order_id,
+        'rebate' => 0,
+        'procees_amount' => $dong_process_amt,
+        'dong_profit_dg' => 0,
+        'dong_profit_di' => 0,
+        'dong_comm_dg' => 0,
         'dong_comm_cdi' => 0,
-        'dong_total'    => $dong_process_amt,
+        'dong_total' => $dong_process_amt,
     ];
 
     //update array to user meta
@@ -269,7 +522,8 @@ function split_process_charges_to_siteowner($siteownerid = 1 , $order_id){
  * @param [ string ] $oid:Order id
  * @return void
  */
-function dongtrader_split_price_affiliates($aid , $oid){
+function dongtrader_split_price_affiliates($aid, $oid)
+{
 
     //get user object
     $user_check = get_user_by('id', $aid);
@@ -284,25 +538,25 @@ function dongtrader_split_price_affiliates($aid , $oid){
         $aff_trading_details_user_meta = !empty($aff_user_trading_meta) ? $aff_user_trading_meta : [];
 
         //commission distributed to individual
-        $dong_comm_cdi  = dongtrader_get_order_meta($oid, 'dong_comm_cdi');
+        $dong_comm_cdi = dongtrader_get_order_meta($oid, 'dong_comm_cdi');
 
         //get profit distributed to individual
         $dong_profit_di = dongtrader_get_order_meta($oid, 'dong_profit_di');
 
         //meta update array
         $aff_trading_details_user_meta[] = [
-            'order_id'      => $oid,
-            'rebate'        => 0,
-            'procees_amount'=> 0,
-            'dong_profit_dg'=> 0,
-            'dong_profit_di'=> $dong_profit_di,
-            'dong_comm_dg'  => 0,
+            'order_id' => $oid,
+            'rebate' => 0,
+            'procees_amount' => 0,
+            'dong_profit_dg' => 0,
+            'dong_profit_di' => $dong_profit_di,
+            'dong_comm_dg' => 0,
             'dong_comm_cdi' => $dong_comm_cdi,
-            'dong_total'    => $dong_profit_di + $dong_comm_cdi,
+            'dong_total' => $dong_profit_di + $dong_comm_cdi,
 
         ];
 
-        //update array to affliate user 
+        //update array to affliate user
         update_user_meta($aid, '_user_trading_details', $aff_trading_details_user_meta);
     endif;
 }
@@ -318,7 +572,9 @@ function glassfrog_api_get_persons_of_circles()
     $results = $wpdb->get_results("SELECT gf_person_id , user_id FROM $table_name WHERE in_circle = 0 LIMIT 5", ARRAY_A);
 
     //if not results exit
-    if (!$results) return;
+    if (!$results) {
+        return;
+    }
 
     //extract glassfrog id from the results in the above custom query
     $glassfrog_ids = wp_list_pluck($results, 'gf_person_id');
@@ -348,8 +604,7 @@ function glassfrog_api_get_persons_of_circles()
             $peoples_circle_name = $api_call->roles[0]->name;
 
             //check if five members rule is accomplished in the circle
-
-            if (count($all_people_in_circle) == 5):
+            if (count($all_people_in_circle) == 3):
 
                 //looping inisde the circle
                 foreach ($all_people_in_circle as $ap):
@@ -358,16 +613,16 @@ function glassfrog_api_get_persons_of_circles()
                     $update_query = $wpdb->prepare("UPDATE $table_name SET in_circle = %d , gf_role_assigned = %s WHERE user_id = %d", 1, $peoples_circle_name, $uid);
 
                     //update to custom database
-                    if($ap->external_id == $uid) :
+                    if ($ap->external_id == $uid):
 
                         //updated
                         $wpdb->query($update_query);
-                        
+
                         //get wp user id stored as external id from the api
                         $members[] = $ap->external_id;
 
                     endif;
-  
+
                     //end foreach loop started for looping inside circle members
                 endforeach;
 
@@ -379,7 +634,7 @@ function glassfrog_api_get_persons_of_circles()
 
     }
 
-    if(!empty($members)):
+    if (!empty($members)):
 
         //intilized empty array
         $new_array = array();
@@ -396,13 +651,13 @@ function glassfrog_api_get_persons_of_circles()
             // Creating an array of user_id and related users.
             $new_array[] = [
                 'user_id' => $user_id,
-                'related' => array_values($related)
+                'related' => array_values($related),
             ];
         }
 
         return $new_array;
-        
-    else :
+
+    else:
 
         return false;
 
@@ -410,16 +665,17 @@ function glassfrog_api_get_persons_of_circles()
 
 }
 
-function dong_display_trading_details($user_id){
+function dong_display_trading_details($user_id)
+{
 
-    //get user trading details 
+    //get user trading details
     $user_trading_metas = get_user_meta($user_id, '_user_trading_details', true);
 
     // $user_trading_meta = 'a:5:{i:0;a:7:{s:8:"order_id";s:4:"2016";s:6:"rebate";s:3:"2.1";s:14:"dong_profit_dg";d:0.8;s:14:"dong_profit_di";i:0;s:12:"dong_comm_dg";d:0.08;s:13:"dong_comm_cdi";i:0;s:10:"dong_total";d:2.9800000000000004;}i:1;a:7:{s:8:"order_id";s:4:"2015";s:6:"rebate";i:0;s:14:"dong_profit_dg";d:0.8;s:14:"dong_profit_di";i:0;s:12:"dong_comm_dg";d:0.08;s:13:"dong_comm_cdi";i:0;s:10:"dong_total";d:0.88;}i:2;a:7:{s:8:"order_id";s:4:"2015";s:6:"rebate";i:0;s:14:"dong_profit_dg";d:0.8;s:14:"dong_profit_di";i:0;s:12:"dong_comm_dg";d:0.08;s:13:"dong_comm_cdi";i:0;s:10:"dong_total";d:0.88;}i:3;a:7:{s:8:"order_id";s:4:"2013";s:6:"rebate";i:0;s:14:"dong_profit_dg";d:0.8;s:14:"dong_profit_di";i:0;s:12:"dong_comm_dg";d:0.08;s:13:"dong_comm_cdi";i:0;s:10:"dong_total";d:0.88;}i:4;a:7:{s:8:"order_id";s:4:"2013";s:6:"rebate";i:0;s:14:"dong_profit_dg";d:0.8;s:14:"dong_profit_di";i:0;s:12:"dong_comm_dg";d:0.08;s:13:"dong_comm_cdi";i:0;s:10:"dong_total";d:0.88;}}';
-    
+
     // $user_trading_metas = unserialize($user_trading_meta);
     //if trading details are not empty
-    if(!empty($user_trading_metas)) :
+    if (!empty($user_trading_metas)):
 
         // determine number of items per page
         $items_per_page = 5;
@@ -434,67 +690,62 @@ function dong_display_trading_details($user_id){
 
             //get filter data from url parameters
             $get_filter = sanitize_text_field($_REQUEST['filter']);
-    
+
             if ($get_filter == "all") {
-    
 
                 $all_selected = "selected";
                 $date_selected = "";
 
             } elseif ($get_filter == "within-a-date-range") {
 
-                //get start date
-                $start      = sanitize_text_field($_REQUEST['start-month']);
+            //get start date
+            $start = sanitize_text_field($_REQUEST['start-month']);
 
-                //get end date
-                $enddate    = sanitize_text_field($_REQUEST['end-month']);
-                $date_selected  = "selected";
-                $all_selected   = "";
-
-                if (strtotime($start) > strtotime($enddate)) {
-                    $temp_date = $start;
-                    $start = $enddate;
-                    $enddate = $temp_date;
-                }
-
-                
-                $start_date_obj = strtotime($start);
-                $end_date_obj = strtotime($enddate);
-
-                if($start_date_obj && $end_date_obj){
-                    
-                    $results = array_filter($user_trading_metas, function($item) use ($start_date_obj, $end_date_obj) {
-                        $order = new WC_Order($item['order_id']);
-                        $item_date = strtotime($order->get_date_created()->date('Y-m-d'));
-                    
-                       return ($item_date >= $start_date_obj && $item_date <= $end_date_obj);
-                    });
-
-                    $user_trading_metas = $results;
-                    $start_index =0;
-                    
-
-                }
-            }
-        } else {
-            $start = "";
-            $enddate = "";
-            $date_selected = "";
+            //get end date
+            $enddate = sanitize_text_field($_REQUEST['end-month']);
+            $date_selected = "selected";
             $all_selected = "";
 
-          
-        }
-    
+            if (strtotime($start) > strtotime($enddate)) {
+                $temp_date = $start;
+                $start = $enddate;
+                $enddate = $temp_date;
+            }
 
-        $items_for_current_page = array_slice($user_trading_metas, $start_index, $items_per_page);
-        // slice the array to get items for current page
-       
+            $start_date_obj = strtotime($start);
+            $end_date_obj = strtotime($enddate);
+
+            if ($start_date_obj && $end_date_obj) {
+
+                $results = array_filter($user_trading_metas, function ($item) use ($start_date_obj, $end_date_obj) {
+                    $order = new WC_Order($item['order_id']);
+                    $item_date = strtotime($order->get_date_created()->date('Y-m-d'));
+
+                    return ($item_date >= $start_date_obj && $item_date <= $end_date_obj);
+                });
+
+                $user_trading_metas = $results;
+                $start_index = 0;
+
+            }
+        }
+    } else {
+        $start = "";
+        $enddate = "";
+        $date_selected = "";
+        $all_selected = "";
+
+    }
+
+    $items_for_current_page = array_slice($user_trading_metas, $start_index, $items_per_page);
+    // slice the array to get items for current page
+
     ?>
     <div class="user-trading-details">
         <strong><?php esc_html_e('Your Trading Details', 'cpm-dongtrader');?></strong>
         <div id="member-history-orders" class="widgets-holder-wrap cpm-table-wrap">
         <form id="posts-filter" method="get" action="">
-            <label for="filter"><?php _e("Show",'cpm-dongtrader'); ?></label>
+            <label for="filter"><?php _e("Show", 'cpm-dongtrader');?></label>
             <select id="filter" name="filter">
                 <option value="all" <?php echo $all_selected; ?>>All</option>
                 <option value="within-a-date-range" <?php echo $date_selected; ?>>Within a Date Range</option>
@@ -551,7 +802,7 @@ function dong_display_trading_details($user_id){
                 pmpro_ShowMonthOrYear();
             </script>
         </form>
-            
+
             <table class="affilate-data" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <thead>
                     <tr>
@@ -568,62 +819,62 @@ function dong_display_trading_details($user_id){
                 </thead>
                 <tbody>
                 <?php
-                if(!empty($items_for_current_page)):
-                    $rebate_arr         = array_column($user_trading_metas, 'rebate');
-                    $dong_profit_dg_arr = array_column($user_trading_metas, 'dong_profit_dg');
-                    $dong_profit_di_arr = array_column($user_trading_metas, 'dong_profit_di');
-                    $dong_comm_dg_arr   = array_column($user_trading_metas, 'dong_comm_dg');
-                    $dong_comm_cdi_arr  = array_column($user_trading_metas, 'dong_comm_cdi');
-                    $dong_total_arr     = array_column($user_trading_metas, 'dong_total');
-                    $i = 1;
-                    $price_symbol = get_woocommerce_currency_symbol();
-                    foreach ($items_for_current_page as $utm):
-                        $order                  = new WC_Order($utm['order_id']);
-                        $formatted_order_date   = wc_format_datetime($order->get_date_created(), 'Y-m-d');
-                        $order_backend_link     = admin_url('post.php?post=' . $utm['order_id'] . '&action=edit');
-                        $user_id                = $order->get_customer_id();
-                        $user_details           = get_userdata($user_id);
-                        $user_display_name      = $user_details->data->display_name;
-                        $user_backend_edit_url  = get_edit_user_link($user_id);
-                ?>
-                        <tr class="enable-sorting">
-                            <td>
-                                <?php echo $utm['order_id']; ?>
-                            </td>
-                            <td>
-                                <?php echo $user_display_name; ?>
-                            </td>
-                            <td>
-                                <?php echo $formatted_order_date; ?>
-                            </td>
-                            <td>
-                                <?php echo $price_symbol . $utm['rebate'] ?>
-                            </td>
-                            <!-- Profit -->
-                            <td>
-                                <?php echo $price_symbol . $utm['dong_profit_dg'] ?>
-                            </td>
-                            <td>
-                                <?php echo $price_symbol . $utm['dong_profit_di']; ?>
-                            </td>
-                            <!-- Commission -->
-                            <td>
-                                <?php echo $price_symbol . $utm['dong_comm_dg'] ?>
-                            </td>
-                            <td>
-                                <?php echo $price_symbol . $utm['dong_comm_cdi']; ?>
-                            </td>
-                            <td>
-                                <?php echo $price_symbol . $utm['dong_total'] ?>
-                            </td>
-                        </tr>
-                    <?php $i++; endforeach; else :?>
+if (!empty($items_for_current_page)):
+        $rebate_arr = array_column($user_trading_metas, 'rebate');
+        $dong_profit_dg_arr = array_column($user_trading_metas, 'dong_profit_dg');
+        $dong_profit_di_arr = array_column($user_trading_metas, 'dong_profit_di');
+        $dong_comm_dg_arr = array_column($user_trading_metas, 'dong_comm_dg');
+        $dong_comm_cdi_arr = array_column($user_trading_metas, 'dong_comm_cdi');
+        $dong_total_arr = array_column($user_trading_metas, 'dong_total');
+        $i = 1;
+        $price_symbol = get_woocommerce_currency_symbol();
+        foreach ($items_for_current_page as $utm):
+            $order = new WC_Order($utm['order_id']);
+            $formatted_order_date = wc_format_datetime($order->get_date_created(), 'Y-m-d');
+            $order_backend_link = admin_url('post.php?post=' . $utm['order_id'] . '&action=edit');
+            $user_id = $order->get_customer_id();
+            $user_details = get_userdata($user_id);
+            $user_display_name = $user_details->data->display_name;
+            $user_backend_edit_url = get_edit_user_link($user_id);
+            ?>
+		                        <tr class="enable-sorting">
+		                            <td>
+		                                <?php echo $utm['order_id']; ?>
+		                            </td>
+		                            <td>
+		                                <?php echo $user_display_name; ?>
+		                            </td>
+		                            <td>
+		                                <?php echo $formatted_order_date; ?>
+		                            </td>
+		                            <td>
+		                                <?php echo $price_symbol . $utm['rebate'] ?>
+		                            </td>
+		                            <!-- Profit -->
+		                            <td>
+		                                <?php echo $price_symbol . $utm['dong_profit_dg'] ?>
+		                            </td>
+		                            <td>
+		                                <?php echo $price_symbol . $utm['dong_profit_di']; ?>
+		                            </td>
+		                            <!-- Commission -->
+		                            <td>
+		                                <?php echo $price_symbol . $utm['dong_comm_dg'] ?>
+		                            </td>
+		                            <td>
+		                                <?php echo $price_symbol . $utm['dong_comm_cdi']; ?>
+		                            </td>
+		                            <td>
+		                                <?php echo $price_symbol . $utm['dong_total'] ?>
+		                            </td>
+		                        </tr>
+		                    <?php $i++;endforeach;else: ?>
                         <tr>
-                            <td colspan="9"><strong><?php _e('Results Not Found', 'cpm-dongtrader') ?></strong></td>
+                            <td colspan="9"><strong><?php _e('Results Not Found', 'cpm-dongtrader')?></strong></td>
                         </tr>
-                    <?php endif; ?>
+                    <?php endif;?>
                 </tbody>
-                <?php if(!empty($items_for_current_page)) : ?>
+                <?php if (!empty($items_for_current_page)): ?>
                 <tfoot>
                     <tr>
                         <td colspan="3">All Totals</td>
@@ -635,30 +886,101 @@ function dong_display_trading_details($user_id){
                         <td><?php echo $price_symbol . array_sum($dong_total_arr); ?></td>
                     </tr>
                 </tfoot>
-                <?php endif; ?>
+                <?php endif;?>
             </table>
         </div>
         <div class="dong-pagination user-trading-list-paginate" style="float:right">
             <?php
-                $num_items = count($user_trading_metas);
-                $num_pages = ceil($num_items / $items_per_page);
-                echo paginate_links(array(
-                    'base' => add_query_arg('listpaged', '%#%'),
-                    'format' => 'list',
-                    'prev_text' => __('&laquo; Previous', 'cpm-dongtrader'),
-                    'next_text' => __('Next &raquo;', 'cpm-dongtrader'),
-                    'total' => $num_pages,
-                    'current' => $current_page,
-                ));
-            ?>
+$num_items = count($user_trading_metas);
+    $num_pages = ceil($num_items / $items_per_page);
+    echo paginate_links(array(
+        'base' => add_query_arg('listpaged', '%#%'),
+        'format' => 'list',
+        'prev_text' => __('&laquo; Previous', 'cpm-dongtrader'),
+        'next_text' => __('Next &raquo;', 'cpm-dongtrader'),
+        'total' => $num_pages,
+        'current' => $current_page,
+    ));
+    ?>
         </div>
         <?php
-        else:
-            echo '<strong>Trading Details Not Found</strong>';
+else:
+        echo '<strong>Trading Details Not Found</strong>';
 
-        endif;
-        ?>
+    endif;
+    ?>
     </div>
 <?php
 }
 add_action('dong_display_distribution_table', 'dong_display_trading_details');
+
+function add_custom_tab_to_my_account()
+{
+
+    $all_my_account_tabs = [
+        [
+            'name' => __('My Orders', 'cpm-dongtrader'),
+            'slug' => 'dongtrader-orders',
+            'position' => 1,
+
+        ],
+
+        [
+            'name' => __('Treasury', 'cpm-dongtrader'),
+            'slug' => 'dongtrader-treasury',
+            'position' => 2,
+        ],
+
+        [
+            'name' => __('Group', 'cpm-dongtrader'),
+            'slug' => 'dongtrader-group',
+            'position' => 3,
+        ],
+
+        [
+            'name' => __('Commission', 'cpm-dongtrader'),
+            'slug' => 'dongtrader-commission',
+            'position' => 4,
+        ],
+    ];
+
+    usort($all_my_account_tabs, function($a, $b) {
+
+        return $a['position'] - $b['position'];
+
+    });
+
+    foreach ($all_my_account_tabs as $k => $v):
+
+
+        add_rewrite_endpoint($v['slug'], EP_ROOT | EP_PAGES);
+
+        add_filter('query_vars', function ($vars) use ( $v ) {
+
+            $vars[] = $v['slug'];
+
+            return $vars;
+        });
+
+        add_filter('woocommerce_account_menu_items', function ($menu_links) use ( $v ) {
+
+            $menu_links = array_slice($menu_links, 0, $v['position'], true)
+            + array($v['slug'] => $v['name'])
+            + array_slice($menu_links, $v['position'], NULL, true);
+    
+        return $menu_links;
+            
+        });
+
+        add_action('woocommerce_account_' . $v['slug'] . '_endpoint', function () use ( $v , $k) {
+
+            $tem_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'content-'.$v['slug'].'.php';
+            
+            if (file_exists($tem_path)) {
+                load_template($tem_path,true, $v);
+            }
+        });
+
+    endforeach;
+}
+add_action('wp_loaded', 'add_custom_tab_to_my_account');

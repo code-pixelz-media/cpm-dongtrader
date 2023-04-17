@@ -605,34 +605,42 @@ add_action('woocommerce_thankyou', 'dongtrader_after_order_received_process', 10
 
 function dongtrader_after_order_received_process($order_id)
 {
-    $order = wc_get_order($order_id);
+    $order          = wc_get_order($order_id);
 
+    $customer_id    = $order->get_user_id();
 
-    $customer_id = $order->get_user_id();
+    $items          =  $order->get_items();
 
-    $items =  $order->get_items();
+    $product_info = [];
 
-    // var_dump($items);
-    $p_id = [];
     foreach ($items as $item) {
+        
+        $product = $item->get_product();
 
-        //check if order is variable item
+        if($product->is_type('variation')){
 
-        $p_id[] = $item->get_product_id();
+            $product_info[] = [ 'var' => true ,'var_id'=>$product->get_id() , 'parent_id' => $item->get_product_id() ];
+
+        }else{
+
+            $product_info[] = [ 'var' => false ,'var_id'=>null , 'parent_id' => $item->get_product_id() ];
+        }
+
     }
 
+    $gf_checkbox = get_post_meta($product_info[0]['parent_id'], '_glassfrog_checkbox', true);
 
-
-    $gf_checkbox = get_post_meta($p_id[0], '_glassfrog_checkbox', true);
-    if ($gf_checkbox == 'on') {
-        dongtrader_user_registration_hook($customer_id, $p_id[0], $order_id);
-    }
-    $current_pro = wc_get_product($p_id[0]);
+    $filtered_id = $product_info[0]['var'] ? $product_info[0]['var_id'] : $product_info[0]['parent_id'];
+    
+    if ($gf_checkbox == 'on')  dongtrader_user_registration_hook($customer_id, $filtered_id, $order_id);
+   
+    $current_pro = wc_get_product($filtered_id);
 
     $current_price = $current_pro->get_price();
 
-    dongtrader_product_price_distribution($current_price, $p_id[0], $order_id, $customer_id);
-    dong_set_user_role($customer_id, $p_id[0]);
+    dongtrader_product_price_distribution($current_price,$product_info[0]['parent_id'], $order_id, $customer_id);
+    
+    dong_set_user_role($customer_id, $filtered_id);
 }
 
 
