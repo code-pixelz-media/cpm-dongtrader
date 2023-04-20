@@ -91,7 +91,7 @@ function dongtrader_distribute_product_prices_to_circle_members()
 
  dongtrader_save_myorder_details($parent_user_id,$order_id);
  dongtrader_save_treasury_details($parent_user_id,$order_id);
- //dongtrader_save_commission_details($parent_user_id,$order_id);
+ dongtrader_save_commission_details($parent_user_id,$order_id);
 
        // dongtrader_save_myorder_details($parent_user_id, $order_id);
         // //save distributed amount to current customer
@@ -258,7 +258,6 @@ function dongtrader_save_treasury_details($b_id , $o_id){
             $product_obj = wc_get_product( $v_product_id );
 
             //variation's parent product id
-
             $p_p_id = $product_obj->get_parent_id();
 
             //get product price
@@ -330,7 +329,7 @@ function dongtrader_save_commission_details($b_id,$o_id){
 
             $group_com  = dongtrader_get_order_meta($o_id,'dong_profit_dg');
 
-            $owner_com = dongtrader_get_order_meta($o_id,'dong_earning_amt');
+            $owner_com  = dongtrader_get_order_meta($o_id,'dong_earning_amt');
 
             $c_d_g = $group_com / 5;
 
@@ -984,3 +983,5 @@ function add_custom_tab_to_my_account()
     endforeach;
 }
 add_action('wp_loaded', 'add_custom_tab_to_my_account');
+
+

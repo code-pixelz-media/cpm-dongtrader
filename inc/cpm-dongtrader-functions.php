@@ -3,9 +3,9 @@
 /**
  * It returns the API credentials for the API name passed to it
  *
- * @param apiname The name of the API you're using.
+ * @param [apiname] The name of the API you're using.
  *
- * @return The API credentials for the API name passed in.
+ * @return [$api_utils] API credentials for the API name passed in.
  */
 
 function dongtrader_get_api_cred($apiname)
@@ -22,6 +22,11 @@ function dongtrader_get_api_cred($apiname)
         $api_utils = get_option('dongtrader_api_settings_crowdsignal');
     }
     return $api_utils;
+}
+
+
+function qrtiger_upload_logo(){
+
 }
 
 /*This function is used to make the Qrtiger API requests.
@@ -132,6 +137,7 @@ function dongtrader_generate_qr2()
     $qr_size = sanitize_text_field($_POST['qrsize']);
     $qr_url = sanitize_url($_POST['qrurl']);
     $qr_color = sanitize_text_field($_POST['qrcolor']);
+    $qr_logo_url =  plugin_dir_url(__FILE__) . 'assets/img/currency.png';
     $dong_user_id = get_current_user_id();
     $response = !empty($qr_size) && !empty($qr_url) && !empty(trim($qr_color)) ? true : false;
     $notify_to_js = array(
@@ -144,6 +150,7 @@ function dongtrader_generate_qr2()
         $qrtiger_array = [
             "qr" => [
                 "size" => $qr_size,
+                "logo" => 'currency.png',
                 "colorDark" => $qr_color,
                 "backgroundColor" => '',
                 "transparentBkg" => false,
@@ -247,10 +254,11 @@ function dongtrader_ajax_test_helper($color = '', $url = '', $size = '')
 
 function dongtrader_ajax_helper($color, $url, $size = '500')
 {
-
+    $logo = "https://smallstreet.app/wp-content/uploads/2023/03/3D2-1-1.png";
     $current_dong_qr_array = true;
     $qrtiger_array = [
         "qr" => [
+            "logo" => $logo,
             "size" => $size,
             "colorDark" => $color,
             "transparentBkg" => false,
@@ -1274,3 +1282,54 @@ function dongtraders_set_product_quantity($product_id)
     }
     //return 0;
 }
+
+
+function qrtiger_api_request_upload($endpoint = '', $bodyParams = array(), $method = "GET")
+{
+    /* Get the API credentials from the database. */
+    $qrtiger_creds = get_option('dongtraders_api_settings_fields');
+    /* Check if the API credentials are empty or not. */
+    $checkFields = !empty($qrtiger_creds['qrtiger-api-key']) && !empty($qrtiger_creds['qrtiger-api-url']) ? true : false;
+    /* Check if the API credentials are empty or not. */
+    if (!$checkFields) {
+        return;
+    }
+
+    /* Get the API URL from the database. */
+    $qrtiger_api_root_url = $qrtiger_creds['qrtiger-api-url'];
+    /* Getting the API key from the database. */
+    $qrtiger_api_key = $qrtiger_creds['qrtiger-api-key'];
+    /* Concatenating the API root URL with the endpoint. */
+    $build_url = $qrtiger_api_root_url . $endpoint;
+    /* A default array. */
+
+    /* Taking the default array and merging it with the  array. */
+    //$body = wp_json_encode(wp_parse_args($qrtiger_defaults, $bodyParams));
+    $body = wp_json_encode($bodyParams);
+    /* Setting the options for the request. */
+    $options = [
+        'body' => $method == "POST" ? $body : '',
+        'headers' => [
+            'Authorization' => 'Bearer ' . $qrtiger_api_key,
+            'Content-Type' => 'application/json',
+        ],
+        'timeout' => 30,
+
+    ];
+
+    // $build_url = 'https://stoplight.io/mocks/qrtiger/qrtiger-api/7801905';
+
+    /* A ternary operator to check get or post parameter and use functions accordingly*/
+    $response_received = $method == 'POST' ? wp_remote_post($build_url, $options) : wp_remote_get($build_url, $options);
+    /* Get the response code from the response received. */
+    $response_status = wp_remote_retrieve_response_code($response_received);
+    /* Checking if the response status is 200 or not. If it is 200 then it will return the body of the response. */
+    $response_body = $response_status == '200' ? wp_remote_retrieve_body($response_received) : false;
+    /* Checking if the response body is not empty and then decoding the response body. */
+    $response_object = $response_body ? json_decode($response_body) : false;
+
+    $resp = $response_object->status != 403 ? $response_object : false;
+
+    return $resp;
+}
+

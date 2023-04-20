@@ -1,5 +1,7 @@
 <?php 
 
+defined( 'ABSPATH' ) || exit;
+
 $order_details = get_user_meta(get_current_user_id(),'_buyer_details',true);
 $cs            = get_woocommerce_currency_symbol();
 ?>
@@ -10,7 +12,6 @@ $cs            = get_woocommerce_currency_symbol();
         <thead>
             <tr>
                 <th><?php esc_html_e('Order ID/Date', 'cpm-dongtrader'); ?>
-                <th><?php esc_html_e('Buyer', 'cpm-dongtrader'); ?>
                 <th><?php esc_html_e('Product', 'cpm-dongtrader'); ?></th>
                 <th><?php esc_html_e('7% Rebate', 'cpm-dongtrader'); ?></th>
                 <th><?php esc_html_e('3% Process', 'cpm-dongtrader'); ?></th>
@@ -28,7 +29,6 @@ $cs            = get_woocommerce_currency_symbol();
                     foreach($order_details as $od) : 
                         echo '<tr>';
                         echo '<td>'.$od['order_id'].'</td>';
-                        echo '<td>'.$od['name'].'</td>';
                         echo '<td>'.$od['product_title'].'</td>';
                         echo '<td>'.$cs.$od['rebate'].'</td>';
                         echo '<td>'.$cs.$od['process'].'</td>';

@@ -277,8 +277,8 @@ function dongtraders_product_link_with_membership_goes_checkoutpage()
 
 
 // add_action('woocommerce_before_checkout_form', 'dongtraders_check_user_bought_product_already_bought', 12);
-add_action('woocommerce_after_shop_loop_item', 'dongtraders_check_user_bought_product_already_bought', 30);
-add_action('woocommerce_before_add_to_cart_quantity', 'dongtraders_check_user_bought_product_already_bought', 30);
+// add_action('woocommerce_after_shop_loop_item', 'dongtraders_check_user_bought_product_already_bought', 30);
+// add_action('woocommerce_before_add_to_cart_quantity', 'dongtraders_check_user_bought_product_already_bought', 30);
 
 function dongtraders_check_user_bought_product_already_bought()
 {
