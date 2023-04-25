@@ -198,7 +198,7 @@ function dongtraders_list_order_meta_table()
 
                         )
                     );
-
+                  
                     //$dong_orders = get_posts($args);
                     $dong_orders = new WP_Query($args);
 
@@ -209,14 +209,12 @@ function dongtraders_list_order_meta_table()
                     while ($dong_orders->have_posts()) : $dong_orders->the_post();
                         $order_id = get_the_ID();
                         $order = new WC_Order($order_id);
-
-                        //var_dump($order);
                         $order_first_name = $order->get_billing_first_name() ?  $order->get_billing_first_name() : null;
                         $order_second_name = $order->get_billing_first_name() ? $order->get_billing_last_name() : null;
                         $order_full_name = $order_first_name . ' ' . $order_second_name;
                         $order_email = $order->get_billing_email() ? $order->get_billing_email() : null;
                         $order_date = $order->get_date_paid();
-                        $order_total = $order->get_formatted_order_total();
+                        $order_total = $order->get_total();
                         $createDate = new DateTime($order_date);
                         $o_date = $createDate->format('Y-m-d');
                         /* echo $o_date . '<br>'; */
@@ -250,7 +248,7 @@ function dongtraders_list_order_meta_table()
                         </td>
                     <td class="column-cost" data-colname="Cost">
                             <span class="pmpro_order-status pmpro_order-status-success">
-                                ' . $order_total . ' </span>
+                                ' .  $price_symbol . $order_total . ' </span>
                         </td>
                      <td class="column-rebate" data-colname="Rebate">' . $price_symbol . $rebate . '</td>
                     <td class="column-process" data-colname="Process">' . $price_symbol . $dong_processamt . '<br> </td>
