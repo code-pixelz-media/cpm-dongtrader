@@ -44,9 +44,18 @@ add_action('dongtrader_cron_job_hook', 'dongtrader_cron_job');
 function dongtrader_cron_job()
 {
     //price distributing function
-    dongtrader_distribute_product_prices_to_circle_members();
+   dongtrader_distribute_product_prices_to_circle_members();
 
 }
+
+// add_action('wp_head', function(){
+//     dongtrader_distribute_product_prices_to_circle_members();
+
+//     // delete_user_meta(141 , '_commission_details');
+//     // delete_user_meta(141 , '_buyer_details');
+//     // delete_user_meta(141 , '_treasury_details');
+// });
+
 
 /**
  * Cron job function to excute distribution process
@@ -60,14 +69,12 @@ function dongtrader_distribute_product_prices_to_circle_members()
     $members = glassfrog_api_get_persons_of_circles();
 
     //exit if there are no members
-    if (!$members) {
-        return;
-    }
+    if (!$members) return;
 
     global $wpdb;
 
     //Our Custom table name from the database.
-    $table_name = $wpdb->prefix . 'manage_users_gf';
+    $table_name = $wpdb->prefix . 'manage_glassfrogs_api';
 
     //looping through all members
     foreach ($members as $m):
@@ -79,38 +86,262 @@ function dongtrader_distribute_product_prices_to_circle_members()
         $order_id = intval($wpdb->get_var("SELECT order_id FROM $table_name WHERE user_id= $m[user_id] "));
 
         $order_obj = wc_get_order($order_id);
+
         //parent userid
         $parent_user_id = intval($m['user_id']);
 
         //get affiliate id
         $seller_id = dongtrader_get_order_meta($order_id, 'dong_affid');
 
+        $check_buyer    = dongtrader_check_user($parent_user_id);
+
         //childrens user ids
         $children_users_id = ['related-' . $parent_user_id . '-' . $order_id => $m['related']];
 
+        if($check_buyer) :
 
- dongtrader_save_myorder_details($parent_user_id,$order_id);
- dongtrader_save_treasury_details($parent_user_id,$order_id);
- dongtrader_save_commission_details($parent_user_id,$order_id);
+            dongtrader_save_all_orders_details($parent_user_id,$m['related']);
 
-       // dongtrader_save_myorder_details($parent_user_id, $order_id);
-        // //save distributed amount to current customer
-        // dongtrader_split_price_parent($parent_user_id, $order_id);
+            dongtrader_save_all_treasury_details($parent_user_id,$m['related']);
 
-        // //save distributed amount to current customers group members
-        // dongtrader_split_price_childrens($children_users_id);
+            dongtrader_save_all_commission_details($parent_user_id, $m['related']);
 
-        // //Saves distributed amount to affiliates
-        // dongtrader_split_price_affiliates($dong_affid, $order_id);
-
-        // //Saves process amount to site owner
-        // split_process_charges_to_siteowner(1, $order_id);
-
-        //end looping for all members
+        endif;
+ 
     endforeach;
 
 }
 
+
+
+
+function dongtrader_save_all_commission_details($b_id, $friends){
+
+    global $wpdb;
+
+    //var_dump($children_users_id);
+
+    //Our Custom table name from the database.
+    $table_name = $wpdb->prefix . 'manage_glassfrogs_api';
+
+    $all_orders_ser = $wpdb->get_row($wpdb->prepare("SELECT all_orders FROM $table_name WHERE user_id = %d", $b_id),ARRAY_A);
+
+    $all_orders     = unserialize($all_orders_ser['all_orders']); 
+
+    if(empty($all_orders)) return;
+    
+    foreach($all_orders as $ao) :
+
+            //get previous seller trading details saved in user meta
+            $commission_meta  = get_user_meta($b_id, '_commission_details', true);
+
+            //assign empty array if $commission_meta is empty 
+            $commission_metas = !empty($commission_meta) ? $commission_meta : [];
+        
+            //get title of the product
+            $product_name = dongtrader_get_product($ao,true);
+
+            //get buyer or customer name
+            $buyer_name   = dongtrader_check_user($b_id , false);
+
+            //seller commission
+            $seller_com = dongtrader_get_order_meta($ao,'dong_profit_di');
+
+            $group_com  = dongtrader_get_order_meta($ao,'dong_profit_dg');
+
+            $owner_com  = dongtrader_get_order_meta($ao,'dong_earning_amt');
+
+            $c_d_g = $group_com / 5;
+
+            $total = $seller_com + $group_com + $owner_com;
+
+            $commission_metas[] = [
+                'order_id'      => $ao,
+                'name'          => $buyer_name,
+                'product_title' => $product_name,
+                'seller_com'    => $seller_com,
+                'group_com'     => $c_d_g,
+                'site_com'      => $owner_com,
+                'total'         => $total
+            ];
+            
+            update_user_meta($b_id,'_commission_details',$commission_metas);
+
+            if(!empty($friends)) :
+
+                foreach($friends as $f) :
+
+                    update_user_meta($f,'_commission_details',$commission_metas);
+
+                endforeach;
+
+            endif;
+          
+            
+
+    endforeach;
+
+
+
+}
+
+function dongtrader_save_all_treasury_details($b_id , $friends){
+
+    global $wpdb;
+
+    //Our Custom table name from the database.
+    $table_name = $wpdb->prefix . 'manage_glassfrogs_api';
+
+    $all_orders_ser = $wpdb->get_row($wpdb->prepare("SELECT all_orders FROM $table_name WHERE user_id = %d", $b_id),ARRAY_A);
+
+    $all_orders     = unserialize($all_orders_ser['all_orders']); 
+
+    if(empty($all_orders)) return;
+    
+    foreach($all_orders as $ao) :
+
+        //get previous seller trading details saved in user meta
+        $treasury_meta  = get_user_meta($b_id, '_treasury_details', true);
+
+        //assign empty array if $treasury_meta is empty 
+        $treasury_metas = !empty($treasury_meta) ? $treasury_meta : [];
+
+        //get title of the product
+        $product_name = dongtrader_get_product($ao,true);
+
+        //product id
+        $v_product_id = dongtrader_get_product($ao);
+
+        //get buyer or customer name
+        $buyer_name   = dongtrader_check_user($b_id , false);
+
+        //get product price by id
+        $product_obj = wc_get_product( $v_product_id );
+
+        //variation's parent product id
+        $p_p_id = $product_obj->get_parent_id();
+
+        //get product price
+        $product_price = intval($product_obj->get_price());
+
+        //rebate amount from order meta distributeable to user whom has brought the product
+        $rebate       = dongtrader_get_order_meta($ao, 'dong_reabate');
+
+        //rebate amount from order meta distributeable to user whom has brought the product
+        $process       = dongtrader_get_order_meta($ao, 'dong_processamt');
+
+        //get membership level
+        $member_level   = get_post_meta($p_p_id, '_membership_product_level', true);
+
+        //paid membership pro extra fields
+        $pm_meta_vals   = get_pmpro_extrafields_meta($member_level);
+
+        //this value is not working
+        $cost           = $pm_meta_vals['dong_cost'];
+
+        $individual_profit = dongtrader_get_order_meta($ao, 'dong_profit_di'); 
+
+        $distributed_total_amt = $rebate + $process + $individual_profit + $cost;
+
+        $remaining_total_amt   = $product_price - $distributed_total_amt;
+
+        $treasury_metas[] = [
+            'order_id'      => $ao,
+            'name'          => $buyer_name,
+            'product_title' => $product_name,
+            'total_amt'     => $product_price,
+            'distrb_amt'    => $distributed_total_amt,
+            'rem_amt'       => $remaining_total_amt,
+        ];
+
+        update_user_meta($b_id,'_treasury_details',$treasury_metas);
+        
+        if(!empty($friends)) :
+
+            foreach($friends as $f) :
+
+                update_user_meta($f,'_treasury_details',$treasury_metas);
+
+            endforeach;
+
+        endif;
+
+    endforeach;
+
+}
+
+
+function dongtrader_save_all_orders_details($b_id, $friends){
+
+    global $wpdb;
+
+    //Our Custom table name from the database.
+    $table_name = $wpdb->prefix . 'manage_glassfrogs_api';
+
+    $all_orders_ser = $wpdb->get_row($wpdb->prepare("SELECT all_orders FROM $table_name WHERE user_id = %d", $b_id),ARRAY_A);
+
+    $all_orders     = unserialize($all_orders_ser['all_orders']); 
+
+    $check_buyer    = dongtrader_check_user($b_id);
+
+    foreach($all_orders as $o) :
+
+        //get affiliate id of the seller
+        $seller_id    = dongtrader_get_order_meta($o, 'dong_affid');
+
+        //get previous seller trading details saved in user meta
+        $buyer_meta  = get_user_meta($b_id, '_buyer_details', true);
+
+        //assign empty array if $buyer_meta is empty 
+        $buyer_metas = !empty($buyer_meta) ? $buyer_meta : [];
+
+        //get buyer or customer name
+        $buyer_name   = dongtrader_check_user($b_id , false);
+        
+        //get seller or affiliate id we might not need this for instance
+        //$seller_name  = dongtrader_check_user($seller_id , false);
+
+        //rebate amount from order meta distributeable to user whom has brought the product
+        $rebate       = dongtrader_get_order_meta($o, 'dong_reabate');
+    
+        //get title of the product
+        $product_name = dongtrader_get_product($o,true);
+
+        //get actual process amount from order meta
+        $process_amt  = dongtrader_get_order_meta($o,'dong_processamt');
+
+        //get seller or affiliate profit amount from order meta
+        $seller_profit= dongtrader_get_order_meta($o,'dong_profit_di'); 
+
+        //if seller is buyer himself compare ids and then set process amount 
+        $process_amount  = $b_id == $seller_id ? $process_amt : 0;
+
+        //new array for new order which we will append to 
+        $buyer_metas[] = [
+            'order_id'      => $o,
+            'name'          => $buyer_name,
+            'product_title' => $product_name,
+            'rebate'        => $rebate,
+            'process'       => $process_amount,
+            'seller_profit' => $seller_profit,
+            'total'         => $rebate + $process_amount + $seller_profit
+        ];
+
+        update_user_meta($b_id,'_buyer_details',$buyer_metas);
+
+        // if(!empty($friends)) :
+
+        //     foreach($friends as $f) :
+
+        //         update_user_meta($f,'_treasury_details',$treasury_metas);
+
+        //     endforeach;
+
+        // endif;
+
+    endforeach;
+ 
+}
 
 function dongtrader_get_product($order_id , $name=false){
 
@@ -298,7 +529,8 @@ function dongtrader_save_treasury_details($b_id , $o_id){
                 'rem_amt'       => $remaining_total_amt,
             ];
 
-            update_user_meta($b_id,'_treasury_details',$treasury_metas);
+            var_dump($treasury_metas);
+           // update_user_meta($b_id,'_treasury_details',$treasury_metas);
 
         endif;
 }
@@ -565,9 +797,9 @@ function glassfrog_api_get_persons_of_circles()
     global $wpdb;
 
     //Our Custom table name from the database.
-    $table_name = $wpdb->prefix . 'manage_users_gf';
+    $table_name = $wpdb->prefix . 'manage_glassfrogs_api';
 
-    //get glassfrog id and user id from custom table manage_users_gf
+    //get glassfrog id and user id from custom table manage_glassfrogs_api
     $results = $wpdb->get_results("SELECT gf_person_id , user_id FROM $table_name WHERE in_circle = 0 LIMIT 5", ARRAY_A);
 
     //if not results exit
@@ -983,5 +1215,4 @@ function add_custom_tab_to_my_account()
     endforeach;
 }
 add_action('wp_loaded', 'add_custom_tab_to_my_account');
-
 

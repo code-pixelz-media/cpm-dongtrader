@@ -218,7 +218,7 @@ function dong_exporter_order_csv_endpoint_content()
  * Automatically add product to cart on visit
  */
 
-add_action('template_redirect', 'dongtraders_product_link_with_membership_goes_checkoutpage');
+//add_action('template_redirect', 'dongtraders_product_link_with_membership_goes_checkoutpage');
 function dongtraders_product_link_with_membership_goes_checkoutpage()
 {
     if (class_exists('WooCommerce')) {
@@ -628,11 +628,9 @@ function dongtrader_after_order_received_process($order_id)
 
     }
 
-    $gf_checkbox = get_post_meta($product_info[0]['parent_id'], '_glassfrog_checkbox', true);
-
     $filtered_id = $product_info[0]['var'] ? $product_info[0]['var_id'] : $product_info[0]['parent_id'];
-    
-    if ($gf_checkbox == 'on')  dongtrader_user_registration_hook($customer_id, $filtered_id, $order_id);
+
+    dongtrader_user_registration_hook($customer_id, $filtered_id, $order_id );
    
     $current_pro = wc_get_product($filtered_id);
 
@@ -989,3 +987,4 @@ function dongtraders_csv_order_importer()
         }
     }
 }
+

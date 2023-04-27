@@ -397,7 +397,7 @@ function dongtrader_create_dbtable()
 
 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'manage_users_gf';
+    $table_name = $wpdb->prefix . 'manage_glassfrogs_api';
     $charset_collate = $wpdb->get_charset_collate();
     $sql = "CREATE TABLE $table_name (
             id INT NOT NULL AUTO_INCREMENT ,
@@ -410,6 +410,7 @@ function dongtrader_create_dbtable()
             gf_circle_name VARCHAR(255) NOT NULL ,
             created_at DATETIME NOT NULL,
             in_circle INT NOT NULL,
+            all_orders VARCHAR(1000),
             user_id INT NOT NULL , PRIMARY KEY (id)) $charset_collate;";
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
     dbDelta($sql);
@@ -437,12 +438,144 @@ function dongtrader_create_dbtable()
 add_action('wp', 'dongtrader_create_dbtable');
 
 
+
+function dongtrader_user_registration_hook($customer_id, $p_id, $oid){
+
+    //global database variable
+    global $wpdb;
+
+    //custom table from our database
+    $table_name = $wpdb->prefix . 'manage_glassfrogs_api';
+
+    //check if a person already exists in a database
+    $check_persons = $wpdb->get_row($wpdb->prepare("SELECT all_orders FROM $table_name WHERE user_id = %d", $customer_id),ARRAY_A);
+    
+
+    if(!empty($check_persons)) :
+        
+        //get serilized data and unserilize it 
+        $unserialized_orders =  unserialize($check_persons['all_orders']);var_dump($unserialized_orders);
+
+        //check if order id is already on the list and append new order id to it
+        if(!in_array($oid ,$unserialized_orders))
+            $unserialized_orders[] = $oid;
+
+        //again serilize data to store in db
+        $new_serilized_orders = serialize($unserialized_orders);var_dump($new_serilized_orders);
+
+        //preapre for updating serialized data
+        $update_query = $wpdb->prepare("UPDATE $table_name SET all_orders = %s WHERE user_id = %d", $new_serilized_orders, $customer_id);
+        
+        //update data finally
+        $wpdb->query($update_query);
+    
+       
+    else:
+        // Get the product object
+        $product = wc_get_product($p_id);
+        
+        //get parent id if product is variable
+        $parent_id = $product->is_type('variation') ? $product->get_parent_id() : $p_id;
+       
+        //for this case orders datas doesnt exists on our custom database table so we need to call the glassfrog api and insert data accordingly
+        $gf_checkbox = get_post_meta($parent_id, '_glassfrog_checkbox', true);
+ 
+
+        //bool to check meta
+        $gf_check   = $gf_checkbox == 'on' ? true : false;
+        
+        if($gf_check) {
+
+        
+            //get user object
+            $user_info = get_userdata($customer_id);
+
+            //get user email
+            $email = $user_info->user_email;
+
+            //api request string
+            $str = '{"people": [{
+                "name": "' . $user_info->display_name . '",
+                "email": "' . $email . '",
+                "external_id": "' . $customer_id . '",
+                "tag_names": ["tag 1", "tag 2"]
+                }]
+                }';
+            
+            //api call
+            $samp = glassfrog_api_request('people', $str, "POST");
+
+            if($samp && isset($samp)) :
+            
+                //glassfrog id from the api
+                $gf_id   = $samp->people[0]->id;
+
+                //glassfrog persons  name
+                $gf_name = $samp->people[0]->name;
+
+            
+                $result = $wpdb->get_row("SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;");
+                
+                $last_circle_name = isset($result) ? $result->gf_circle_name : '1';
+                
+                $circle_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE gf_circle_name = %s", $last_circle_name));
+                
+                $new_circle_name = $circle_count < 5 ? $last_circle_name : $last_circle_name + 1;
+                
+                $in_circle = 0;
+
+                $all_orders = serialize(array($oid));
+
+                $wpdb->query(
+                    $wpdb->prepare(
+                        "INSERT INTO $table_name
+                    (
+                        gf_person_id,
+                        product_id,
+                        order_id,
+                        gf_role_id,
+                        gf_role_assigned,
+                        gf_name,
+                        gf_circle_name ,
+                        created_at,
+                        in_circle,
+                        all_orders,
+                        user_id
+                    )
+                    VALUES ( %d,%d,%d,%d,%s,%s,%s,%s,%d,%s,%d )",
+                        esc_attr($gf_id),//d
+                        $p_id,//d
+                        $oid,//d
+                        1,//d
+                        'false',//s
+                        esc_attr($gf_name),//s
+                        esc_attr($new_circle_name),//s
+                        current_time('mysql', 1),//s
+                        $in_circle,//d
+                        $all_orders,//s
+                        $customer_id//d
+
+                    )
+                );
+            
+            endif;
+        }else {
+
+            //when order need not to be sent to glass frog where and how to manage it
+
+        }
+    
+
+    endif;
+
+}
+
 /**
  * Step 1 : Create a database table where we can save circles each circle will have 5 members each(https://i.imgur.com/i5dECgu.png).
  * Step 2 : Save user details from response received from glassfrog api to the above table
  * Step 3 : Create meta on products for variations and simple products so that user can be assigned to specific roles  
  */
-function dongtrader_user_registration_hook($customer_id, $p_id, $oid)
+function dongtrader_user_registration_hook_outdated($customer_id, $p_id, $oid)
 {
     global $wpdb;
     $table_name = $wpdb->prefix . 'manage_users_gf';
@@ -1282,54 +1415,3 @@ function dongtraders_set_product_quantity($product_id)
     }
     //return 0;
 }
-
-
-function qrtiger_api_request_upload($endpoint = '', $bodyParams = array(), $method = "GET")
-{
-    /* Get the API credentials from the database. */
-    $qrtiger_creds = get_option('dongtraders_api_settings_fields');
-    /* Check if the API credentials are empty or not. */
-    $checkFields = !empty($qrtiger_creds['qrtiger-api-key']) && !empty($qrtiger_creds['qrtiger-api-url']) ? true : false;
-    /* Check if the API credentials are empty or not. */
-    if (!$checkFields) {
-        return;
-    }
-
-    /* Get the API URL from the database. */
-    $qrtiger_api_root_url = $qrtiger_creds['qrtiger-api-url'];
-    /* Getting the API key from the database. */
-    $qrtiger_api_key = $qrtiger_creds['qrtiger-api-key'];
-    /* Concatenating the API root URL with the endpoint. */
-    $build_url = $qrtiger_api_root_url . $endpoint;
-    /* A default array. */
-
-    /* Taking the default array and merging it with the  array. */
-    //$body = wp_json_encode(wp_parse_args($qrtiger_defaults, $bodyParams));
-    $body = wp_json_encode($bodyParams);
-    /* Setting the options for the request. */
-    $options = [
-        'body' => $method == "POST" ? $body : '',
-        'headers' => [
-            'Authorization' => 'Bearer ' . $qrtiger_api_key,
-            'Content-Type' => 'application/json',
-        ],
-        'timeout' => 30,
-
-    ];
-
-    // $build_url = 'https://stoplight.io/mocks/qrtiger/qrtiger-api/7801905';
-
-    /* A ternary operator to check get or post parameter and use functions accordingly*/
-    $response_received = $method == 'POST' ? wp_remote_post($build_url, $options) : wp_remote_get($build_url, $options);
-    /* Get the response code from the response received. */
-    $response_status = wp_remote_retrieve_response_code($response_received);
-    /* Checking if the response status is 200 or not. If it is 200 then it will return the body of the response. */
-    $response_body = $response_status == '200' ? wp_remote_retrieve_body($response_received) : false;
-    /* Checking if the response body is not empty and then decoding the response body. */
-    $response_object = $response_body ? json_decode($response_body) : false;
-
-    $resp = $response_object->status != 403 ? $response_object : false;
-
-    return $resp;
-}
-
