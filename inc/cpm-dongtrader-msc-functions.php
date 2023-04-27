@@ -44,17 +44,17 @@ add_action('dongtrader_cron_job_hook', 'dongtrader_cron_job');
 function dongtrader_cron_job()
 {
     //price distributing function
-   dongtrader_distribute_product_prices_to_circle_members();
+   //dongtrader_distribute_product_prices_to_circle_members();
 
 }
 
-// add_action('wp_head', function(){
-//     dongtrader_distribute_product_prices_to_circle_members();
+add_action('wp_head', function(){
+   // dongtrader_distribute_product_prices_to_circle_members();
 
-//     // delete_user_meta(141 , '_commission_details');
-//     // delete_user_meta(141 , '_buyer_details');
-//     // delete_user_meta(141 , '_treasury_details');
-// });
+    // delete_user_meta(141 , '_commission_details');
+    // delete_user_meta(141 , '_buyer_details');
+    // delete_user_meta(141 , '_treasury_details');
+});
 
 
 /**
@@ -106,12 +106,20 @@ function dongtrader_distribute_product_prices_to_circle_members()
 
             dongtrader_save_all_commission_details($parent_user_id, $m['related']);
 
+            dongtrader_save_group_details($children_users_id);
+
         endif;
  
     endforeach;
 
 }
 
+
+function dongtrader_save_group_details($children_users_id){
+
+  
+
+}
 
 
 
@@ -847,7 +855,7 @@ function glassfrog_api_get_persons_of_circles()
                     if ($ap->external_id == $uid):
 
                         //updated
-                        $wpdb->query($update_query);
+                       // $wpdb->query($update_query);
 
                         //get wp user id stored as external id from the api
                         $members[] = $ap->external_id;
@@ -1216,3 +1224,75 @@ function add_custom_tab_to_my_account()
 }
 add_action('wp_loaded', 'add_custom_tab_to_my_account');
 
+// add_action('pagination_search_params', 'dong_pagination_params');
+
+function dong_pagination_params($arr, $items_per_page=5){
+
+        // determine current page number from query parameter
+        $current_page = isset($_GET['listpaged']) ? intval($_GET['listpaged']) : 1;
+
+        // calculate start and end indices for items on current page
+        $start_index = ($current_page - 1) * $items_per_page;
+
+        if (isset($_REQUEST['filter'])) {
+
+            //get filter data from url parameters
+            $get_filter = sanitize_text_field($_REQUEST['filter']);
+
+            if ($get_filter == "all") {
+
+                $all_selected = "selected";
+                $date_selected = "";
+
+            } elseif ($get_filter == "within-a-date-range") {
+
+            //get start date
+            $start = sanitize_text_field($_REQUEST['start-month']);
+
+            //get end date
+            $enddate = sanitize_text_field($_REQUEST['end-month']);
+            $date_selected = "selected";
+            $all_selected = "";
+
+            if (strtotime($start) > strtotime($enddate)) {
+                $temp_date = $start;
+                $start = $enddate;
+                $enddate = $temp_date;
+            }
+
+            $start_date_obj = strtotime($start);
+            $end_date_obj = strtotime($enddate);
+
+            if ($start_date_obj && $end_date_obj) {
+
+                $results = array_filter($arr, function ($item) use ($start_date_obj, $end_date_obj) {
+                    $order = new WC_Order($item['order_id']);
+                    $item_date = strtotime($order->get_date_created()->date('Y-m-d'));
+
+                    return ($item_date >= $start_date_obj && $item_date <= $end_date_obj);
+                });
+
+                $arr = $results;
+                $start_index = 0;
+
+            }
+        }
+    } else {
+        $start = "";
+        $enddate = "";
+        $date_selected = "";
+        $all_selected = "";
+
+    }
+
+    $items_for_current_page = array_slice($arr, $start_index, $items_per_page);
+
+
+    return $items_for_current_page;
+}
+
+add_action('my_custom' , 'dong_my_custom');
+
+function dong_my_custom(){
+    $ample = 23;
+}

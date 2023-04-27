@@ -1,14 +1,18 @@
 <?php 
 
 defined( 'ABSPATH' ) || exit;
+$items_per_page = 8;
 
 $order_details = get_user_meta(get_current_user_id(),'_buyer_details',true);
 $cs            = get_woocommerce_currency_symbol();
+$filter_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'partials'. DIRECTORY_SEPARATOR.'filter-top.php';
+$pagination_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'partials'. DIRECTORY_SEPARATOR.'pagination-buttom.php';
 ?>
 <div class="detente-orders">
     <h3><?php esc_html_e('My orders', 'cpm-dongtrader'); ?></h3>
     <br class="clear" />
     <div id="member-history-orders" class="widgets-holder-wrap">
+        <?php if(file_exists($filter_template_path) && !empty($order_details))  load_template($filter_template_path,true); ?>
         <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
             <thead>
                 <tr>
@@ -23,13 +27,18 @@ $cs            = get_woocommerce_currency_symbol();
                 <?php 
                 echo '<tbody>';
                     if(!empty($order_details)):
-                        $rebate_sum  = array_sum(array_column($order_details, 'rebate'));
-                        $process_sum = array_sum(array_column($order_details, 'process'));
-                        $profit_sum  = array_sum(array_column($order_details, 'seller_profit'));
-                        $total_sum   = array_sum(array_column($order_details,'total'));
-                        foreach($order_details as $od) : 
+
+                        $paginated_array = dong_pagination_params($order_details , $items_per_page);
+                        $rebate_sum  = array_sum(array_column($paginated_array, 'rebate'));
+                        $process_sum = array_sum(array_column($paginated_array, 'process'));
+                        $profit_sum  = array_sum(array_column($paginated_array, 'seller_profit'));
+                        $total_sum   = array_sum(array_column($paginated_array,'total'));
+
+                        foreach($paginated_array as $od) : 
+                            $order = new WC_Order($od['order_id']);
+                            $formatted_order_date = wc_format_datetime($order->get_date_created(), 'Y-m-d');
                             echo '<tr>';
-                            echo '<td>'.$od['order_id'].'</td>';
+                            echo '<td>'.$od['order_id'].'/'.$formatted_order_date.'</td>';
                             echo '<td>'.$od['product_title'].'</td>';
                             echo '<td>'.$cs.$od['rebate'].'</td>';
                             echo '<td>'.$cs.$od['process'].'</td>';
@@ -52,10 +61,19 @@ $cs            = get_woocommerce_currency_symbol();
                         echo '</tr>';
                     endif;
                 echo '</tbody>';
+if(isset($_REQUEST['within-a-date-range'])){
+    $args = ['num_items'=> sizeof($paginated_array) , 'items_per_page'=>$items_per_page ];
+}else{
+
+    $args = ['num_items'=> sizeof($order_details) , 'items_per_page'=>$items_per_page ];
+
+}
+           
             
     ?>
 
             
         </table>
     </div>
+    <?php if(file_exists($pagination_template_path) && !empty($order_details))  load_template($pagination_template_path,true , $args ); ?>
 </div>

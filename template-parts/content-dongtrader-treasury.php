@@ -2,11 +2,13 @@
 
 $treasury_details = get_user_meta(get_current_user_id(),'_treasury_details',true);
 $cs               = get_woocommerce_currency_symbol();
+$filter_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'partials'. DIRECTORY_SEPARATOR.'filter-top.php';
 ?>
 <div class="detente-treasury">
     <h3><?php esc_html_e('Treasury', 'cpm-dongtrader'); ?></h3>
     <br class="clear" />
     <div id="member-history-orders" class="widgets-holder-wrap">
+    <?php if(file_exists($filter_template_path) && !empty($treasury_details))  load_template($filter_template_path,true); ?>
         <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
             <thead>
                 <tr>
@@ -25,8 +27,10 @@ $cs               = get_woocommerce_currency_symbol();
                         $distrb_amt_aum = array_sum(array_column($treasury_details, 'distrb_amt'));
                         $rem_amt_sum  = array_sum(array_column($treasury_details, 'rem_amt'));
                         foreach($treasury_details as $od) : 
+                            $order = new WC_Order($od['order_id']);
+                            $formatted_order_date = wc_format_datetime($order->get_date_created(), 'Y-m-d');
                             echo '<tr>';
-                            echo '<td>'.$od['order_id'].'</td>';
+                            echo '<td>'.$od['order_id'].'/'.$formatted_order_date.'</td>';
                             echo '<td>'.$od['name'].'</td>';
                             echo '<td>'.$od['product_title'].'</td>';
                             echo '<td>'.$cs.$od['total_amt'].'</td>';
