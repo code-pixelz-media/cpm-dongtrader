@@ -1,7 +1,7 @@
 <?php 
 
 defined( 'ABSPATH' ) || exit;
-$items_per_page = 8;
+
 
 $order_details = get_user_meta(get_current_user_id(),'_buyer_details',true);
 $cs            = get_woocommerce_currency_symbol();
@@ -26,13 +26,74 @@ $pagination_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY
             </thead>
                 <?php 
                 echo '<tbody>';
-                    if(!empty($order_details)):
+                if(!empty($order_details)):
 
-                        $paginated_array = dong_pagination_params($order_details , $items_per_page);
+                        $items_per_page = 5;
+
+                        // determine current page number from query parameter
+                        $current_page = isset($_GET['listpaged']) ? intval($_GET['listpaged']) : 1;
+                
+                        // calculate start and end indices for items on current page
+                        $start_index = ($current_page - 1) * $items_per_page;
+                
+                        if (isset($_REQUEST['filter'])) {
+                
+                            //get filter data from url parameters
+                            $get_filter = sanitize_text_field($_REQUEST['filter']);
+                
+                            if ($get_filter == "all") {
+                
+                                $all_selected = "selected";
+                                $date_selected = "";
+                
+                            } elseif ($get_filter == "within-a-date-range") {
+                
+                            //get start date
+                            $start = sanitize_text_field($_REQUEST['start-month']);
+                
+                            //get end date
+                            $enddate = sanitize_text_field($_REQUEST['end-month']);
+                            $date_selected = "selected";
+                            $all_selected = "";
+                
+                            if (strtotime($start) > strtotime($enddate)) {
+                                $temp_date = $start;
+                                $start = $enddate;
+                                $enddate = $temp_date;
+                            }
+                
+                            $start_date_obj = strtotime($start);
+                            $end_date_obj = strtotime($enddate);
+                
+                            if ($start_date_obj && $end_date_obj) {
+                
+                                $results = array_filter($order_details, function ($item) use ($start_date_obj, $end_date_obj) {
+                                    $order = new WC_Order($item['order_id']);
+                                    $item_date = strtotime($order->get_date_created()->date('Y-m-d'));
+                
+                                    return ($item_date >= $start_date_obj && $item_date <= $end_date_obj);
+                                });
+                
+                                $order_details = $results;
+                                $start_index = 0;
+                
+                            }
+                        }
+                        } else {
+                            $start = "";
+                            $enddate = "";
+                            $date_selected = "";
+                            $all_selected = "";
+                    
+                        }
+
+                        $paginated_array = array_slice($order_details, $start_index, $items_per_page);
                         $rebate_sum  = array_sum(array_column($paginated_array, 'rebate'));
                         $process_sum = array_sum(array_column($paginated_array, 'process'));
                         $profit_sum  = array_sum(array_column($paginated_array, 'seller_profit'));
                         $total_sum   = array_sum(array_column($paginated_array,'total'));
+
+
 
                         foreach($paginated_array as $od) : 
                             $order = new WC_Order($od['order_id']);
@@ -61,13 +122,7 @@ $pagination_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY
                         echo '</tr>';
                     endif;
                 echo '</tbody>';
-if(isset($_REQUEST['within-a-date-range'])){
-    $args = ['num_items'=> sizeof($paginated_array) , 'items_per_page'=>$items_per_page ];
-}else{
 
-    $args = ['num_items'=> sizeof($order_details) , 'items_per_page'=>$items_per_page ];
-
-}
            
             
     ?>
@@ -75,5 +130,20 @@ if(isset($_REQUEST['within-a-date-range'])){
             
         </table>
     </div>
-    <?php if(file_exists($pagination_template_path) && !empty($order_details))  load_template($pagination_template_path,true , $args ); ?>
+    <div class="dong-pagination user-trading-list-paginate" style="float:right">
+        <?php
+        $num_items = count($order_details);
+
+        $num_pages = ceil($num_items / $items_per_page);
+
+        echo paginate_links(array(
+            'base' => add_query_arg('listpaged', '%#%'),
+            'format' => 'list',
+            'prev_text' => __('&laquo; Previous', 'cpm-dongtrader'),
+            'next_text' => __('Next &raquo;', 'cpm-dongtrader'),
+            'total' => $num_pages,
+            'current' => $current_page,
+        ));
+        ?>
+    </div>
 </div>
