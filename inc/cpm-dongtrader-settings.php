@@ -13,7 +13,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 
 			<div class="addbanner-wrap col-md-6">
 				<div class="title">
-					<h1><?php _e('Detente Settings', 'dongtraders'); ?></h1>
+					<h1><?php _e('Detente 2.0 Settings', 'dongtraders'); ?></h1>
 				</div>
 			</div>
 
