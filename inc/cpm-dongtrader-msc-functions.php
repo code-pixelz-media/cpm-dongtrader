@@ -44,7 +44,7 @@ add_action('dongtrader_cron_job_hook', 'dongtrader_cron_job');
 function dongtrader_cron_job()
 {
     //price distributing function
-   //dongtrader_distribute_product_prices_to_circle_members();
+   dongtrader_distribute_product_prices_to_circle_members();
 
 }
 
@@ -811,10 +811,8 @@ function glassfrog_api_get_persons_of_circles()
     $results = $wpdb->get_results("SELECT gf_person_id , user_id FROM $table_name WHERE in_circle = 0 LIMIT 5", ARRAY_A);
 
     //if not results exit
-    if (!$results) {
-        return;
-    }
-
+    if (!$results) return;
+    
     //extract glassfrog id from the results in the above custom query
     $glassfrog_ids = wp_list_pluck($results, 'gf_person_id');
 
@@ -855,7 +853,7 @@ function glassfrog_api_get_persons_of_circles()
                     if ($ap->external_id == $uid):
 
                         //updated
-                       // $wpdb->query($update_query);
+                        $wpdb->query($update_query);
 
                         //get wp user id stored as external id from the api
                         $members[] = $ap->external_id;
@@ -1130,17 +1128,17 @@ if (!empty($items_for_current_page)):
         </div>
         <div class="dong-pagination user-trading-list-paginate" style="float:right">
             <?php
-$num_items = count($user_trading_metas);
-    $num_pages = ceil($num_items / $items_per_page);
-    echo paginate_links(array(
-        'base' => add_query_arg('listpaged', '%#%'),
-        'format' => 'list',
-        'prev_text' => __('&laquo; Previous', 'cpm-dongtrader'),
-        'next_text' => __('Next &raquo;', 'cpm-dongtrader'),
-        'total' => $num_pages,
-        'current' => $current_page,
-    ));
-    ?>
+                $num_items = count($user_trading_metas);
+                $num_pages = ceil($num_items / $items_per_page);
+                echo paginate_links(array(
+                    'base' => add_query_arg('listpaged', '%#%'),
+                    'format' => 'list',
+                    'prev_text' => __('&laquo; Previous', 'cpm-dongtrader'),
+                    'next_text' => __('Next &raquo;', 'cpm-dongtrader'),
+                    'total' => $num_pages,
+                    'current' => $current_page,
+                ));
+            ?>
         </div>
         <?php
 else:
@@ -1291,8 +1289,62 @@ function dong_pagination_params($arr, $items_per_page=5){
     return $items_for_current_page;
 }
 
-add_action('my_custom' , 'dong_my_custom');
+add_action( 'woocommerce_admin_order_data_after_order_details', 'add_checkbox_to_order_edit_page' );
 
-function dong_my_custom(){
-    $ample = 23;
+function add_checkbox_to_order_edit_page( $order ) {
+    $order_id = $order->get_id();
+    $checked = get_post_meta( $order_id, 'release_profit_amount', true ) ? 'checked' : '';
+    $text = get_post_meta( $order_id, 'release_note', true );
+    ?>
+    <p class="form-field " >
+        <label for="release_profit_amount">Check To Release Profit Amount</label>
+        <input type="checkbox"style="width:0%;" id="release_profit_amount" name="release_profit_amount" value="1" <?php echo $checked; ?>>
+    </p>
+    <p class="form-field form-field-wide" id="textarea_wrapper" style="<?php echo $checked ? '' : 'display: none;'; ?>">
+        <label for="release_note">Release Note</label>
+        <textarea id="release_note" name="release_note"><?php echo esc_html( $text ); ?></textarea>
+    </p>
+    <?php
 }
+
+// Enqueue jQuery and custom script
+add_action( 'admin_enqueue_scripts', 'enqueue_scripts' );
+
+function enqueue_scripts() {
+    wp_enqueue_script( 'jquery' );
+    wp_enqueue_script( 'custom-script', get_stylesheet_directory_uri() . '/custom.js', array('jquery'), '1.0', true );
+}
+
+// Add custom script to handle checkbox change
+add_action( 'admin_footer', 'add_custom_script' );
+
+function add_custom_script() {
+    ?>
+    <script>
+        jQuery(document).ready(function($) {
+            var $checkbox = $('#release_profit_amount');
+            var $textarea_wrapper = $('#textarea_wrapper');
+
+            $checkbox.on('change', function() {
+                $textarea_wrapper.toggle(this.checked);
+            });
+        });
+    </script>
+    <?php
+}
+
+// Save checkbox and textarea values to order meta
+add_action( 'woocommerce_process_shop_order_meta', 'save_checkbox_and_release_notes' );
+
+function save_checkbox_and_release_notes( $order_id ) {
+    if ( isset( $_POST['release_profit_amount'] ) ) {
+        $release_profit_amount = '1';
+    } else {
+        $release_profit_amount = '0';
+    }
+    update_post_meta( $order_id, 'release_profit_amount', $release_profit_amount );
+
+    $release_note = sanitize_text_field( $_POST['release_note'] );
+    update_post_meta( $order_id, 'release_note', $release_note );
+}
+

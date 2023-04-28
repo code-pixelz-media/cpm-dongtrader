@@ -1,4 +1,5 @@
-<form id="posts-filter" method="get" action="">
+<div class="export-section">
+    <form id="posts-filter" method="get" action="">
             <label for="filter"><?php _e("Show", 'cpm-dongtrader');?></label>
             <select id="filter" name="filter">
                 <option value="all" <?php echo $all_selected; ?>>All</option>
@@ -56,3 +57,4 @@
                 pmpro_ShowMonthOrYear();
             </script>
         </form>
+</div>

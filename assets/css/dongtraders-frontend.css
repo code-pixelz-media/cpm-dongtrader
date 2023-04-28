@@ -213,6 +213,12 @@ form#export-csv-order p {
     text-align: center;
 }
 
+form#export-csv-order {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
 /*end of affiliate referrals*/
 
 /* ADD YOUR AFFILIATE ORDER */

@@ -17,9 +17,6 @@ $combined_order_array = array_reduce($all_friends_orders, function ($result, $or
   return array_merge($result, $orders);
 }, array());
 
-
-
-
 ?>
 
 <div class="detente-groups">
@@ -40,29 +37,33 @@ $combined_order_array = array_reduce($all_friends_orders, function ($result, $or
             <?php 
                 echo '<tbody>';
                     if(!empty($combined_order_array)):
-                        $i =1;
                         foreach($combined_order_array as $od) : 
                             $order = new WC_Order($od);
-                            $formatted_order_date = wc_format_datetime($order->get_date_created(), 'Y-m-d');
+                            $formatted_order_date   = wc_format_datetime($order->get_date_created(), 'Y-m-d');
+                            $group_profit_amount    = dongtrader_get_order_meta($od, 'dong_profit_dg'); 
+                            $currency_symbol        = get_woocommerce_currency_symbol();
+                            $check_release_status   = dongtrader_get_order_meta($od, 'release_profit_amount'); 
+                            $check_release_status_bool = $check_release_status == '1' ? true : false;
+                            $release_note           = $check_release_status_bool ? dongtrader_get_order_meta($od,'release_note') : false;
                             echo '<tr>';
                             echo '<td>'.$order->get_user_id().'</td>';
-                            echo '<td>'.$od.'</td>';
+                            echo $check_release_status_bool ? '<td>--</td>' : '<td>'.$od.'</td>' ;
                             echo '<td>'.$formatted_order_date.'</td>';
                             echo '<td>'.$current_user_role.'</td>';
-                            echo '<td>'.'-'.'</td>';
-                            echo '<td>'.'-'.'</td>';
+                            echo '<td>'.$currency_symbol.$group_profit_amount.'</td>';
+                            if($check_release_status_bool ){
+                                if($release_note != 0){
+                                    echo '<td>'.$release_note.'</td>';
+                                }else{
+                                    echo '<td>The requested amount has been released</td>';
+                                }
+                               
+                            }else{
+                                echo '<td>--</td>';
+                            }
+                           
                             echo '</tr>';
-                        $i++;
                         endforeach;
-                        // echo '<tfoot>';
-                        //     echo '<tr>';
-                        //     echo "<td colspan='2'>All Totals</td>";
-                        //     echo "<td>$cs$rebate_sum</td>";
-                        //     echo "<td>$cs$process_sum</td>";
-                        //     echo "<td>$cs$profit_sum</td>";
-                        //     echo "<td>$cs$total_sum</td>";
-                        //     echo '</tr>';
-                        // echo '</tfoot>';
                     else:
                         echo '<tr>';
                         echo '<td style="text-align:center;"colspan="6" >Details Not Found</td>';

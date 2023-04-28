@@ -1,6 +1,6 @@
 <div class="dong-pagination user-trading-list-paginate" style="float:right">
     <?php
-$current_page = get_query_var( 'listpaged' ) ? (int) get_query_var( 'listpaged' ) : 1;
+        $current_page = get_query_var( 'listpaged' ) ? (int) get_query_var( 'listpaged' ) : 1;
         $num_items = $args['num_items'];
         $items_per_page = $args['items_per_page'];
         $num_pages = ceil($num_items / $items_per_page);

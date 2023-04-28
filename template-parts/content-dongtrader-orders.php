@@ -1,14 +1,12 @@
 <?php 
 
 defined( 'ABSPATH' ) || exit;
-
-
 $order_details = get_user_meta(get_current_user_id(),'_buyer_details',true);
 $cs            = get_woocommerce_currency_symbol();
 $filter_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'partials'. DIRECTORY_SEPARATOR.'filter-top.php';
 $pagination_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'partials'. DIRECTORY_SEPARATOR.'pagination-buttom.php';
 ?>
-<div class="detente-orders">
+<div class="detente-orders cpm-table-wrap">
     <h3><?php esc_html_e('My orders', 'cpm-dongtrader'); ?></h3>
     <br class="clear" />
     <div id="member-history-orders" class="widgets-holder-wrap">
@@ -93,8 +91,6 @@ $pagination_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY
                         $profit_sum  = array_sum(array_column($paginated_array, 'seller_profit'));
                         $total_sum   = array_sum(array_column($paginated_array,'total'));
 
-
-
                         foreach($paginated_array as $od) : 
                             $order = new WC_Order($od['order_id']);
                             $formatted_order_date = wc_format_datetime($order->get_date_created(), 'Y-m-d');
@@ -116,11 +112,11 @@ $pagination_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY
                             echo "<td>$cs$total_sum</td>";
                             echo '</tr>';
                         echo '</tfoot>';
-                    else:
+                else:
                         echo '<tr>';
                         echo '<td style="text-align:center;"colspan="6" >Details Not Found</td>';
                         echo '</tr>';
-                    endif;
+                endif;
                 echo '</tbody>';
 
            
@@ -130,20 +126,22 @@ $pagination_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY
             
         </table>
     </div>
-    <div class="dong-pagination user-trading-list-paginate" style="float:right">
-        <?php
-        $num_items = count($order_details);
+    <?php if(!empty($order_details)): ?>
+        <div class="dong-pagination user-trading-list-paginate" style="float:right">
+            <?php
+            $num_items = count($order_details);
 
-        $num_pages = ceil($num_items / $items_per_page);
+            $num_pages = ceil($num_items / $items_per_page);
 
-        echo paginate_links(array(
-            'base' => add_query_arg('listpaged', '%#%'),
-            'format' => 'list',
-            'prev_text' => __('&laquo; Previous', 'cpm-dongtrader'),
-            'next_text' => __('Next &raquo;', 'cpm-dongtrader'),
-            'total' => $num_pages,
-            'current' => $current_page,
-        ));
-        ?>
-    </div>
+            echo paginate_links(array(
+                'base' => add_query_arg('listpaged', '%#%'),
+                'format' => 'list',
+                'prev_text' => __('&laquo; Previous', 'cpm-dongtrader'),
+                'next_text' => __('Next &raquo;', 'cpm-dongtrader'),
+                'total' => $num_pages,
+                'current' => $current_page,
+            ));
+            ?>
+        </div>
+    <?php endif; ?>
 </div>
