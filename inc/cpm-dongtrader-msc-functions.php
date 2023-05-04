@@ -1222,72 +1222,7 @@ function add_custom_tab_to_my_account()
 }
 add_action('wp_loaded', 'add_custom_tab_to_my_account');
 
-// add_action('pagination_search_params', 'dong_pagination_params');
 
-function dong_pagination_params($arr, $items_per_page=5){
-
-        // determine current page number from query parameter
-        $current_page = isset($_GET['listpaged']) ? intval($_GET['listpaged']) : 1;
-
-        // calculate start and end indices for items on current page
-        $start_index = ($current_page - 1) * $items_per_page;
-
-        if (isset($_REQUEST['filter'])) {
-
-            //get filter data from url parameters
-            $get_filter = sanitize_text_field($_REQUEST['filter']);
-
-            if ($get_filter == "all") {
-
-                $all_selected = "selected";
-                $date_selected = "";
-
-            } elseif ($get_filter == "within-a-date-range") {
-
-            //get start date
-            $start = sanitize_text_field($_REQUEST['start-month']);
-
-            //get end date
-            $enddate = sanitize_text_field($_REQUEST['end-month']);
-            $date_selected = "selected";
-            $all_selected = "";
-
-            if (strtotime($start) > strtotime($enddate)) {
-                $temp_date = $start;
-                $start = $enddate;
-                $enddate = $temp_date;
-            }
-
-            $start_date_obj = strtotime($start);
-            $end_date_obj = strtotime($enddate);
-
-            if ($start_date_obj && $end_date_obj) {
-
-                $results = array_filter($arr, function ($item) use ($start_date_obj, $end_date_obj) {
-                    $order = new WC_Order($item['order_id']);
-                    $item_date = strtotime($order->get_date_created()->date('Y-m-d'));
-
-                    return ($item_date >= $start_date_obj && $item_date <= $end_date_obj);
-                });
-
-                $arr = $results;
-                $start_index = 0;
-
-            }
-        }
-    } else {
-        $start = "";
-        $enddate = "";
-        $date_selected = "";
-        $all_selected = "";
-
-    }
-
-    $items_for_current_page = array_slice($arr, $start_index, $items_per_page);
-
-
-    return $items_for_current_page;
-}
 
 add_action( 'woocommerce_admin_order_data_after_order_details', 'add_checkbox_to_order_edit_page' );
 
@@ -1348,3 +1283,82 @@ function save_checkbox_and_release_notes( $order_id ) {
     update_post_meta( $order_id, 'release_note', $release_note );
 }
 
+
+
+function test_filter($details, $par1, $par2){
+
+    return $details;
+}
+
+
+function dongtrader_pagination_array($details, $items_per_page = 10 , $items_array=false){
+
+    $current_page = isset($_GET['listpaged']) ? (int) $_GET['listpaged'] : 1;
+
+    // calculate start and end indices for items on current page
+    $start_index = ($current_page - 1) * $items_per_page;
+
+
+    if (isset($_REQUEST['filter'])) {
+                
+        //get filter data from url parameters
+        $get_filter = sanitize_text_field($_REQUEST['filter']);
+
+        if ($get_filter == "all") {
+
+            $all_selected = "selected";
+            $date_selected = "";
+
+        } elseif ($get_filter == "within-a-date-range") {
+
+            //get start date
+            $start = sanitize_text_field($_REQUEST['start-month']);
+
+            //get end date
+            $enddate = sanitize_text_field($_REQUEST['end-month']);
+            $date_selected = "selected";
+            $all_selected = "";
+
+            if (strtotime($start) > strtotime($enddate)) {
+                $temp_date = $start;
+                $start = $enddate;
+                $enddate = $temp_date;
+            }
+
+            $start_date_obj = strtotime($start);
+            $end_date_obj = strtotime($enddate);
+
+            if ($start_date_obj && $end_date_obj) {
+
+                $results = array_filter($details, function ($item) use ($start_date_obj, $end_date_obj) {
+                    $order = new WC_Order($item['order_id']);
+                    $item_date = strtotime($order->get_date_created()->date('Y-m-d'));
+
+                    return ($item_date >= $start_date_obj && $item_date <= $end_date_obj);
+                });
+
+                $details = $results;
+                $start_index = 0;
+
+            }
+    }
+    } else {
+        $start          = "";
+        $enddate        = "";
+        $date_selected  = "";
+        $all_selected   = "";
+
+    }
+
+    $paginated_array = array_slice($details, $start_index, $items_per_page);
+
+    $params_arr = [
+        'startdate'     => $start,
+        'enddate'       => $enddate,
+        'date_selected' => $date_selected,
+        'all_selected'  => $all_selected
+    ];
+
+    return $items_array ? $paginated_array : $params_arr ;
+
+}

@@ -19,7 +19,7 @@ $combined_order_array = array_reduce($all_friends_orders, function ($result, $or
 
 ?>
 
-<div class="detente-groups">
+<div class="detente-groups cpm-table-wrap">
     <h3><?php esc_html_e('Group ', 'cpm-dongtrader'); ?></h3>
     <br class="clear" />
     <div id="member-history-orders" class="widgets-holder-wrap">

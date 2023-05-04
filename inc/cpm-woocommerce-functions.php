@@ -1,6 +1,5 @@
 <?php
-/* Woocommerce hooks to add fields to my acount page */
-/* Always Update Permalink after adding a new endpoint */
+
 
 /* add v card option for my-account page */
 
@@ -58,10 +57,10 @@ function cpm_dong_my_membership_vcard_endpoint_content()
         <p id="copy_url_id" style="display:none;">' . $user_meta_qrs . '</p>
         </div>
         <style>
-	.qr-tiger-vcard-code-generator{
-		display: none;
-	}
-</style>';
+            .qr-tiger-vcard-code-generator{
+                display: none;
+            }
+        </style>';
     ?>
         <div class="vcards_buttons">
             <a href="JavaScript:Void(0);" class="copy_qr_image_url" onclick="dong_traders_url_copy('#copy_url_id')">Copy QR URL</a> <a class="update_card" href="JavaScript:Void(0);">Update Vcard</a>
@@ -936,11 +935,13 @@ function dongtraders_csv_order_importer()
                     );
 
                     $order = wc_create_order();
-                    //var_dump($order);
+                    
                     $order->set_customer_id($user_id);
+
                     $order->update_meta_data('dong_affid', $affiliate_user_id);
-                    // add products
+                    
                     $get_quantity_yam = get_post_meta($product_id, '_qty_args', true);
+                    
                     if (is_array($get_quantity_yam)) {
                         $get_quantity_yam_no = dongtraders_set_product_quantity($product_id);
                         $order->add_product(wc_get_product($product_id_csv), $get_quantity_yam_no);

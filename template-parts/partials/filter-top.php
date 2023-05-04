@@ -1,3 +1,11 @@
+<?php 
+
+
+$get_items = dongtrader_pagination_array($args, $items_per_page = 10 , $items_array=false);
+
+extract($get_items);
+
+?>
 <div class="export-section">
     <form id="posts-filter" method="get" action="">
             <label for="filter"><?php _e("Show", 'cpm-dongtrader');?></label>
@@ -6,13 +14,12 @@
                 <option value="within-a-date-range" <?php echo $date_selected; ?>>Within a Date Range</option>
             </select>
             <span id="from" style="display: none;">From</span>
-            <input id="start-month" name="start-month" type="date" size="2" value="<?php echo $start; ?>" style="display: none;">
+            <input id="start-month" name="start-month" type="date" size="2" value="<?php echo $startdate; ?>" style="display: none;">
             <span id="to" style="display: none;">To</span>
             <input id="end-month" name="end-month" type="date" size="2" value="<?php echo $enddate; ?>" style="display: none;">
             <span id="filterby" style="display: none;">filter by </span>
             <input id="submit" class="button" type="submit" value="Filter">
             <script>
-                    //update month/year when period dropdown is changed
                 jQuery(document).ready(function() {
                     jQuery('#filter').change(function() {
                         pmpro_ShowMonthOrYear();

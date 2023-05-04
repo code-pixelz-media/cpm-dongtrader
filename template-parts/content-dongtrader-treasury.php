@@ -1,14 +1,19 @@
 <?php 
 
-$treasury_details = get_user_meta(get_current_user_id(),'_treasury_details',true);
-$cs               = get_woocommerce_currency_symbol();
-$filter_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'partials'. DIRECTORY_SEPARATOR.'filter-top.php';
+$treasury_details         = get_user_meta(get_current_user_id(),'_treasury_details',true);
+$cs                       = get_woocommerce_currency_symbol();
+$filter_template_path     = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'partials'. DIRECTORY_SEPARATOR.'filter-top.php';
+$pagination_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'partials'. DIRECTORY_SEPARATOR.'pagination-buttom.php';
+
 ?>
-<div class="detente-treasury">
+<div class="detente-treasury cpm-table-wrap">
     <h3><?php esc_html_e('Treasury', 'cpm-dongtrader'); ?></h3>
     <br class="clear" />
     <div id="member-history-orders" class="widgets-holder-wrap">
-    <?php if(file_exists($filter_template_path) && !empty($treasury_details))  load_template($filter_template_path,true); ?>
+    <?php
+    if(!empty($treasury_details)) 
+        if(file_exists($filter_template_path) && !empty($treasury_details))  load_template($filter_template_path,true,$treasury_details); 
+    ?>
         <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
             <thead>
                 <tr>
@@ -23,10 +28,11 @@ $filter_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEP
                 <?php 
                 echo '<tbody>';
                     if(!empty($treasury_details)):
-                        $total_order_amt_sum  = array_sum(array_column($treasury_details, 'total_amt'));
-                        $distrb_amt_aum = array_sum(array_column($treasury_details, 'distrb_amt'));
-                        $rem_amt_sum  = array_sum(array_column($treasury_details, 'rem_amt'));
-                        foreach($treasury_details as $od) : 
+                        $paginated_treasury   = dongtrader_pagination_array($treasury_details,10,true);
+                        $total_order_amt_sum  = array_sum(array_column($paginated_treasury, 'total_amt'));
+                        $distrb_amt_aum       = array_sum(array_column($paginated_treasury, 'distrb_amt'));
+                        $rem_amt_sum          = array_sum(array_column($paginated_treasury, 'rem_amt'));
+                        foreach($paginated_treasury as $od) : 
                             $order = new WC_Order($od['order_id']);
                             $formatted_order_date = wc_format_datetime($order->get_date_created(), 'Y-m-d');
                             echo '<tr>';
@@ -58,4 +64,5 @@ $filter_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEP
             
         </table>
     </div>
+    <?php if(file_exists($pagination_template_path) && !empty($treasury_details))  load_template($pagination_template_path,true , $treasury_details); ?>
 </div>
