@@ -1,8 +1,5 @@
 <?php 
-
-
 $get_items = dongtrader_pagination_array($args, $items_per_page = 10 , $items_array=false);
-
 extract($get_items);
 
 ?>

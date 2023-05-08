@@ -92,10 +92,6 @@ $dong_qr_array = get_option('dong_user_qr_values');
 				</div>
 
 				<div id="api-integration">
-					<h2 class="tab-title">Set Your API keys</h2>
-
-					<hr>
-
 					<?php
 					$dongtraders_api_setting_data = get_option('dongtraders_api_settings_fields');
 					?>
@@ -104,9 +100,36 @@ $dong_qr_array = get_option('dong_user_qr_values');
 						settings_errors();
 
 						settings_fields('dongtraders_api_setting_page');
-
+						
 
 						?>
+
+						<h3><?php _e('Currency Conversion','cpm-dongtrader') ?></h3>
+                        <div class="form-group">
+							
+                            <label for=""><?php _e('Enable','cpm-dongtrader') ?></label>
+                            <div class="form-control-wrap">
+                                <div class="checkbox-wrap custom">
+									<?php // var_dump($dongtraders_api_setting_data['dong_enable_currency']); ?>
+								  	<input type="checkbox" id="dong_currency_check" name="dongtraders_api_settings_fields[dong_enable_currency]" 
+									value="<?php echo esc_attr('on'); ?>"
+									<?php if (isset($dongtraders_api_setting_data['dong_enable_currency'])) { echo checked($dongtraders_api_setting_data['dong_enable_currency'], 'on', false);}?>>
+                                    <span class="custom-checkbox"></span>
+                                </div>
+                            </div>
+                        </div>
+						
+						<div class="currency-convert">
+							<label for=""><?php _e('1 Dollar is equal to (x) V.N.D ','cpm-dongtrader') ?></label>
+							<div class="form-group">
+								<div class="form-control-wrap">
+									<input class="form-control" name="dongtraders_api_settings_fields[vnd_rate]" type="text" placeholder="1 dollar equals to (x) vnd"
+									 onfocus="this.placeholder=''" onblur="this.placeholder='1 dollar equals to (x) vnd'"
+									  value="<?php echo esc_html($dongtraders_api_setting_data['vnd_rate']); ?>" >
+								</div>
+							</div>
+						</div>
+						
 						<h3>QrTiger API Credentials</h3>
 						<div class="form-group">
 							<label for="">QrTiger API Key</label>

@@ -1,4 +1,5 @@
 jQuery(document).ready(function ($) {
+
   jQuery("#refresh_order").click(function () {
     location.reload();
   });
@@ -9,6 +10,20 @@ jQuery(document).ready(function ($) {
   /*When any tab is clicked from settings sections the tab id is stored in session storage */
   $("#dongtrader-tabs>li").on("click", function () {
     sessionStorage.setItem("lastid", $(this).prop("id"));
+  });
+
+  if(!$('#dong_currency_check').is(':checked')){
+    $('.currency-convert').hide();
+    $('#dong_currency_check').val('off');
+  }
+
+  $('#dong_currency_check').change(function() {
+    $('.currency-convert').toggle($(this).is(':checked'));
+    if($('#dong_currency_check').is(':checked')){
+      $('#dong_currency_check').val('on');
+    }else{
+      $('#dong_currency_check').val('off');
+    }
   });
   /*Saves Data On Options via ajax for the from inside Integration API Tab from settings section*/
   $("#save-settings").submit(function () {

@@ -4,7 +4,7 @@ $treasury_details         = get_user_meta(get_current_user_id(),'_treasury_detai
 $cs                       = get_woocommerce_currency_symbol();
 $filter_template_path     = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'partials'. DIRECTORY_SEPARATOR.'filter-top.php';
 $pagination_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'partials'. DIRECTORY_SEPARATOR.'pagination-buttom.php';
-
+extract($args);
 ?>
 <div class="detente-treasury cpm-table-wrap">
     <h3><?php esc_html_e('Treasury', 'cpm-dongtrader'); ?></h3>
@@ -39,17 +39,17 @@ $pagination_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY
                             echo '<td>'.$od['order_id'].'/'.$formatted_order_date.'</td>';
                             echo '<td>'.$od['name'].'</td>';
                             echo '<td>'.$od['product_title'].'</td>';
-                            echo '<td>'.$cs.$od['total_amt'].'</td>';
-                            echo '<td>'.$cs.$od['distrb_amt'].'</td>';
-                            echo '<td>'.$cs.$od['rem_amt'].'</td>';
+                            echo '<td>'.$symbol.$od['total_amt']*$vnd_rate.'</td>';
+                            echo '<td>'.$symbol.$od['distrb_amt']*$vnd_rate.'</td>';
+                            echo '<td>'.$symbol.$od['rem_amt']*$vnd_rate.'</td>';
                             echo '</tr>';
                         endforeach;
                         echo '<tfoot>';
                             echo '<tr>';
-                            echo "<td colspan='3'>All Totals</td>";
-                            echo "<td>$cs$total_order_amt_sum</td>";
-                            echo "<td>$cs$distrb_amt_aum</td>";
-                            echo "<td>$cs$rem_amt_sum</td>";
+                            echo '<td colspan="3">All Totals</td>';
+                            echo '<td>'.$symbol.$total_order_amt_sum*$vnd_rate.'</td>';
+                            echo '<td>'.$symbol.$distrb_amt_aum*$vnd_rate.'</td>';
+                            echo '<td>'.$symbol.$rem_amt_sum*$vnd_rate.'</td>';
                             echo '</tr>';
                         echo '</tfoot>';
                     else:

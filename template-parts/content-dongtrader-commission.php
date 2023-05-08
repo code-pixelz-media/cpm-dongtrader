@@ -3,7 +3,7 @@ $commission_details       = get_user_meta(get_current_user_id(),'_commission_det
 $cs                       = get_woocommerce_currency_symbol();
 $filter_template_path     = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'partials'. DIRECTORY_SEPARATOR.'filter-top.php';
 $pagination_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'partials'. DIRECTORY_SEPARATOR.'pagination-buttom.php';
-
+extract($args);
 ?>
 <div class="detente-commission cpm-table-wrap">
     <h3><?php esc_html_e('Commission ', 'cpm-dongtrader'); ?></h3>
@@ -30,10 +30,10 @@ $pagination_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY
                 echo '<tbody>';
                     if(!empty($commission_details)):
                         $paginated_commission = dongtrader_pagination_array($commission_details,10,true);
-                        $seller_com_sum   = array_sum(array_column($paginated_commission, 'seller_com'));
-                        $group_com_sum    = array_sum(array_column($paginated_commission, 'group_com'));
-                        $site_com_sum     = array_sum(array_column($paginated_commission, 'site_com'));
-                        $total_sum        = array_sum(array_column($paginated_commission, 'total'));
+                        $seller_com_sum   = array_sum(array_column($commission_details, 'seller_com'));
+                        $group_com_sum    = array_sum(array_column($commission_details, 'group_com'));
+                        $site_com_sum     = array_sum(array_column($commission_details, 'site_com'));
+                        $total_sum        = array_sum(array_column($commission_details, 'total'));
                         foreach($paginated_commission as $od) : 
                             $order = new WC_Order($od['order_id']);
                             $formatted_order_date = wc_format_datetime($order->get_date_created(), 'Y-m-d');
@@ -41,19 +41,19 @@ $pagination_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY
                             echo '<td>'.$od['order_id'].'/'.$formatted_order_date.'</td>';
                             echo '<td>'.$od['name'].'</td>';
                             echo '<td>'.$od['product_title'].'</td>';
-                            echo '<td>'.$cs.$od['seller_com'].'</td>';
-                            echo '<td>'.$cs.$od['group_com'].'</td>';
-                            echo '<td>'.$cs.$od['site_com'].'</td>';
-                            echo '<td>'.$cs.$od['total'].'</td>';
+                            echo '<td>'.$symbol .$od['seller_com']*$vnd_rate.'</td>';
+                            echo '<td>'.$symbol .$od['group_com']*$vnd_rate.'</td>';
+                            echo '<td>'.$symbol .$od['site_com']*$vnd_rate.'</td>';
+                            echo '<td>'.$symbol .$od['total']*$vnd_rate.'</td>';
                             echo '</tr>';
                         endforeach;
                         echo '<tfoot>';
                             echo '<tr>';
-                            echo "<td colspan='3'>All Totals</td>";
-                            echo "<td>$cs$seller_com_sum</td>";
-                            echo "<td>$cs$group_com_sum</td>";
-                            echo "<td>$cs$site_com_sum</td>";
-                            echo "<td>$cs$total_sum</td>";
+                            echo '<td colspan="3">All Totals</td>';
+                            echo '<td>'.$symbol.$seller_com_sum*$vnd_rate.'</td>';
+                            echo '<td>'.$symbol.$group_com_sum*$vnd_rate.'</td>';
+                            echo '<td>'.$symbol.$site_com_sum*$vnd_rate.'</td>';
+                            echo '<td>'.$symbol.$total_sum*$vnd_rate.'</td>';
                             echo '</tr>';
                         echo '</tfoot>';
                     else:

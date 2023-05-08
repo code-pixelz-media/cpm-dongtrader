@@ -17,6 +17,7 @@ $combined_order_array = array_reduce($all_friends_orders, function ($result, $or
   return array_merge($result, $orders);
 }, array());
 
+extract($args);
 ?>
 
 <div class="detente-groups cpm-table-wrap">
@@ -41,7 +42,6 @@ $combined_order_array = array_reduce($all_friends_orders, function ($result, $or
                             $order = new WC_Order($od);
                             $formatted_order_date   = wc_format_datetime($order->get_date_created(), 'Y-m-d');
                             $group_profit_amount    = dongtrader_get_order_meta($od, 'dong_profit_dg'); 
-                            $currency_symbol        = get_woocommerce_currency_symbol();
                             $check_release_status   = dongtrader_get_order_meta($od, 'release_profit_amount'); 
                             $check_release_status_bool = $check_release_status == '1' ? true : false;
                             $release_note           = $check_release_status_bool ? dongtrader_get_order_meta($od,'release_note') : false;
@@ -50,7 +50,7 @@ $combined_order_array = array_reduce($all_friends_orders, function ($result, $or
                             echo $check_release_status_bool ? '<td>--</td>' : '<td>'.$od.'</td>' ;
                             echo '<td>'.$formatted_order_date.'</td>';
                             echo '<td>'.$current_user_role.'</td>';
-                            echo '<td>'.$currency_symbol.$group_profit_amount.'</td>';
+                            echo '<td>'.$symbol.$group_profit_amount*$vnd_rate.'</td>';
                             if($check_release_status_bool ){
                                 if($release_note != 0){
                                     echo '<td>'.$release_note.'</td>';

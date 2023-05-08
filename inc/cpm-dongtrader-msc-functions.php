@@ -48,15 +48,6 @@ function dongtrader_cron_job()
 
 }
 
-add_action('wp_head', function(){
-   // dongtrader_distribute_product_prices_to_circle_members();
-
-    // delete_user_meta(141 , '_commission_details');
-    // delete_user_meta(141 , '_buyer_details');
-    // delete_user_meta(141 , '_treasury_details');
-});
-
-
 /**
  * Cron job function to excute distribution process
  *
@@ -137,7 +128,7 @@ function dongtrader_save_all_commission_details($b_id, $friends){
     $all_orders     = unserialize($all_orders_ser['all_orders']); 
 
     if(empty($all_orders)) return;
-    
+
     foreach($all_orders as $ao) :
 
             //get previous seller trading details saved in user meta
@@ -161,7 +152,7 @@ function dongtrader_save_all_commission_details($b_id, $friends){
 
             $c_d_g = $group_com / 5;
 
-            $total = $seller_com + $group_com + $owner_com;
+            $total = $seller_com + $c_d_g + $owner_com;
 
             $commission_metas[] = [
                 'order_id'      => $ao,
@@ -173,6 +164,7 @@ function dongtrader_save_all_commission_details($b_id, $friends){
                 'total'         => $total
             ];
             
+
             update_user_meta($b_id,'_commission_details',$commission_metas);
 
             if(!empty($friends)) :
@@ -1187,6 +1179,16 @@ function add_custom_tab_to_my_account()
 
     });
 
+    $dongtraders_setting_data = get_option('dongtraders_api_settings_fields');
+
+    $currency_rate_check      = $dongtraders_setting_data['dong_enable_currency'];
+
+    $actual_vnd_rate          = $currency_rate_check == 'on' ?  $dongtraders_setting_data['vnd_rate'] : 1;
+
+    $currency_symbol          = $currency_rate_check == 'on' ?  'D' :  get_woocommerce_currency_symbol();
+
+    $vnd_rate_array           = ['currency_enabled'=> $currency_rate_check, 'vnd_rate'=>$actual_vnd_rate , 'symbol'=>$currency_symbol];
+
     foreach ($all_my_account_tabs as $k => $v):
 
 
@@ -1209,12 +1211,12 @@ function add_custom_tab_to_my_account()
             
         });
 
-        add_action('woocommerce_account_' . $v['slug'] . '_endpoint', function () use ( $v , $k) {
+        add_action('woocommerce_account_' . $v['slug'] . '_endpoint', function () use ( $v , $vnd_rate_array ) {
 
             $tem_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'content-'.$v['slug'].'.php';
             
             if (file_exists($tem_path)) {
-                load_template($tem_path,true, $v);
+                load_template($tem_path,true, $vnd_rate_array);
             }
         });
 
