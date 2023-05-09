@@ -1149,26 +1149,26 @@ function add_custom_tab_to_my_account()
     $all_my_account_tabs = [
         [
             'name' => __('My Orders', 'cpm-dongtrader'),
-            'slug' => 'dongtrader-orders',
+            'slug' => 'detente-orders',
             'position' => 1,
 
         ],
 
         [
             'name' => __('Treasury', 'cpm-dongtrader'),
-            'slug' => 'dongtrader-treasury',
+            'slug' => 'detente-treasury',
             'position' => 2,
         ],
 
         [
             'name' => __('Group', 'cpm-dongtrader'),
-            'slug' => 'dongtrader-group',
+            'slug' => 'detente-group',
             'position' => 3,
         ],
 
         [
             'name' => __('Commission', 'cpm-dongtrader'),
-            'slug' => 'dongtrader-commission',
+            'slug' => 'detente-commission',
             'position' => 4,
         ],
     ];
