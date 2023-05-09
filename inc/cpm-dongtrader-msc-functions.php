@@ -1185,7 +1185,7 @@ function add_custom_tab_to_my_account()
 
     $actual_vnd_rate          = $currency_rate_check == 'on' ?  $dongtraders_setting_data['vnd_rate'] : 1;
 
-    $currency_symbol          = $currency_rate_check == 'on' ?  'D' :  get_woocommerce_currency_symbol();
+    $currency_symbol          = $currency_rate_check == 'on' ?  '₫' :  get_woocommerce_currency_symbol();
 
     $vnd_rate_array           = ['currency_enabled'=> $currency_rate_check, 'vnd_rate'=>$actual_vnd_rate , 'symbol'=>$currency_symbol];
 
