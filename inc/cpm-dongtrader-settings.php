@@ -118,7 +118,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 										'media_buttons' => false, // This setting removes the media button.
 										'textarea_name' => $custom_editor_name, // Set custom name.
 										'textarea_rows' => get_option('default_post_edit_rows', 10), //Determine the number of rows.
-										'quicktags' => false, // Remove view as HTML button.
+										'quicktags' => true, // Remove view as HTML button.
 									);
 								wp_editor( $content, $custom_editor_id, $args );
 
