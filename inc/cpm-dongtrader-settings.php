@@ -103,6 +103,28 @@ $dong_qr_array = get_option('dong_user_qr_values');
 						
 
 						?>
+					
+						<h3>Change Welcome Email Text</h3>
+						<div class="form-group">
+							<label for="">Change Welcome Email Text</label>
+							<div class="form-control-wrap">
+								<!-- <input class="form-control" name="dongtraders_api_settings_fields[dong_change_welcome_text]" type="text" placeholder="Enter API Key" onfocus="this.placeholder=''" onblur="this.placeholder='Enter API Key'" value="<?php echo esc_html($dongtraders_api_setting_data['qrtiger-api-key']); ?>"> -->
+							<!-- <textarea name="dongtraders_api_settings_fields[dong_change_welcome_text]" id="" cols="30" rows="10"><?php //echo esc_html($dongtraders_api_setting_data['dong_change_welcome_text']); ?></textarea> -->
+								<?php 
+								$content = "";
+								$custom_editor_id = "dongchange_welcome_email";
+								$custom_editor_name = "dongtraders_api_settings_fields[dong_change_welcome_text]";
+								$args = array(
+										'media_buttons' => false, // This setting removes the media button.
+										'textarea_name' => $custom_editor_name, // Set custom name.
+										'textarea_rows' => get_option('default_post_edit_rows', 10), //Determine the number of rows.
+										'quicktags' => false, // Remove view as HTML button.
+									);
+								wp_editor( $content, $custom_editor_id, $args );
+
+								?>
+							</div>
+						</div>
 
 						<h3><?php _e('Currency Conversion','cpm-dongtrader') ?></h3>
                         <div class="form-group">
