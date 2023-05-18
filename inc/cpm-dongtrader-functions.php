@@ -309,7 +309,7 @@ function dongtrader_meta_qr_generator()
 
         $current_data = dongtrader_ajax_helper('rgb(87, 3, 48)', $product_url);
         if (!empty($current_data)) {
-            $update_data = json_encode($current_data);
+            $update_data = json_encode($current_data); 
             $resp['success'] = true;
             $resp['template'] = '<div id="" class="dong-qr-components">
             <img src="' . $current_data['qr_image_url'] . '" alt="" width="200" height="200">
@@ -386,9 +386,39 @@ function dongtrader_delete_qr_fields()
             $ajax_values['html'] = true;
         }
     }
-    wp_send_json($ajax_values);
+    wp_send_json($ajax_values);   
     wp_die();
 }
+
+
+//remove functionality for qr codes from settings page
+// Remove functionality for qr codes
+add_action('wp_ajax_dongtrader_delete_qr_items_settingspage', 'dongtrader_delete_qr_items_settingspage');
+function dongtrader_delete_qr_items_settingspage()
+{
+
+    $dong_qr_array = get_option('dong_user_qr_values');
+    $index  = (int) esc_attr($_POST['index']);
+    $ajax_values = array('resp' => false , 'reload'=> false);
+    if($index >= 0 ){
+        
+        unset($dong_qr_array[$index]);
+        array_values($dong_qr_array);
+        update_option('dong_user_qr_values', $dong_qr_array);
+        $new_qr_array = get_option('dong_user_qr_values');
+
+        $reload = count($new_qr_array) == 0  ? true : false;
+
+        $ajax_values = array('resp' => true , 'reload' => $reload);
+        
+    }
+
+    wp_send_json($ajax_values);
+
+    wp_die();
+
+}
+
 
 
 /*Create database tables where we can save api response details*/
@@ -397,8 +427,12 @@ function dongtrader_create_dbtable()
 
 
     global $wpdb;
-    $table_name = $wpdb->prefix . 'manage_glassfrogs_api';
+
     $charset_collate = $wpdb->get_charset_collate();
+
+    //group table ends
+    $table_name = $wpdb->prefix . 'manage_glassfrogs_api';
+
     $sql = "CREATE TABLE $table_name (
             id INT NOT NULL AUTO_INCREMENT ,
             product_id INT ,
@@ -417,23 +451,59 @@ function dongtrader_create_dbtable()
 
     /* create table to store custom order */
     $order_table_name = $wpdb->prefix . 'dong_order_export_table';
-    $export_sql = "CREATE TABLE $order_table_name ( 
-            id INT NOT NULL AUTO_INCREMENT ,
-            customer_email VARCHAR(255) NOT NULL ,
-            customer_first_name VARCHAR(255) NOT NULL , 
-            customer_last_name VARCHAR(255) NOT NULL ,
-            customer_phone VARCHAR(255) NOT NULL ,
-            customer_country VARCHAR(255) NOT NULL ,
-            customer_state VARCHAR(255) NOT NULL ,
-            customer_address VARCHAR(255) NOT NULL ,
-            customer_postcode VARCHAR(255) NOT NULL ,
-            customer_city VARCHAR(255) NOT NULL ,
-            product_id INT NOT NULL ,
-            product_varition_id INT NOT NULL ,
-            affilate_user_id INT NOT NULL ,
-            created_at VARCHAR(255) NOT NULL,
+    if ( $wpdb->get_var( "SHOW TABLES LIKE '{$order_table_name}'" ) != $order_table_name ) :
+        $export_sql = "CREATE TABLE $order_table_name ( 
+                id INT NOT NULL AUTO_INCREMENT ,
+                customer_email VARCHAR(255) NOT NULL ,
+                customer_first_name VARCHAR(255) NOT NULL , 
+                customer_last_name VARCHAR(255) NOT NULL ,
+                customer_phone VARCHAR(255) NOT NULL ,
+                customer_country VARCHAR(255) NOT NULL ,
+                customer_state VARCHAR(255) NOT NULL ,
+                customer_address VARCHAR(255) NOT NULL ,
+                customer_postcode VARCHAR(255) NOT NULL ,
+                customer_city VARCHAR(255) NOT NULL ,
+                product_id INT NOT NULL ,
+                product_varition_id INT NOT NULL ,
+                affilate_user_id INT NOT NULL ,
+                created_at VARCHAR(255) NOT NULL,
+                PRIMARY KEY (id)) $charset_collate;";
+        dbDelta($export_sql);
+    endif;
+
+    // Create users glassfrog details table
+    $user_details_table = $wpdb->prefix . 'glassfrog_user_data';
+    if ( $wpdb->get_var( "SHOW TABLES LIKE '{$user_details_table}'" ) != $user_details_table ) :
+        $glassfrog_user_sql = "CREATE TABLE $user_details_table (
+            id INT NOT NULL AUTO_INCREMENT , 
+            user_id VARCHAR(255) NOT NULL ,
+            gf_person_id VARCHAR(255) NOT NULL , 
+            gf_name VARCHAR(255) NOT NULL ,
+            in_glassfrog VARCHAR(255) NOT NULL ,
+            all_orders VARCHAR(255) NOT NULL ,
+            group_id INT,
             PRIMARY KEY (id)) $charset_collate;";
-    dbDelta($export_sql);
+            dbDelta($glassfrog_user_sql);
+    endif;
+
+    //create glassfrog groups(circle tables)
+    $group_details_table = $wpdb->prefix . 'glassfrog_group_data';
+    if ( $wpdb->get_var( "SHOW TABLES LIKE '{$group_details_table}'" ) != $group_details_table ) :
+        $group_details_sql = "CREATE TABLE $group_details_table ( 
+            id INT NOT NULL AUTO_INCREMENT ,
+            group_array VARCHAR(255) NOT NULL ,
+            circle_id INT NOT NULL , 
+            circle_name VARCHAR(255) NOT NULL,
+            created_date DATETIME NOT NULL,
+            updated_date DATETIME NOT NULL,
+            group_leader INT NOT NULL,
+            leader_since DATETIME NOT NULL,
+            leadership_expires DATETIME NOT NULL,
+            distribution_status ENUM('true', 'false', 'update_required')
+            PRIMARY KEY (id)) $charset_collate;";
+            dbDelta($group_details_sql);
+    endif;
+
 }
 add_action('wp', 'dongtrader_create_dbtable');
 
@@ -445,32 +515,41 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid){
     global $wpdb;
 
     //custom table from our database
-    $table_name = $wpdb->prefix . 'manage_glassfrogs_api';
+    $table_name = $wpdb->prefix . 'glassfrog_user_data';
 
     //check if a person already exists in a database
     $check_persons = $wpdb->get_row($wpdb->prepare("SELECT all_orders FROM $table_name WHERE user_id = %d", $customer_id),ARRAY_A);
     
 
-    if(!empty($check_persons)) :
+    if(!empty($check_persons)) {
         
         //get serilized data and unserilize it 
-        $unserialized_orders =  unserialize($check_persons['all_orders']);var_dump($unserialized_orders);
+        $unserialized_orders =  unserialize($check_persons['all_orders']);
 
         //check if order id is already on the list and append new order id to it
-        if(!in_array($oid ,$unserialized_orders))
-            $unserialized_orders[] = $oid;
+        if(!in_array($oid ,$unserialized_orders)) $unserialized_orders[] = $oid;
 
         //again serilize data to store in db
-        $new_serilized_orders = serialize($unserialized_orders);var_dump($new_serilized_orders);
+        $new_serilized_orders = serialize($unserialized_orders);
 
         //preapre for updating serialized data
         $update_query = $wpdb->prepare("UPDATE $table_name SET all_orders = %s WHERE user_id = %d", $new_serilized_orders, $customer_id);
         
         //update data finally
-        $wpdb->query($update_query);
+        $update = $wpdb->query($update_query);
+
+        if($update === 1) {
+
+            $group_table_name = $wpdb->prefix . 'glassfrog_group_data';
+
+            $group_update = $wpdb->prepare("UPDATE $group_table_name SET distribution_status = 'update_required' WHERE user_id = %d",  $customer_id);
+
+            $wpdb->query($group_update);
+
+        }
     
        
-    else:
+    } else {
         // Get the product object
         $product = wc_get_product($p_id);
         
@@ -480,13 +559,10 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid){
         //for this case orders datas doesnt exists on our custom database table so we need to call the glassfrog api and insert data accordingly
         $gf_checkbox = get_post_meta($parent_id, '_glassfrog_checkbox', true);
  
-
         //bool to check meta
         $gf_check   = $gf_checkbox == 'on' ? true : false;
         
         if($gf_check) {
-
-        
             //get user object
             $user_info = get_userdata($customer_id);
 
@@ -513,50 +589,29 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid){
                 //glassfrog persons  name
                 $gf_name = $samp->people[0]->name;
 
-            
-                $result = $wpdb->get_row("SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;");
-                
-                $last_circle_name = isset($result) ? $result->gf_circle_name : '1';
-                
-                $circle_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE gf_circle_name = %s", $last_circle_name));
-                
-                $new_circle_name = $circle_count < 5 ? $last_circle_name : $last_circle_name + 1;
-                
-                $in_circle = 0;
-
                 $all_orders = serialize(array($oid));
 
                 $wpdb->query(
                     $wpdb->prepare(
                         "INSERT INTO $table_name
-                    (
-                        gf_person_id,
-                        product_id,
-                        order_id,
-                        gf_role_id,
-                        gf_role_assigned,
-                        gf_name,
-                        gf_circle_name ,
-                        created_at,
-                        in_circle,
-                        all_orders,
-                        user_id
-                    )
-                    VALUES ( %d,%d,%d,%d,%s,%s,%s,%s,%d,%s,%d )",
-                        esc_attr($gf_id),//d
-                        $p_id,//d
-                        $oid,//d
-                        1,//d
-                        'false',//s
-                        esc_attr($gf_name),//s
-                        esc_attr($new_circle_name),//s
-                        current_time('mysql', 1),//s
-                        $in_circle,//d
-                        $all_orders,//s
-                        $customer_id//d
-
+                        (
+                            user_id,
+                            gf_person_id,
+                            gf_name,
+                            in_glassfrog,
+                            all_orders,
+                            group_id
+                        )
+                        VALUES ( %d,%d,%s,%d,%s,%d)",
+                        $customer_id, // d
+                        $gf_id, // d
+                        $gf_name, // s
+                        0, // d
+                        $all_orders, // s
+                        0 // d
                     )
                 );
+
             
             endif;
         }else {
@@ -566,75 +621,9 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid){
         }
     
 
-    endif;
-
-}
-
-/**
- * Step 1 : Create a database table where we can save circles each circle will have 5 members each(https://i.imgur.com/i5dECgu.png).
- * Step 2 : Save user details from response received from glassfrog api to the above table
- * Step 3 : Create meta on products for variations and simple products so that user can be assigned to specific roles  
- */
-function dongtrader_user_registration_hook_outdated($customer_id, $p_id, $oid)
-{
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'manage_users_gf';
-    $user_info = get_userdata($customer_id);
-    $username = $user_info->user_login;
-    $first_name = $user_info->first_name;
-    $last_name = $user_info->last_name;
-    $full_name = $first_name . ' ' . $last_name;
-    $email = $user_info->user_email;
-    $str = '{"people": [{
-        "name": "' . $user_info->display_name . '",
-        "email": "' . $email . '",
-        "external_id": "' . $customer_id . '",
-        "tag_names": ["tag 1", "tag 2"]
-        }]
-        }';
-    $samp = glassfrog_api_request('people', $str, "POST");
-
-    if ($samp && isset($samp)) {
-        $gf_id = $samp->people[0]->id;
-        $gf_name = $samp->people[0]->name;
-        $result = $wpdb->get_row("SELECT gf_circle_name  FROM $table_name ORDER BY id DESC LIMIT 1;");
-        $last_circle_name = isset($result) ? $result->gf_circle_name : '1';
-        $circle_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE gf_circle_name = %s", $last_circle_name));
-        $new_circle_name = $circle_count < 5 ? $last_circle_name : $last_circle_name + 1;
-        $in_circle = 0;
-        $wpdb->query(
-            $wpdb->prepare(
-                "INSERT INTO $table_name
-               (
-                gf_person_id,
-                product_id,
-                order_id,
-                gf_role_id,
-                gf_role_assigned,
-                gf_name,
-                gf_circle_name ,
-                created_at,
-                in_circle,
-                user_id
-               )
-               VALUES ( %d,%d,%d,%d,%s,%s,%s,%s,%d,%d )",
-                esc_attr($gf_id),
-                $p_id,
-                $oid,
-                1,
-                'false',
-                esc_attr($gf_name),
-                esc_attr($new_circle_name),
-                current_time('mysql', 1),
-                $in_circle,
-                $customer_id
-
-            )
-        );
     }
+
 }
-
-
 
 /* add custom field to save user role on user profile */
 add_action('show_user_profile', 'dong_show_user_role');
@@ -1414,4 +1403,26 @@ function dongtraders_set_product_quantity($product_id)
         return $get_qty_no;
     }
     //return 0;
+}
+
+
+
+add_action('wp', 'pf_rb_install');
+function pf_rb_install() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'pf_parts';
+    $pf_parts_db_version = '1.0.0';
+    $charset_collate = $wpdb->get_charset_collate();
+
+    if ( $wpdb->get_var( "SHOW TABLES LIKE '{$table_name}'" ) != $table_name ) {
+
+        $sql = "CREATE TABLE $table_name (
+                        id mediumint(9) NOT NULL AUTO_INCREMENT,
+                        PRIMARY KEY  (id)
+                        ) $charset_collate;";
+
+        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+        dbDelta( $sql );
+        add_option( 'pf_parts_db_version', $pf_parts_db_version );
+    }
 }

@@ -1,29 +1,21 @@
 <?php 
-
-$loggedin_user_id = get_current_user_id();
-
-
-global $wpdb;
-
-//Our Custom table name from the database.
-$table_name = $wpdb->prefix . 'manage_glassfrogs_api';
-
-$current_user_role = $wpdb->get_var($wpdb->prepare("SELECT gf_role_assigned FROM $table_name WHERE user_id = %d", $loggedin_user_id));
-
-$all_friends_orders = $wpdb->get_results($wpdb->prepare("SELECT all_orders FROM $table_name WHERE gf_role_assigned = %s", $current_user_role),ARRAY_A);
-
-$combined_order_array = array_reduce($all_friends_orders, function ($result, $order_array) {
-  $orders = unserialize($order_array['all_orders']);
-  return array_merge($result, $orders);
-}, array());
-
+$group_details            = get_user_meta(get_current_user_id(),'_group_details',true);
+$cs                       = get_woocommerce_currency_symbol();
+$filter_template_path     = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'partials'. DIRECTORY_SEPARATOR.'filter-top.php';
+$pagination_template_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'partials'. DIRECTORY_SEPARATOR.'pagination-buttom.php';
 extract($args);
+
 ?>
 
 <div class="detente-groups cpm-table-wrap">
     <h3><?php esc_html_e('Group ', 'cpm-dongtrader'); ?></h3>
     <br class="clear" />
     <div id="member-history-orders" class="widgets-holder-wrap">
+    <?php 
+    if(!empty($commission_details)) 
+        if(file_exists($filter_template_path) && !empty($commission_details))  load_template($filter_template_path,true,$commission_details); 
+
+    ?>
         <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
             <thead>
                 <tr>
@@ -37,23 +29,20 @@ extract($args);
             </thead>
             <?php 
                 echo '<tbody>';
-                    if(!empty($combined_order_array)):
-                        foreach($combined_order_array as $od) : 
-                            $order = new WC_Order($od);
-                            $formatted_order_date   = wc_format_datetime($order->get_date_created(), 'Y-m-d');
-                            $group_profit_amount    = dongtrader_get_order_meta($od, 'dong_profit_dg'); 
-                            $check_release_status   = dongtrader_get_order_meta($od, 'release_profit_amount'); 
-                            $check_release_status_bool = $check_release_status == '1' ? true : false;
-                            $release_note           = $check_release_status_bool ? dongtrader_get_order_meta($od,'release_note') : false;
+                    if(!empty($group_details)):
+                        $paginated_gd = dongtrader_pagination_array($group_details,10,true);
+                        $i =1;
+                        foreach($paginated_gd as $gd) : 
+                           
                             echo '<tr>';
-                            echo '<td>'.$order->get_user_id().'</td>';
-                            echo $check_release_status_bool ? '<td>--</td>' : '<td>'.$od.'</td>' ;
-                            echo '<td>'.$formatted_order_date.'</td>';
-                            echo '<td>'.$current_user_role.'</td>';
-                            echo '<td>'.$symbol.$group_profit_amount*$vnd_rate.'</td>';
-                            if($check_release_status_bool ){
-                                if($release_note != 0){
-                                    echo '<td>'.$release_note.'</td>';
+                            echo '<td>'.$i.'</td>';
+                            echo '<td>'.$gd['order_id'].'</td>' ;
+                            echo '<td>'.$gd['order_date'].'</td>';
+                            echo '<td>'.$gd['gf_name'].'</td>';
+                            echo '<td>'.$symbol.$gd['profit_amount']*$vnd_rate.'</td>';
+                            if($gd['release']['enabled'] ){
+                                if($gd['release']['note']){
+                                    echo '<td>'.$gd['release']['note'].'</td>';
                                 }else{
                                     echo '<td>The requested amount has been released</td>';
                                 }
@@ -63,6 +52,8 @@ extract($args);
                             }
                            
                             echo '</tr>';
+
+                        $i++;
                         endforeach;
                     else:
                         echo '<tr>';
@@ -74,4 +65,5 @@ extract($args);
     ?>
         </table>
     </div>
+    <?php if(file_exists($pagination_template_path) && !empty($commission_details))  load_template($pagination_template_path,true , $commission_details); ?>
 </div>

@@ -148,9 +148,9 @@ jQuery(document).ready(function ($) {
     var save = !checkLocation ? $(".save-variation-changes") : false;
 
     $.post(
-      dongScript.ajaxUrl,
+      dongScript.ajaxUrl, 
       {
-        action: "dongtrader_delete_qr_fields",
+        action: "dongtrader_delete_qr_fields", 
         itemID: itemId,
         metakey: metaKey,
       },
@@ -163,6 +163,35 @@ jQuery(document).ready(function ($) {
     );
   });
 
+  $(document).on("click", ".qr-delete", function (rm) {
+
+    var index = $(this).attr('data-index');
+    var buttonId = $(this).prop('id');
+    
+     var row = $(this).closest('#tr-index-'+index);
+     $('#'+buttonId).text('Deleting...');
+      $.post(
+          dongScript.ajaxUrl,
+          {
+            action : "dongtrader_delete_qr_items_settingspage",
+            index : index,
+          },
+          function(data){
+          
+
+            if(data.resp){
+              row.remove();
+            }
+
+            if(data.reload){
+              window.location.reload();
+            }
+          }
+        
+      );
+  
+  });
+
   function qr_generator(button) {
     button.on("click", function (e) {
       e.preventDefault();
@@ -173,7 +202,6 @@ jQuery(document).ready(function ($) {
       var mainContainer = $(this).parent(".dong-qr-components");
       var variations = $(this).attr(".data-variable");
 
-      console.log(mainContainer);
       initiate_ajax_request(
         {
           action: "dongtrader_meta_qr_generator",
@@ -193,7 +221,7 @@ jQuery(document).ready(function ($) {
 
   function initiate_ajax_request(datas, inPut, mainContainer, button) {
     $.post(dongScript.ajaxUrl, datas, function (mData) {
-      //console.log(mData);
+      
       var jsonData = JSON.parse(mData);
       console.table(jsonData);
       if (jsonData.success) {

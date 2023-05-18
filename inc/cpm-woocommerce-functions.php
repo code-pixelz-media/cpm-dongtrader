@@ -75,36 +75,6 @@ function cpm_dong_my_membership_vcard_endpoint_content()
     }
 }
 
-
-
-/* Show affiliate referrals menu  */
-
-add_filter('woocommerce_account_menu_items', 'cpm_dong_show_membership_affilate_Data', 40);
-function cpm_dong_show_membership_affilate_Data($menu_links)
-{
-
-    $menu_links = array_slice($menu_links, 0, 5, true)
-        + array('show-membership-affiliate-data' => 'Affiliate Referrals')
-        + array_slice($menu_links, 5, NULL, true);
-
-    return $menu_links;
-}
-// register permalink endpoint
-add_action('init', 'cpm_dong_my_membership_affilate_data_endpoint');
-function cpm_dong_my_membership_affilate_data_endpoint()
-{
-
-    add_rewrite_endpoint('show-membership-affiliate-data', EP_PAGES);
-}
-// content for the new page in My Account, woocommerce_account_{ENDPOINT NAME}_endpoint
-add_action('woocommerce_account_show-membership-affiliate-data_endpoint', 'cpm_dong_my_membership_affilate_data_endpoint_content');
-function cpm_dong_my_membership_affilate_data_endpoint_content()
-{
-    $user_ID = get_current_user_id();
-
-    do_action( 'dong_display_distribution_table', $user_ID);
-}
-
 /* show memebership data on woocommerce tab */
 
 add_filter('woocommerce_account_menu_items', 'cpm_dong_show_membership_data', 40);
@@ -217,7 +187,7 @@ function dong_exporter_order_csv_endpoint_content()
  * Automatically add product to cart on visit
  */
 
-//add_action('template_redirect', 'dongtraders_product_link_with_membership_goes_checkoutpage');
+add_action('template_redirect', 'dongtraders_product_link_with_membership_goes_checkoutpage');
 function dongtraders_product_link_with_membership_goes_checkoutpage()
 {
     if (class_exists('WooCommerce')) {
@@ -524,29 +494,29 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
     // $order_fields   = apply_filters('membership_level_fields', array(), true);
     $pm_meta_vals   = get_pmpro_extrafields_meta($member_level);
     /*Rebate Calculation */
-    $rebate_amount  = $pm_meta_vals['dong_reabate'] / 100 * $price;
+    $rebate_amount  = number_format($pm_meta_vals['dong_reabate'] / 100 * $price,2);
     /*Process Amount */
-    $process_amount = $pm_meta_vals['dong_processamt'] / 100 * $price;
+    $process_amount = number_format(($pm_meta_vals['dong_processamt'] / 100) * $price, 2);
     /**Sum of data recieved from pmpro membership levels */
-    $constant_sum = $pm_meta_vals['dong_cost'] + $pm_meta_vals['dong_reserve'] + $pm_meta_vals['dong_earning_amt'];
+    $constant_sum = number_format($pm_meta_vals['dong_cost'] + $pm_meta_vals['dong_reserve'] + $pm_meta_vals['dong_earning_amt'],2);
     /*Profit after deduction from rebate and process */
-    $remining_profit_amount = $checkgf ? $price - $constant_sum : $price - $rebate_amount - $process_amount;
+    $remining_profit_amount = $checkgf ? number_format($price - $constant_sum,2) : number_format($price - $rebate_amount - $process_amount,2);
     /*Total Profit that must be distributed to individual */
-    $profit_amt_individual  = $remining_profit_amount * $pm_meta_vals['dong_profit_di'] / 100;
+    $profit_amt_individual  = number_format($remining_profit_amount * $pm_meta_vals['dong_profit_di'] / 100,2);
     /*Total Profit that must be distributed to group */
-    $profit_amt_group       = $remining_profit_amount * $pm_meta_vals['dong_profit_dg'] / 100;
+    $profit_amt_group       = number_format($remining_profit_amount * $pm_meta_vals['dong_profit_dg'] / 100,2);
     /*commision amount from profit */
-    $profit_commission_amt  = $remining_profit_amount * $pm_meta_vals['dong_profit_dca'] / 100;
+    $profit_commission_amt  = number_format($remining_profit_amount * $pm_meta_vals['dong_profit_dca'] / 100,2);
     /*commision amount from individual */
-    $commission_amt_to_individual = $profit_commission_amt * $pm_meta_vals['dong_comm_cdi'] / 100;
+    $commission_amt_to_individual = number_format($profit_commission_amt * $pm_meta_vals['dong_comm_cdi'] / 100,2);
     /*commision amount from individual */
-    $commission_amt_to_group      = $profit_commission_amt * $pm_meta_vals['dong_comm_cdg'] / 100;
+    $commission_amt_to_group      = number_format($profit_commission_amt * $pm_meta_vals['dong_comm_cdg'] / 100,2);
     /*Treasury Amount Calculation */
     $treasury_amount = $checkgf ? '0' : $remining_profit_amount;
     /*Discount Amount */
-    $early_discount = $pm_meta_vals['dong_discounts'] / 100  * $remining_profit_amount;
+    $early_discount = number_format($pm_meta_vals['dong_discounts'] / 100  * $remining_profit_amount ,2);
     /**Earnings */
-    $earnings = $checkgf ? $pm_meta_vals['dong_earning_per'] / 100 * $pm_meta_vals['dong_earning_amt'] : '0';
+    $earnings = $checkgf ? number_format($pm_meta_vals['dong_earning_per'] / 100 * $pm_meta_vals['dong_earning_amt'],2) : '0';
 
     $aid = get_post_meta($oid, 'dong_affid', true);
 
@@ -634,6 +604,8 @@ function dongtrader_after_order_received_process($order_id)
     $current_pro = wc_get_product($filtered_id);
 
     $current_price = $current_pro->get_price();
+
+   
 
     dongtrader_product_price_distribution($current_price,$product_info[0]['parent_id'], $order_id, $customer_id);
     
@@ -856,7 +828,6 @@ function dongtraders_csv_order_importer()
         }
 
         if (($open = fopen($fileurl, "r")) !== FALSE) {
-            // var_dump('file-open');
             // Skip the first line
             $first_row = true;
             $get_orders = array();

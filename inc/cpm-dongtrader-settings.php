@@ -108,8 +108,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 						<div class="form-group">
 							<label for="">Change Welcome Email Text</label>
 							<div class="form-control-wrap">
-								<!-- <input class="form-control" name="dongtraders_api_settings_fields[dong_change_welcome_text]" type="text" placeholder="Enter API Key" onfocus="this.placeholder=''" onblur="this.placeholder='Enter API Key'" value="<?php echo esc_html($dongtraders_api_setting_data['qrtiger-api-key']); ?>"> -->
-							<!-- <textarea name="dongtraders_api_settings_fields[dong_change_welcome_text]" id="" cols="30" rows="10"><?php //echo esc_html($dongtraders_api_setting_data['dong_change_welcome_text']); ?></textarea> -->
+								
 								<?php 
 									$content = $dongtraders_api_setting_data['dong_change_welcome_text'];
 									$custom_editor_id = "dongchange_welcome_email";
@@ -124,14 +123,13 @@ $dong_qr_array = get_option('dong_user_qr_values');
 								?>
 							</div>
 						</div>
-
+						<hr>
 						<h3><?php _e('Currency Conversion','cpm-dongtrader') ?></h3>
                         <div class="form-group">
 							
                             <label for=""><?php _e('Enable','cpm-dongtrader') ?></label>
                             <div class="form-control-wrap">
                                 <div class="checkbox-wrap custom">
-									<?php // var_dump($dongtraders_api_setting_data['dong_enable_currency']); ?>
 								  	<input type="checkbox" id="dong_currency_check" name="dongtraders_api_settings_fields[dong_enable_currency]" 
 									value="<?php echo esc_attr('on'); ?>"
 									<?php if (isset($dongtraders_api_setting_data['dong_enable_currency'])) { echo checked($dongtraders_api_setting_data['dong_enable_currency'], 'on', false);}?>>
@@ -150,7 +148,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 								</div>
 							</div>
 						</div>
-						
+						<hr>
 						<h3>QrTiger API Credentials</h3>
 						<div class="form-group">
 							<label for="">QrTiger API Key</label>
@@ -219,12 +217,12 @@ $dong_qr_array = get_option('dong_user_qr_values');
 											foreach ($dong_qr_array as $key => $value) :
 
 											?>
-												<tr>
+												<tr id="<?php echo 'tr-index-'.$key?>">
 													<td><?= $i ?></td>
 													<td><?php echo $value['qr_id'] ?></td>
 													<td><img src="<?php echo $value['qr_image_url']; ?>" width="50" height="50"></td>
 													<td><button class="cpm-btn url-copy" data-url="<?= $value['qr_image_url']; ?>">Copy</button></td>
-													<td><button class="cpm-btn qr-delete" data-index="<?= $key ?>">Delete</button></td>
+													<td><button id="<?php echo 'delete-item-'.$key ?>"class="cpm-btn qr-delete" data-index="<?= $key ?>">Delete</button></td>
 												</tr>
 											<?php $i++;
 											endforeach; ?>
