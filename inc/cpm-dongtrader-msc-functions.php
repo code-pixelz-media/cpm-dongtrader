@@ -46,9 +46,9 @@ function dongtrader_schedule_cron_job()
 add_action('dongtrader_cron_job_hook', 'dongtrader_cron_job');
 function dongtrader_cron_job()
 {
-    // glassfrog_api_get_persons_of_circles();
-    // dongtrader_rotate_leadership();
-    // dongtrader_distribute_product_prices_to_circle_members();
+    glassfrog_api_get_persons_of_circles();
+    dongtrader_rotate_leadership();
+    dongtrader_distribute_product_prices_to_circle_members();
 
 }
 
