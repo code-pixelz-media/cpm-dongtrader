@@ -485,7 +485,7 @@ function get_pmpro_extrafields_meta($memId)
  */
 function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
 {
-
+    
     $gf_membership_checkbox = get_post_meta($proId, '_glassfrog_checkbox', true);
     // Get boolean by checking checkbox
     $checkgf = $gf_membership_checkbox == 'on' ? true : false;
@@ -493,6 +493,7 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
     $member_level   = get_post_meta($proId, '_membership_product_level', true);
     // $order_fields   = apply_filters('membership_level_fields', array(), true);
     $pm_meta_vals   = get_pmpro_extrafields_meta($member_level);
+
     /*Rebate Calculation */
     $rebate_amount  = number_format($pm_meta_vals['dong_reabate'] / 100 * $price,2);
     /*Process Amount */
@@ -500,7 +501,11 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
     /**Sum of data recieved from pmpro membership levels */
     $constant_sum = number_format($pm_meta_vals['dong_cost'] + $pm_meta_vals['dong_reserve'] + $pm_meta_vals['dong_earning_amt'],2);
     /*Profit after deduction from rebate and process */
-    $remining_profit_amount = $checkgf ? number_format($price - $constant_sum,2) : number_format($price - $rebate_amount - $process_amount,2);
+
+    //when gf(enabled) was used for t-shirts it worked perfectly but when the requirement was changed later it did not worked 
+    // $remining_profit_amount = $checkgf ? number_format($price - $constant_sum,2) : number_format($price - $rebate_amount - $process_amount,2);
+
+    $remining_profit_amount = number_format($price - $constant_sum,2) ;
     /*Total Profit that must be distributed to individual */
     $profit_amt_individual  = number_format($remining_profit_amount * $pm_meta_vals['dong_profit_di'] / 100,2);
     /*Total Profit that must be distributed to group */
@@ -516,7 +521,8 @@ function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
     /*Discount Amount */
     $early_discount = number_format($pm_meta_vals['dong_discounts'] / 100  * $remining_profit_amount ,2);
     /**Earnings */
-    $earnings = $checkgf ? number_format($pm_meta_vals['dong_earning_per'] / 100 * $pm_meta_vals['dong_earning_amt'],2) : '0';
+    //$earnings = $checkgf ? number_format($pm_meta_vals['dong_earning_per'] / 100 * $pm_meta_vals['dong_earning_amt'],2) : '0';
+    $earnings = number_format($pm_meta_vals['dong_earning_per'] / 100 * $pm_meta_vals['dong_earning_amt'],2);
 
     $aid = get_post_meta($oid, 'dong_affid', true);
 
@@ -613,195 +619,7 @@ function dongtrader_after_order_received_process($order_id)
 }
 
 
-add_action('show_user_profile', 'custom_user_profile_fields');
-add_action('edit_user_profile', 'custom_user_profile_fields');
 
-function custom_user_profile_fields($user)
-{
-    $user_trading_metas = get_user_meta($user->ID, '_user_trading_details', true);
-
-    if (empty($user_trading_metas)) return;
-    //reverse array
-    array_reverse($user_trading_metas);
-    // determine number of items per page
-    $items_per_page = 5;
-    // determine current page number from query parameter
-    $current_page = isset($_GET['listpaged']) ? intval($_GET['listpaged']) : 1;
-
-    // calculate start and end indices for items on current page
-    $start_index = ($current_page - 1) * $items_per_page;
-
-    $end_index = $start_index + $items_per_page;
-
-    // slice the array to get items for current page
-    $items_for_current_page = array_slice($user_trading_metas, $start_index, $items_per_page);
-
-    // $current_page_loop = array_slice($user_trading_metas);
-?>
-    <hr />
-    <h3><?php esc_html_e('Receiveable Amounts', 'cpm-dongtrader'); ?></h3>
-    <p>
-        <strong>
-            <?php esc_html_e('All of the trading status are listed here', 'cpm-dongtrader'); ?>
-        </strong>
-    </p>
-    <br class="clear" />
-    <div id="member-history-orders" class="widgets-holder-wrap">
-        <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
-            <thead>
-                <tr>
-
-                    <th><?php esc_html_e('Order ID', 'cpm-dongtrader'); ?><span class="sorting-indicator"></span></th>
-                    <th><?php esc_html_e('Initiator', 'cpm-dongtrader'); ?><span class="sorting-indicator"></span></th>
-                    <th><?php esc_html_e('Created Date', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Rebate', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Profit', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Individual Profit', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Commission', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Individual Commission', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Total Amount', 'cpm-dongtrader'); ?></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                $rebate_arr         = array_column($user_trading_metas, 'rebate');
-                $dong_profit_dg_arr = array_column($user_trading_metas, 'dong_profit_dg');
-                $dong_profit_di_arr = array_column($user_trading_metas, 'dong_profit_di');
-                $dong_comm_dg_arr   = array_column($user_trading_metas, 'dong_comm_dg');
-                $dong_comm_cdi_arr  = array_column($user_trading_metas, 'dong_comm_cdi');
-                $dong_total_arr     = array_column($user_trading_metas, 'dong_total');
-                $i = 1;
-                $price_symbol = get_woocommerce_currency_symbol();
-                foreach ($items_for_current_page as $utm) :
-                    $order = new WC_Order($utm['order_id']);
-                    $formatted_order_date = wc_format_datetime($order->get_date_created(), get_option('date_format') . ' ' . get_option('time_format'));
-                    $order_backend_link = admin_url('post.php?post=' . $utm['order_id'] . '&action=edit');
-                    $user_id = $order->get_customer_id();
-                    $user_details = get_userdata($user_id);
-                    $user_display_name = $user_details->data->display_name;
-                    $user_backend_edit_url = get_edit_user_link($user_id);
-                ?>
-                    <tr class="enable-sorting">
-                        <td>
-                            <a href="<?php echo $order_backend_link; ?>">
-                                <?php echo $utm['order_id'] ?>
-                            </a>
-                        </td>
-                        <td>
-                            <a href="<?php echo $user_backend_edit_url; ?>">
-                                <?php echo $user_display_name; ?>
-                            </a>
-                        </td>
-                        <td>
-                            <?php echo $formatted_order_date; ?>
-                        </td>
-                        <td>
-                            <?php echo $price_symbol . $utm['rebate'] ?>
-                        </td>
-                        <!-- Profit -->
-                        <td>
-                            <?php echo $price_symbol . $utm['dong_profit_dg'] ?>
-                        </td>
-                        <td>
-                            <?php echo $price_symbol . $utm['dong_profit_di']; ?>
-                        </td>
-                        <!-- Commission -->
-                        <td>
-                            <?php echo $price_symbol . $utm['dong_comm_dg'] ?>
-                        </td>
-                        <td>
-                            <?php echo $price_symbol . $utm['dong_comm_cdi']; ?>
-                        </td>
-                        <td>
-                            <?php echo $price_symbol . $utm['dong_total'] ?>
-                        </td>
-                    </tr>
-
-                <?php $i++;
-                endforeach; ?>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="3">All Totals</td>
-                    <td><?php echo $price_symbol . array_sum($rebate_arr); ?></td>
-                    <td><?php echo $price_symbol . array_sum($dong_profit_dg_arr); ?></td>
-                    <td><?php echo $price_symbol . array_sum($dong_profit_di_arr); ?></td>
-                    <td><?php echo $price_symbol . array_sum($dong_comm_dg_arr); ?></td>
-                    <td><?php echo $price_symbol . array_sum($dong_comm_cdi_arr); ?></td>
-                    <td><?php echo $price_symbol . array_sum($dong_total_arr); ?></td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
-    <div class="user-trading-list-paginate" style="float:right">
-        <?php
-        $num_items = count($user_trading_metas);
-        $num_pages = ceil($num_items / $items_per_page);
-        echo paginate_links(array(
-            'base' => add_query_arg('listpaged', '%#%'),
-            'format' => 'list',
-            'prev_text' => __('&laquo; Previous'),
-            'next_text' => __('Next &raquo;'),
-            'total' => $num_pages,
-            'current' => $current_page
-        ));
-        ?>
-    </div>
-    <script>
-        jQuery(document).ready(function($) {
-            // const queryString = window.location.search;
-            // const paginationParam = urlParams.get('product')
-            const match = /[?&]listpaged=([^&#]*)/.exec(window.location.href);
-            const paginationParam = match ? match[1] : null;
-            if (paginationParam) {
-                $('html, body').animate({
-                    scrollTop: $('#member-history-orders').offset().top
-                }, 1000);
-            }
-            $('th').each(function() {
-                $(this).data('sortDir', 'desc');
-            }).click(function() {
-                var table = $(this).parents('table').eq(0);
-                var rows = table.find('tr:gt(0):not(:last)').toArray().sort(comparer($(this).index()));
-                var sortDir = $(this).data('sortDir');
-                $('th').removeClass('asc desc');
-                if (sortDir === 'desc') {
-                    rows = rows.reverse(); // sort in ascending order
-                    $(this).data('sortDir', 'asc');
-                    $(this).addClass('asc'); // add caret class to current th element
-                } else {
-                    $(this).data('sortDir', 'desc');
-                    $(this).addClass('desc'); // add caret class to current th element
-                }
-                for (var i = 0; i < rows.length; i++) {
-                    table.append(rows[i])
-                }
-            });
-
-            function comparer(index) {
-                return function(a, b) {
-                    var valA = getCellValue(a, index),
-                        valB = getCellValue(b, index);
-                    if (index === 1) { // check if we're sorting by price amount
-                        valA = parseFloat(valA.replace(/[^0-9.-]+/g, "")); // convert to number
-                        valB = parseFloat(valB.replace(/[^0-9.-]+/g, ""));
-                    } else if ((/\d{4}-\d{2}-\d{2}/).test(valA)) { // check if we're sorting by date
-                        // Convert dates to a comparable format
-                        valA = $.trim(valA).replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2");
-                        valB = $.trim(valB).replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2");
-                    }
-                    return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
-                }
-            }
-
-            function getCellValue(row, index) {
-                return $(row).children('td').eq(index).text()
-
-            }
-        });
-    </script>
-<?php
-}
 
 /* check if provided product id from csv is on product */
 if (!function_exists('is_product_check')) {
