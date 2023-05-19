@@ -430,24 +430,8 @@ function dongtrader_create_dbtable()
 
     $charset_collate = $wpdb->get_charset_collate();
 
-    //group table ends
-    $table_name = $wpdb->prefix . 'manage_glassfrogs_api';
 
-    $sql = "CREATE TABLE $table_name (
-            id INT NOT NULL AUTO_INCREMENT ,
-            product_id INT ,
-            order_id INT ,
-            gf_person_id INT NOT NULL ,
-            gf_role_id INT NOT NULL ,
-            gf_role_assigned VARCHAR(255) NOT NULL ,
-            gf_name VARCHAR(255) NOT NULL ,
-            gf_circle_name VARCHAR(255) NOT NULL ,
-            created_at DATETIME NOT NULL,
-            in_circle INT NOT NULL,
-            all_orders VARCHAR(1000),
-            user_id INT NOT NULL , PRIMARY KEY (id)) $charset_collate;";
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-    dbDelta($sql);
 
     /* create table to store custom order */
     $order_table_name = $wpdb->prefix . 'dong_order_export_table';
@@ -488,24 +472,26 @@ function dongtrader_create_dbtable()
 
     //create glassfrog groups(circle tables)
     $group_details_table = $wpdb->prefix . 'glassfrog_group_data';
-    if ( $wpdb->get_var( "SHOW TABLES LIKE '{$group_details_table}'" ) != $group_details_table ) :
+    if ($wpdb->get_var("SHOW TABLES LIKE '{$group_details_table}'") != $group_details_table) :
         $group_details_sql = "CREATE TABLE $group_details_table ( 
-            id INT NOT NULL AUTO_INCREMENT ,
-            group_array VARCHAR(255) NOT NULL ,
-            circle_id INT NOT NULL , 
+            id INT NOT NULL AUTO_INCREMENT,
+            group_array VARCHAR(255) NOT NULL,
+            circle_id INT NOT NULL, 
             circle_name VARCHAR(255) NOT NULL,
             created_date DATETIME NOT NULL,
-            updated_date DATETIME NOT NULL,
+            updated_date DATETIME ,
             group_leader INT NOT NULL,
             leader_since DATETIME NOT NULL,
             leadership_expires DATETIME NOT NULL,
-            distribution_status ENUM('true', 'false', 'update_required')
-            PRIMARY KEY (id)) $charset_collate;";
-            dbDelta($group_details_sql);
+            distribution_status ENUM('true', 'false', 'update_required'),
+            PRIMARY KEY (id)
+        ) $charset_collate;";
+        dbDelta($group_details_sql);
     endif;
+    
 
 }
-add_action('wp', 'dongtrader_create_dbtable');
+add_action('plugin_loaded', 'dongtrader_create_dbtable');
 
 
 
@@ -1104,7 +1090,7 @@ if (!function_exists('dong_custom_order_exporter_csv_files')) {
             $get_custom_orders = $wpdb->get_results("SELECT * FROM $get_table_name WHERE created_at BETWEEN  '$get_start_date' AND '$get_end_date' ", ARRAY_A);
         }
 
-        //var_dump($get_custom_orders);
+       
         if (!empty($get_custom_orders)) {
             $cpm_order_exporter_generate_csv_filename =  'dongtraders-custom-orders' . date('Ymd_His') . '-export.csv';
             header('Content-Type: application/csv');

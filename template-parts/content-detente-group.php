@@ -65,5 +65,5 @@ extract($args);
     ?>
         </table>
     </div>
-    <?php if(file_exists($pagination_template_path) && !empty($commission_details))  load_template($pagination_template_path,true , $commission_details); ?>
+    <?php if(file_exists($pagination_template_path) && !empty($commission_details))  load_template($pagination_template_path,true , $group_details ); ?>
 </div>

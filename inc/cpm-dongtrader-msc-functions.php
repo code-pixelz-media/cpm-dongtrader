@@ -37,9 +37,6 @@ function dongtrader_schedule_cron_job()
     }
 }
 
-
-
-
 /**
  * Add a custom hook to the cron job, and then run a function when that hook is called.
  */
@@ -51,7 +48,6 @@ function dongtrader_cron_job()
     dongtrader_distribute_product_prices_to_circle_members();
 
 }
-
 
 
 function glassfrog_api_get_persons_of_circles()
@@ -204,13 +200,12 @@ function dongtrader_save_glassfrog_details_to_db($members){
 
 }
 
-
-
 /**
  * Rotate leaderships from database created from the glassfrog  
  *
  * @return void          
  */
+
 function dongtrader_rotate_leadership(){
 
     global $wpdb;
@@ -287,8 +282,8 @@ function dongtrader_rotate_leadership(){
  *
  * @return void
  */
-function dongtrader_distribute_product_prices_to_circle_members()
-{
+
+function dongtrader_distribute_product_prices_to_circle_members(){
     global $wpdb;
 
     $group_data_table = $wpdb->prefix . 'glassfrog_group_data';
@@ -728,6 +723,10 @@ function add_custom_tab_to_my_account()
             }
         });
 
+        //the mechvibes is not working 
+        //After the mech vibes
+        // thsis is my code from nepal
+
     endforeach;
 }
 add_action('wp_loaded', 'add_custom_tab_to_my_account');
@@ -859,3 +858,5 @@ function dongtrader_pagination_array($details, $items_per_page = 10 , $items_arr
     return $items_array ? $paginated_array : $params_arr ;
 
 }
+
+
