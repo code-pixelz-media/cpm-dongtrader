@@ -1,9 +1,7 @@
 <?php
 
-/**
- * @author anil
- * All about cron job which is used for price distribution
- */
+ //All about cron job which is used for price distribution an tabs creation in woocommerce my account page
+ 
 
 /**
  * Interval Settings filters For the cron job
@@ -14,9 +12,9 @@
 function dongtrader_one_minutes_interval($schedules)
 {
 
-    $schedules['1_minutes'] = array(
+    $schedules['5_minutes'] = array(
         'interval' => 5 * 60,
-        'display' => __('Every 3 minutes', 'cpm-dongtrader'),
+        'display' => __('Every 5 minutes', 'cpm-dongtrader'),
     );
 
     return $schedules;
@@ -32,7 +30,7 @@ function dongtrader_schedule_cron_job()
 {
     if (!wp_next_scheduled('dongtrader_cron_job_hook')) {
 
-        wp_schedule_event(time(), '1_minutes', 'dongtrader_cron_job_hook');
+        wp_schedule_event(time(), '5_minutes', 'dongtrader_cron_job_hook');
 
     }
 }
@@ -49,7 +47,27 @@ function dongtrader_cron_job()
 
 }
 
+add_action('wp_head', function(){
+// always required for debugging purpose
 
+//    $user_id = [166,167,168];
+
+//    foreach($user_id as $u){
+//     delete_user_meta($u,'_buyer_details');
+//     delete_user_meta($u,'_treasury_details');
+//     delete_user_meta($u,'_group_details');
+//     delete_user_meta($u,'_commission_details');
+//    } 
+
+        // glassfrog_api_get_persons_of_circles();
+        // dongtrader_rotate_leadership();
+        //dongtrader_distribute_product_prices_to_circle_members();
+});
+
+/**
+ *communicates and syncs with glassfrog api
+ * @return void
+ */
 function glassfrog_api_get_persons_of_circles()
 {
     global $wpdb;
@@ -111,7 +129,6 @@ function glassfrog_api_get_persons_of_circles()
                         $wpdb->query($update_query);
 
                         //get wp user id stored as external id from the api
-                       // $members[] = $ap->external_id.'-'.$circle_id;
                         $members[] = array(
                             'user_id' => $ap->external_id,
                             'circle_id' => $circle_id,
@@ -277,57 +294,152 @@ function dongtrader_rotate_leadership(){
 
 }
 
+function dongtrader_get_orders_by_user($user_id , $group_table_orders) {
+
+    if(empty($user_id) && empty($group_table_orders)) return;
+   
+    // Create an instance of WC_Order_Query
+    $order_query = new WC_Order_Query(array(
+        'limit' => -1,
+        'customer_id' => $user_id,
+        'status' => 'wc-completed',
+    ));
+    
+    // Get the orders
+    $orders = $order_query->get_orders();
+    
+    // Extract order IDs into an array
+    $order_ids = array();
+    foreach ($orders as $order) {
+        $order_ids[] = $order->get_id();
+    }
+    
+    $difference = array_diff($order_ids , $group_table_orders);
+    
+    return $difference;
+}
+
 /**
  * Cron job function to excute distribution process
  *
  * @return void
  */
-
 function dongtrader_distribute_product_prices_to_circle_members(){
+
     global $wpdb;
 
+    //get group details table name
     $group_data_table = $wpdb->prefix . 'glassfrog_group_data';
     
+    //get user detail table name
     $group_user_table = $wpdb->prefix . 'glassfrog_user_data';
     
-    $group_prepared_query = $wpdb->prepare("SELECT id, group_array, group_leader FROM $group_data_table WHERE distribution_status='false' OR distribution_status='update_required'");
+    //sql query to get list of groups and group leader where distribution is not done or just a update is required
+    $group_prepared_query = $wpdb->prepare("SELECT id, group_array, group_leader , distribution_status FROM $group_data_table WHERE distribution_status='false' OR distribution_status='update_required'");
     
+    //get results from above sql query
     $group_results = $wpdb->get_results($group_prepared_query, ARRAY_A);
 
-    
+    //if group is not empty
     if (!empty($group_results)) {
 
+        //create a new array in required fromat by manipulating group details table results 
         $groups_details = array_map(function($group_result) use($wpdb, $group_user_table , $group_data_table) {
             
+            //unserilize group lsit from a serilized string(saved as serilized string in database)
             $group_array = unserialize($group_result['group_array']);
             
+            //group id from query result
             $group_id = $group_result['id'];
-            
+
+            //get distribution status
+            $d_status = $group_result['distribution_status'];
+
+            //get all related members from the group
             $related = array_values(array_diff($group_array, array($group_result['group_leader'])));
 
+            //get circle name from group_data_table
             $group_name =  $wpdb->get_var($wpdb->prepare("SELECT circle_name FROM $group_data_table WHERE id = %d",  (int) $group_id));
             
+            //intilized new array to make its format = [order_id1 => user_id1 , order_id2=>user_id1, order_id3=>user_id2]
             $orders_user = array();
 
+            //intialized new array to make its format = [user_id1 => [order_id2 ,order_id3]]
             $users_order  = array();
-            
+
+            //looping inside each group array
             foreach ($group_array as $user_id) {
-            
+                
+                //get all order foreach group member from group_user_table
                 $user_orders = $wpdb->get_var($wpdb->prepare("SELECT all_orders FROM $group_user_table WHERE user_id = %s", $user_id));
-    
+                
+                //if the user exists in group_user_table
                 if ($user_orders !== null) {
-            
+                    
+                    //unserlize the serilized orders
                     $unserialized_orders = unserialize($user_orders);
 
-                    $users_order[$user_id] = $unserialized_orders;
+                    //if the row requires a update
+                    if($d_status == 'update_required'){
 
-                    foreach($unserialized_orders as $uo){
+                        //check all orders by user id and orders stored in our custom $group_user_table and find a different order id
+                        $diff = dongtrader_get_orders_by_user($user_id , $unserialized_orders);
 
-                        $orders_user[$uo] = $user_id;
+                        //check if differences between two arrays is empty or not
+                        if(!empty($diff)) {
+                            
+                            //add differed element to previous unserialized_orders
+                            $new_unnserialized_orders = $diff + $unserialized_orders;
+
+                            //serialize the new array
+                            $new_serialized_orders = serialize($new_unnserialized_orders);
+
+                            //preapre for updating serialized data
+                            $update_query = $wpdb->prepare("UPDATE $group_user_table SET all_orders = %s WHERE user_id = %d", $new_serialized_orders, (int) $user_id);
+                            
+                            //update data finally
+                            $update = $wpdb->query($update_query);
+
+                            if($update === 1) {
+                             
+                                // prepare for update to group table
+                                $group_update = $wpdb->prepare("UPDATE $group_data_table SET distribution_status = 'true' WHERE id = %d", (int) $group_id);
+
+                                // update the group_data_table distribution status to true for last user_id finally
+                                $wpdb->query($group_update);
+
+                            }
+                            //update $users_order array format = [user_id1 => [order_id2 order_id3]]
+                            $users_order[$user_id] = $diff;
+
+                            //again looping inside serilized orders
+                            foreach($diff as $uo){
+
+                                //update $orders_user in format of [order_id1 => user_id1 , order_id2=>user_id1, order_id3=>user_id2]
+                                $orders_user[$uo] = $user_id;
+                            }
+                        
+                        } 
+                    }else{
+
+                        //update $users_order array format = [user_id1 => [order_id2 order_id3]]
+                        $users_order[$user_id] = $unserialized_orders;
+
+
+                        // if(!is_array($unserialized_orders)) continue;
+                        //again looping inside serilized orders
+                        foreach($unserialized_orders as $uo){
+
+                            //update $orders_user in format of [order_id1 => user_id1 , order_id2=>user_id1, order_id3=>user_id2]
+                            $orders_user[$uo] = $user_id;
+                        }
                     }
+                   
                 }
+         
             }
-    
+          
+            //create and return the manipulated array to required format
             return array(
                 'parent_user_id' => $group_result['group_leader'],
                 'related' => $related,
@@ -337,19 +449,25 @@ function dongtrader_distribute_product_prices_to_circle_members(){
                 'user_orders' =>$users_order,
                 'orders_user' => $orders_user
             );
+
         }, $group_results);
 
-        
+        //looping inside the created array format 
         foreach($groups_details as $gd){
 
+            //saving all order details
             detente_save_order_details( $gd['user_orders']);
 
+            //saving all treasury  details
             detente_save_treasury_details($gd['orders_user'] , $gd['all_members']);
 
+            //saving all commission details
             detente_save_commission_details($gd['orders_user'] , $gd['all_members']);
 
+            //saving all group details
             detente_save_group_details($gd['parent_user_id'], $gd['orders_user'],  $gd['group_name'] , $gd['all_members']);
 
+            //set the group data table row distribution status to true so that it wont loop in forever every time
             $wpdb->update($group_data_table,
                 array('distribution_status' => 'true'),
                 array('id' => (int) $gd['group_id']),
@@ -472,6 +590,7 @@ function detente_save_commission_details($order_members ,$allmems) {
 
     }
 }
+
 function detente_save_treasury_details($orders_members , $allmems) {
 
     foreach($orders_members as $order=>$user){
@@ -536,10 +655,9 @@ function detente_save_treasury_details($orders_members , $allmems) {
          }
  
     }
-  }
+}
   
   
-
 function detente_save_group_details($leader,$orders_members,$group_name , $allmembers ){
 
     foreach($orders_members as $order=>$user){
@@ -577,7 +695,6 @@ function detente_save_group_details($leader,$orders_members,$group_name , $allme
             }
     }
 }
-
 
 function dongtrader_get_product($order_id , $name=false){
 
@@ -627,7 +744,6 @@ function dongtrader_check_user($uid , $check_only = true ){
 
 }
 
-
 /**
  * Retrieves meta values from order . If meta is empty returns 0 otherwise returns value
  *
@@ -645,7 +761,11 @@ function dongtrader_get_order_meta($orderid, $key)
 
 }
 
-
+/**
+ * Adding tabs and tables for woocommerce my account page documetations can be easily found for those.
+ *
+ * @return void
+ */
 function add_custom_tab_to_my_account()
 {
 
@@ -722,10 +842,6 @@ function add_custom_tab_to_my_account()
                 load_template($tem_path,true, $vnd_rate_array);
             }
         });
-
-        //the mechvibes is not working 
-        //After the mech vibes
-        // thsis is my code from nepal
 
     endforeach;
 }

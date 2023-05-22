@@ -462,6 +462,7 @@ function dongtrader_create_dbtable()
             id INT NOT NULL AUTO_INCREMENT , 
             user_id VARCHAR(255) NOT NULL ,
             gf_person_id VARCHAR(255) NOT NULL , 
+            circle_id	int(11)
             gf_name VARCHAR(255) NOT NULL ,
             in_glassfrog VARCHAR(255) NOT NULL ,
             all_orders VARCHAR(255) NOT NULL ,
@@ -500,41 +501,44 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid){
     //global database variable
     global $wpdb;
 
-    //custom table from our database
+    //custom user table from our database
     $table_name = $wpdb->prefix . 'glassfrog_user_data';
 
+    //custom group table
+    $group_table_name = $wpdb->prefix . 'glassfrog_group_data';
+
     //check if a person already exists in a database
-    $check_persons = $wpdb->get_row($wpdb->prepare("SELECT all_orders FROM $table_name WHERE user_id = %d", $customer_id),ARRAY_A);
-    
+    $check_persons = $wpdb->get_row($wpdb->prepare("SELECT all_orders , group_id FROM $table_name WHERE user_id = %d", $customer_id),ARRAY_A);
+
+
 
     if(!empty($check_persons)) {
         
-        //get serilized data and unserilize it 
-        $unserialized_orders =  unserialize($check_persons['all_orders']);
+        if($check_persons['group_id'] != 0){
+            //query to update group distribution status to update_required when the person has already brought product
+            $wpdb->query($wpdb->prepare("UPDATE $group_table_name SET distribution_status = 'update_required' WHERE id = %d",  (int) $check_persons['group_id']));
 
-        //check if order id is already on the list and append new order id to it
-        if(!in_array($oid ,$unserialized_orders)) $unserialized_orders[] = $oid;
+        }elseif($check_persons['group_id'] == 0){
 
-        //again serilize data to store in db
-        $new_serilized_orders = serialize($unserialized_orders);
+            $unserialized_orders =  unserialize($check_persons['all_orders']);
 
-        //preapre for updating serialized data
-        $update_query = $wpdb->prepare("UPDATE $table_name SET all_orders = %s WHERE user_id = %d", $new_serilized_orders, $customer_id);
-        
-        //update data finally
-        $update = $wpdb->query($update_query);
+            //check if order id is already on the list and append new order id to it
+            if(!in_array($oid ,$unserialized_orders)) {
 
-        if($update === 1) {
+                $unserialized_orders[] = $oid;
 
-            $group_table_name = $wpdb->prefix . 'glassfrog_group_data';
+                //again serilize data to store in db
+                $new_serilized_orders = serialize($unserialized_orders);
+                    
+                //preapre and update serialized data
+                $wpdb->query($wpdb->prepare("UPDATE $table_name SET all_orders = %s WHERE user_id = %d", $new_serilized_orders, $customer_id));
 
-            $group_update = $wpdb->prepare("UPDATE $group_table_name SET distribution_status = 'update_required' WHERE user_id = %d",  $customer_id);
-
-            $wpdb->query($group_update);
-
-        }
+            }
     
-       
+          
+        }
+
+
     } else {
         // Get the product object
         $product = wc_get_product($p_id);

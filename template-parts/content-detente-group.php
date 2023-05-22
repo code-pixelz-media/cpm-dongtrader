@@ -12,8 +12,8 @@ extract($args);
     <br class="clear" />
     <div id="member-history-orders" class="widgets-holder-wrap">
     <?php 
-    if(!empty($commission_details)) 
-        if(file_exists($filter_template_path) && !empty($commission_details))  load_template($filter_template_path,true,$commission_details); 
+    if(!empty($group_details)) 
+        if(file_exists($filter_template_path) && !empty($group_details))  load_template($filter_template_path,true,$group_details); 
 
     ?>
         <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -65,5 +65,5 @@ extract($args);
     ?>
         </table>
     </div>
-    <?php if(file_exists($pagination_template_path) && !empty($commission_details))  load_template($pagination_template_path,true , $group_details ); ?>
+    <?php if(file_exists($pagination_template_path) && !empty($group_details))  load_template($pagination_template_path,true , $group_details ); ?>
 </div>

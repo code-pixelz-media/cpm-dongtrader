@@ -611,8 +611,6 @@ function dongtrader_after_order_received_process($order_id)
 
     $current_price = $current_pro->get_price();
 
-   
-
     dongtrader_product_price_distribution($current_price,$product_info[0]['parent_id'], $order_id, $customer_id);
     
     dong_set_user_role($customer_id, $filtered_id);
