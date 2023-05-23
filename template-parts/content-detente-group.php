@@ -19,11 +19,10 @@ extract($args);
         <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
             <thead>
                 <tr>
-                    <th><?php esc_html_e('ID', 'cpm-dongtrader'); ?>
                     <th><?php esc_html_e('Order Id', 'cpm-dongtrader'); ?>
                     <th><?php esc_html_e('Date', 'cpm-dongtrader'); ?></th>
                     <th><?php esc_html_e('Group Name', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Amount For', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('For Amount', 'cpm-dongtrader'); ?></th>
                     <th><?php esc_html_e('Amount', 'cpm-dongtrader'); ?></th>
                 </tr>
             </thead>
@@ -35,7 +34,6 @@ extract($args);
                         foreach($paginated_gd as $gd) : 
                            
                             echo '<tr>';
-                            echo '<td>'.$i.'</td>';
                             echo '<td>'.$gd['order_id'].'</td>' ;
                             echo '<td>'.$gd['order_date'].'</td>';
                             echo '<td>'.$gd['gf_name'].'</td>';

@@ -19,7 +19,7 @@ extract($args);
                     <th><?php esc_html_e('Product', 'cpm-dongtrader'); ?></th>
                     <th><?php esc_html_e('7% Rebate', 'cpm-dongtrader'); ?></th>
                     <th><?php esc_html_e('3% Process', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Profit', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Individual Profit', 'cpm-dongtrader'); ?></th>
                     <th><?php esc_html_e('Total', 'cpm-dongtrader'); ?></th>
                 </tr>
             </thead>
@@ -33,6 +33,7 @@ extract($args);
                         $total_sum   = array_sum(array_column($order_details,'total'));
 
                         foreach($paginated_orders as $od) : 
+                            if(get_post_type($od['order_id']) != 'shop_order') continue;
                             $order = new WC_Order($od['order_id']);
                             $formatted_order_date = wc_format_datetime($order->get_date_created(), 'Y-m-d');
                             echo '<tr>';

@@ -33,6 +33,7 @@ extract($args);
                         $distrb_amt_aum       = array_sum(array_column($paginated_treasury, 'distrb_amt'));
                         $rem_amt_sum          = array_sum(array_column($paginated_treasury, 'rem_amt'));
                         foreach($paginated_treasury as $od) : 
+                            if(get_post_type($od['order_id']) != 'shop_order') continue;
                             $order = new WC_Order($od['order_id']);
                             $formatted_order_date = wc_format_datetime($order->get_date_created(), 'Y-m-d');
                             echo '<tr>';

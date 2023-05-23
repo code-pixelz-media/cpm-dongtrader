@@ -47,21 +47,18 @@ function dongtrader_cron_job()
 
 }
 
+//always required for debugging purpose delete it and regret later
 add_action('wp_head', function(){
-// always required for debugging purpose
 
-//    $user_id = [166,167,168];
+    $uid = [170,171,172];
 
-//    foreach($user_id as $u){
-//     delete_user_meta($u,'_buyer_details');
-//     delete_user_meta($u,'_treasury_details');
-//     delete_user_meta($u,'_group_details');
-//     delete_user_meta($u,'_commission_details');
-//    } 
-
-        // glassfrog_api_get_persons_of_circles();
-        // dongtrader_rotate_leadership();
-        //dongtrader_distribute_product_prices_to_circle_members();
+    // foreach($uid as $u){
+    //     delete_user_meta($u, '_group_details');
+    //     delete_user_meta($u, '_commission_details');
+    //     delete_user_meta($u, '_treasury_details');
+    //     delete_user_meta($u, '_buyer_details');
+    // }
+    
 });
 
 /**
@@ -455,7 +452,7 @@ function dongtrader_distribute_product_prices_to_circle_members(){
         //looping inside the created array format 
         foreach($groups_details as $gd){
 
-            //saving all order details
+            // saving all order details
             detente_save_order_details( $gd['user_orders']);
 
             //saving all treasury  details
@@ -464,10 +461,10 @@ function dongtrader_distribute_product_prices_to_circle_members(){
             //saving all commission details
             detente_save_commission_details($gd['orders_user'] , $gd['all_members']);
 
-            //saving all group details
+            // saving all group details
             detente_save_group_details($gd['parent_user_id'], $gd['orders_user'],  $gd['group_name'] , $gd['all_members']);
 
-            //set the group data table row distribution status to true so that it wont loop in forever every time
+            // set the group data table row distribution status to true so that it wont loop in forever every time
             $wpdb->update($group_data_table,
                 array('distribution_status' => 'true'),
                 array('id' => (int) $gd['group_id']),
@@ -498,6 +495,9 @@ function detente_save_order_details($members_and_orders){
 
         //looping inside all orders of this 
         foreach($order as $ao){
+
+            //check if order id exists in database
+            if(get_post_type($ao) != 'shop_order') continue;
 
             //get affiliate from order meta
             $seller_id    = dongtrader_get_order_meta($ao, 'dong_affid');
@@ -547,6 +547,9 @@ function detente_save_commission_details($order_members ,$allmems) {
 
     foreach ($order_members as $order => $user) {
 
+        //check if order id exists in database
+        if(get_post_type($order) != 'shop_order') continue;
+
         $commission_meta = get_user_meta($user, '_commission_details', true);
             
         //assign empty array if $commission_meta is empt
@@ -555,14 +558,11 @@ function detente_save_commission_details($order_members ,$allmems) {
         //get name of the product
         $product_name = dongtrader_get_product($order, true);
         
-        //buyers name
-        $buyer_name = dongtrader_check_user($user, false);
-        
         //commission to seller
-        $seller_com = dongtrader_get_order_meta($order, 'dong_profit_di');
+        $seller_com = dongtrader_get_order_meta($order, 'dong_comm_cdi');
         
         //commission to group
-        $group_com = dongtrader_get_order_meta($order, 'dong_profit_dg');
+        $group_com = dongtrader_get_order_meta($order, 'dong_comm_cdg');
         
         //commission to owner
         $owner_com = dongtrader_get_order_meta($order, 'dong_earning_amt');
@@ -571,7 +571,7 @@ function detente_save_commission_details($order_members ,$allmems) {
         $c_d_g = number_format($group_com / 5, 2);
         
         //totals
-        $total = number_format($seller_com + $c_d_g + $owner_com, 2);
+        $total = number_format($seller_com + $group_com + $owner_com, 2);
 
         // Distribute the commission equally to each member
         $commission_metas[] = [
@@ -579,7 +579,7 @@ function detente_save_commission_details($order_members ,$allmems) {
             'name' => dongtrader_check_user($user, false),
             'product_title' => $product_name,
             'seller_com' => $seller_com,
-            'group_com' =>  $c_d_g,
+            'group_com' =>  $group_com,
             'site_com' => $owner_com,
             'total' => $total
             
@@ -594,6 +594,9 @@ function detente_save_commission_details($order_members ,$allmems) {
 function detente_save_treasury_details($orders_members , $allmems) {
 
     foreach($orders_members as $order=>$user){
+
+        //check if order id exists in database
+        if(get_post_type($order) != 'shop_order') continue;
 
          //get previous seller trading details saved in user meta
          $treasury_meta  = get_user_meta($user, '_treasury_details', true);
@@ -614,7 +617,7 @@ function detente_save_treasury_details($orders_members , $allmems) {
          $product_obj = wc_get_product( $v_product_id );
  
          //variation's parent product id
-         $p_p_id = $product_obj->get_parent_id();
+         $p_p_id = $product_obj->is_type('variable') ? $product_obj->get_parent_id() : $v_product_id;
  
          //get product price
          $product_price = intval($product_obj->get_price());
@@ -631,14 +634,14 @@ function detente_save_treasury_details($orders_members , $allmems) {
          //paid membership pro extra fields
          $pm_meta_vals   = get_pmpro_extrafields_meta($member_level);
  
-         //this value is not working
+         //constant cost from pmpro custom fields
          $cost           = $pm_meta_vals['dong_cost'];
  
          $individual_profit = dongtrader_get_order_meta($order, 'dong_profit_di'); 
  
-         $distributed_total_amt = $rebate + $process + $individual_profit + $cost;
+         $distributed_total_amt = number_format($rebate + $process + $individual_profit + $cost,2);
  
-         $remaining_total_amt   = $product_price - $distributed_total_amt;
+         $remaining_total_amt   = number_format($product_price - $distributed_total_amt,2);
  
          $treasury_metas[] = [
              'order_id'      => $order,
@@ -657,13 +660,17 @@ function detente_save_treasury_details($orders_members , $allmems) {
     }
 }
   
-  
 function detente_save_group_details($leader,$orders_members,$group_name , $allmembers ){
 
-    foreach($orders_members as $order=>$user){
+   $all_orders = array_keys($orders_members);
+
+    foreach($all_orders as $order){
+
+            //check if order id exists in database
+            if(get_post_type($order) != 'shop_order') continue;
 
             //get previous seller trading details saved in user meta
-            $group_meta  = get_user_meta($user, '_group_details', true);
+            $group_meta  = get_user_meta($leader, '_group_details', true);
 
             //assign empty array if $treasury_meta is empty 
             $group_metas = !empty($group_meta) ? $group_meta : [];
@@ -680,20 +687,18 @@ function detente_save_group_details($leader,$orders_members,$group_name , $allme
             
             $release_note           = $check_release_status_bool ? get_post_meta((int) $order, 'release_note',true) : false;
 
-            $gp = $user == $leader ? $group_profit_amount : 0;
-
             $group_metas[] = [
-                'order_id'      => $check_release_status_bool ? '--' :$order,
-                'order_date'    => $formatted_order_date,
-                'gf_name'       => $group_name    ,
-                'profit_amount'     => $gp,
-                'release'    => ['enabled' => $check_release_status_bool , 'note' => $release_note ],
+                'order_id'          => $check_release_status_bool ? '--' :$order,
+                'order_date'        => $formatted_order_date,
+                'gf_name'           => $group_name ,
+                'profit_amount'     => $group_profit_amount,
+                'release'           => ['enabled' => $check_release_status_bool , 'note' => $release_note ],
             ];
 
-            foreach($allmembers as $m){
-                update_user_meta($m , '_group_details' , $group_metas );
-            }
+            update_user_meta($leader,'_group_details',$group_metas);
     }
+
+
 }
 
 function dongtrader_get_product($order_id , $name=false){
@@ -899,9 +904,6 @@ function save_checkbox_and_release_notes( $order_id ) {
     $release_note = sanitize_text_field( $_POST['release_note'] );
     update_post_meta( $order_id, 'release_note', $release_note );
 }
-
-
-
 
 function dongtrader_pagination_array($details, $items_per_page = 10 , $items_array=false){
 

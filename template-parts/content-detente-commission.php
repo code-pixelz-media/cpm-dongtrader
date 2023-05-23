@@ -35,6 +35,8 @@ extract($args);
                         $site_com_sum     = array_sum(array_column($commission_details, 'site_com'));
                         $total_sum        = array_sum(array_column($commission_details, 'total'));
                         foreach($paginated_commission as $od) : 
+
+                            if(get_post_type($od['order_id']) != 'shop_order') continue;
                             $order = new WC_Order($od['order_id']);
                             $formatted_order_date = wc_format_datetime($order->get_date_created(), 'Y-m-d');
                             echo '<tr>';
@@ -46,6 +48,7 @@ extract($args);
                             echo '<td>'.$symbol .$od['site_com']*$vnd_rate.'</td>';
                             echo '<td>'.$symbol .$od['total']*$vnd_rate.'</td>';
                             echo '</tr>';
+                        
                         endforeach;
                         echo '<tfoot>';
                             echo '<tr>';
