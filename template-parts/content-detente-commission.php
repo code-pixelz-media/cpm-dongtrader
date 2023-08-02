@@ -20,7 +20,7 @@ extract($args);
                     <th><?php esc_html_e('Order ID/Date', 'cpm-dongtrader'); ?>
                     <th><?php esc_html_e('Buyer', 'cpm-dongtrader'); ?>
                     <th><?php esc_html_e('Product', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Individual Commission', 'cpm-dongtrader'); ?></th>
+                    <!-- <th><?php //esc_html_e('Individual Commission', 'cpm-dongtrader'); ?></th> -->
                     <th><?php esc_html_e('Group Commission', 'cpm-dongtrader'); ?></th>
                     <th><?php esc_html_e('Site Commission', 'cpm-dongtrader'); ?></th>
                     <th><?php esc_html_e('Total', 'cpm-dongtrader'); ?></th>
@@ -43,7 +43,7 @@ extract($args);
                             echo '<td>'.$od['order_id'].'/'.$formatted_order_date.'</td>';
                             echo '<td>'.$od['name'].'</td>';
                             echo '<td>'.$od['product_title'].'</td>';
-                            echo '<td>'.$symbol .$od['seller_com']*$vnd_rate.'</td>';
+                            // echo '<td>'.$symbol .$od['seller_com']*$vnd_rate.'</td>';
                             echo '<td>'.$symbol .$od['group_com']*$vnd_rate.'</td>';
                             echo '<td>'.$symbol .$od['site_com']*$vnd_rate.'</td>';
                             echo '<td>'.$symbol .$od['total']*$vnd_rate.'</td>';
@@ -53,7 +53,7 @@ extract($args);
                         echo '<tfoot>';
                             echo '<tr>';
                             echo '<td colspan="3">All Totals</td>';
-                            echo '<td>'.$symbol.$seller_com_sum*$vnd_rate.'</td>';
+                            // echo '<td>'.$symbol.$seller_com_sum*$vnd_rate.'</td>';
                             echo '<td>'.$symbol.$group_com_sum*$vnd_rate.'</td>';
                             echo '<td>'.$symbol.$site_com_sum*$vnd_rate.'</td>';
                             echo '<td>'.$symbol.$total_sum*$vnd_rate.'</td>';

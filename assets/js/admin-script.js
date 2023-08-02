@@ -192,6 +192,32 @@ jQuery(document).ready(function ($) {
   
   });
 
+  $(document).on("submit",".rfund-form" , function(rf){
+    rf.preventDefault();
+    animate_button(true);
+    var formdatas =  $(this).serialize() , resptemp = $(this).find('.rfund-notify-msg') , form = $(this);
+
+
+    $.post(dongScript.ajaxUrl,{action : "dongtrader_release_funds", formdatas : formdatas,},function(response){
+      var msgClass = response.success ? `success-msg` : `error-msg`,
+      iconClass = response.success ? `fa fa-check` : `fa fa-times-circle`,
+      notifyHtml = `<div class="${msgClass}"><i class="${iconClass}"></i> ${response.data}</div>`;
+      resptemp.append(notifyHtml).fadeIn().delay(2000).fadeOut(function() {
+       
+        form[0].reset();
+        animate_button(false);
+        window.location.reload();
+      });
+
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+      
+      console.log(textStatus + ': ' + errorThrown);
+      animate_button(false);
+    });
+   
+   
+  });
+
   function qr_generator(button) {
     button.on("click", function (e) {
       e.preventDefault();
@@ -232,6 +258,23 @@ jQuery(document).ready(function ($) {
       }
     });
   }
+
+
+  $('.rf-del').on('click', function(es){
+
+    es.preventDefault();
+    $(this).text('...')
+    let rowId=$(this).attr('data-rfid');
+    $.post(dongScript.ajaxUrl,{action : "dongtrader_delete_funds", rowid : rowId,},function(response){
+       if(response.success){
+        window.location.reload();
+       }else{
+        alert('Some Error Ocured.Please try again!!')
+       }
+    });
+    // $(this).text('Delete');
+
+  });
 
   //Scenario changed a bit for meta fields
 

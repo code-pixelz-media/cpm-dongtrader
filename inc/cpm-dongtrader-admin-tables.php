@@ -218,20 +218,28 @@ function dongtraders_list_order_meta_table()
                         $createDate = new DateTime($order_date);
                         $o_date = $createDate->format('Y-m-d');
                         /* echo $o_date . '<br>'; */
-                        $rebate         = $order->get_meta('dong_reabate') ? $order->get_meta('dong_reabate') : 0;
-                        $dong_processamt = $order->get_meta('dong_processamt') ? $order->get_meta('dong_processamt') : 0;
-                        $dong_profitamt = $order->get_meta('dong_profitamt') ? $order->get_meta('dong_profitamt') : 0;
-                        $dong_profit_indivudual = $order->get_meta('dong_profit_di') ? $order->get_meta('dong_profit_di') : 0;
-                        $profit_amt_group = $order->get_meta('dong_profit_dg') ? $order->get_meta('dong_profit_dg') : 0;
+
+                        // cashback 7%
+                        $rebate         = $order->get_meta('mega_cashback_v') ? $order->get_meta('mega_cashback_v') : 0;
+
+                        // cash back to voter 3%
+                        $dong_processamt = $order->get_meta('mega_cashback_d') ? $order->get_meta('mega_cashback_d') : 0;
+
+                        $dong_profitamt = $order->get_meta('mega_members_r') ? $order->get_meta('mega_members_r') : 0;
+                        $dong_profit_indivudual = $order->get_meta('mega_mr_di') ? $order->get_meta('mega_mr_di') : 0;
+                        $profit_amt_group = $order->get_meta('mega_mr_dg') ? $order->get_meta('mega_mr_dg') : 0;
                         //$30 ko 
-                        $order_reserve_amt = $order->get_meta('dong_reserve') ? $order->get_meta('dong_reserve') : 0;
+                        $order_reserve_amt = $order->get_meta('mega_reserve') ? $order->get_meta('mega_reserve') : 0;
+
                         $order_cost_amt = $order->get_meta('dong_cost') ? $order->get_meta('dong_cost') : 0;
 
-                        $profit_commission_amt = $order->get_meta('dong_profit_dca') ? $order->get_meta('dong_profit_dca') : 0;
-                        $commission_amt_to_individual = $order->get_meta('dong_comm_cdi') ? $order->get_meta('dong_comm_cdi') : 0;
-                        $commission_amt_to_group = $order->get_meta('dong_comm_cdg') ? $order->get_meta('dong_comm_cdg') : 0;
+                        $profit_commission_amt = $order->get_meta('mega_mr_dca') ? $order->get_meta('mega_mr_dca') : 0;
+                        $commission_amt_to_individual = $order->get_meta('mega_mr_c_di') ? $order->get_meta('mega_mr_c_di') : 0;
+                        
+                        $commission_amt_to_group = $order->get_meta('mega_mr_c_dg') ? $order->get_meta('mega_mr_c_dg') : 0;
+                        
                         $treasury_amount = $order->get_meta('dong_treasury') ? $order->get_meta('dong_treasury') : 0;
-                        $dong_earnings = $order->get_meta('dong_earning_amt') ? $order->get_meta('dong_earning_amt') : 0;
+                        $dong_earnings = $order->get_meta('mega_comm_c_ds') ? $order->get_meta('mega_comm_c_ds') : 0;
                         $dong_discounts = $order->get_meta('dong_discounts') ? $order->get_meta('dong_discounts') : 0;
                         echo '
                 <tr>

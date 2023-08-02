@@ -16,6 +16,8 @@ define('CPM_DONGTRADER_VERSION', '1.0.0');
 
 define('CPM_DONGTRADER_PLUGIN_DIR', plugin_dir_path( __FILE__ ));
 
+
+
 //Loads All the required files
 require_once('inc/cpm-dongtrader-loader.php');
 

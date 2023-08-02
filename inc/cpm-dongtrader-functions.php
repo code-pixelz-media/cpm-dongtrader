@@ -24,8 +24,8 @@ function dongtrader_get_api_cred($apiname)
     return $api_utils;
 }
 
-
-function qrtiger_upload_logo(){
+function qrtiger_upload_logo()
+{
 
 }
 
@@ -137,7 +137,7 @@ function dongtrader_generate_qr2()
     $qr_size = sanitize_text_field($_POST['qrsize']);
     $qr_url = sanitize_url($_POST['qrurl']);
     $qr_color = sanitize_text_field($_POST['qrcolor']);
-    $qr_logo_url =  plugin_dir_url(__FILE__) . 'assets/img/currency.png';
+    $qr_logo_url = plugin_dir_url(__FILE__) . 'assets/img/currency.png';
     $dong_user_id = get_current_user_id();
     $response = !empty($qr_size) && !empty($qr_url) && !empty(trim($qr_color)) ? true : false;
     $notify_to_js = array(
@@ -309,7 +309,7 @@ function dongtrader_meta_qr_generator()
 
         $current_data = dongtrader_ajax_helper('rgb(87, 3, 48)', $product_url);
         if (!empty($current_data)) {
-            $update_data = json_encode($current_data); 
+            $update_data = json_encode($current_data);
             $resp['success'] = true;
             $resp['template'] = '<div id="" class="dong-qr-components">
             <img src="' . $current_data['qr_image_url'] . '" alt="" width="200" height="200">
@@ -386,10 +386,9 @@ function dongtrader_delete_qr_fields()
             $ajax_values['html'] = true;
         }
     }
-    wp_send_json($ajax_values);   
+    wp_send_json($ajax_values);
     wp_die();
 }
-
 
 //remove functionality for qr codes from settings page
 // Remove functionality for qr codes
@@ -398,19 +397,19 @@ function dongtrader_delete_qr_items_settingspage()
 {
 
     $dong_qr_array = get_option('dong_user_qr_values');
-    $index  = (int) esc_attr($_POST['index']);
-    $ajax_values = array('resp' => false , 'reload'=> false);
-    if($index >= 0 ){
-        
+    $index = (int) esc_attr($_POST['index']);
+    $ajax_values = array('resp' => false, 'reload' => false);
+    if ($index >= 0) {
+
         unset($dong_qr_array[$index]);
         array_values($dong_qr_array);
         update_option('dong_user_qr_values', $dong_qr_array);
         $new_qr_array = get_option('dong_user_qr_values');
 
-        $reload = count($new_qr_array) == 0  ? true : false;
+        $reload = count($new_qr_array) == 0 ? true : false;
 
-        $ajax_values = array('resp' => true , 'reload' => $reload);
-        
+        $ajax_values = array('resp' => true, 'reload' => $reload);
+
     }
 
     wp_send_json($ajax_values);
@@ -419,84 +418,165 @@ function dongtrader_delete_qr_items_settingspage()
 
 }
 
-
-
 /*Create database tables where we can save api response details*/
 function dongtrader_create_dbtable()
 {
-
 
     global $wpdb;
 
     $charset_collate = $wpdb->get_charset_collate();
 
-
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
     /* create table to store custom order */
     $order_table_name = $wpdb->prefix . 'dong_order_export_table';
-    if ( $wpdb->get_var( "SHOW TABLES LIKE '{$order_table_name}'" ) != $order_table_name ) :
-        $export_sql = "CREATE TABLE $order_table_name ( 
-                id INT NOT NULL AUTO_INCREMENT ,
-                customer_email VARCHAR(255) NOT NULL ,
-                customer_first_name VARCHAR(255) NOT NULL , 
-                customer_last_name VARCHAR(255) NOT NULL ,
-                customer_phone VARCHAR(255) NOT NULL ,
-                customer_country VARCHAR(255) NOT NULL ,
-                customer_state VARCHAR(255) NOT NULL ,
-                customer_address VARCHAR(255) NOT NULL ,
-                customer_postcode VARCHAR(255) NOT NULL ,
-                customer_city VARCHAR(255) NOT NULL ,
-                product_id INT NOT NULL ,
-                product_varition_id INT NOT NULL ,
-                affilate_user_id INT NOT NULL ,
-                created_at VARCHAR(255) NOT NULL,
-                PRIMARY KEY (id)) $charset_collate;";
+    if ($wpdb->get_var("SHOW TABLES LIKE '{$order_table_name}'") != $order_table_name):
+        $export_sql = "CREATE TABLE $order_table_name (
+            id INT NOT NULL AUTO_INCREMENT ,
+            customer_email VARCHAR(255) NOT NULL ,
+            customer_first_name VARCHAR(255) NOT NULL ,
+            customer_last_name VARCHAR(255) NOT NULL ,
+            customer_phone VARCHAR(255) NOT NULL ,
+            customer_country VARCHAR(255) NOT NULL ,
+            customer_state VARCHAR(255) NOT NULL ,
+            customer_address VARCHAR(255) NOT NULL ,
+            customer_postcode VARCHAR(255) NOT NULL ,
+            customer_city VARCHAR(255) NOT NULL ,
+            product_id INT NOT NULL ,
+            product_varition_id INT NOT NULL ,
+            affilate_user_id INT NOT NULL ,
+            created_at VARCHAR(255) NOT NULL,
+            PRIMARY KEY (id)) $charset_collate;";
         dbDelta($export_sql);
     endif;
 
-    // Create users glassfrog details table
-    $user_details_table = $wpdb->prefix . 'glassfrog_user_data';
-    if ( $wpdb->get_var( "SHOW TABLES LIKE '{$user_details_table}'" ) != $user_details_table ) :
-        $glassfrog_user_sql = "CREATE TABLE $user_details_table (
-            id INT NOT NULL AUTO_INCREMENT , 
-            user_id VARCHAR(255) NOT NULL ,
-            gf_person_id VARCHAR(255) NOT NULL , 
-            circle_id	int(11)
-            gf_name VARCHAR(255) NOT NULL ,
-            in_glassfrog VARCHAR(255) NOT NULL ,
-            all_orders VARCHAR(255) NOT NULL ,
-            group_id INT,
-            PRIMARY KEY (id)) $charset_collate;";
-            dbDelta($glassfrog_user_sql);
-    endif;
+    // // Create users glassfrog details table
+    // $user_details_table = $wpdb->prefix . 'glassfrog_user_data';
+    // if ($wpdb->get_var("SHOW TABLES LIKE '{$user_details_table}'") != $user_details_table):
+    //     $glassfrog_user_sql = "CREATE TABLE $user_details_table (
+    //         id INT NOT NULL AUTO_INCREMENT ,
+    //         user_id INT ,
+    //         gf_person_id VARCHAR(255) ,
+    //         circle_id	int(11),
+    //         gf_name VARCHAR(255) ,
+    //         in_glassfrog VARCHAR(255) NOT NULL ,
+    //         all_orders VARCHAR(255) NOT NULL ,
+    //         group_id INT,
+    //         upline_id INT,
+    //         PRIMARY KEY (id),
+    //         INDEX (user_id),
+    //         FOREIGN KEY (upline_id) REFERENCES {$user_details_table}(user_id)
+    //         ) $charset_collate;";
+    //     dbDelta($glassfrog_user_sql);
+    // endif;
 
-    //create glassfrog groups(circle tables)
-    $group_details_table = $wpdb->prefix . 'glassfrog_group_data';
-    if ($wpdb->get_var("SHOW TABLES LIKE '{$group_details_table}'") != $group_details_table) :
-        $group_details_sql = "CREATE TABLE $group_details_table ( 
+
+
+
+    $release_group_profit = $wpdb->prefix . 'release_groups_profit';
+    if ($wpdb->get_var("SHOW TABLES LIKE '{$release_group_profit}'") != $release_group_profit) {
+        $release_group_profit_query = "CREATE TABLE {$release_group_profit} (
             id INT NOT NULL AUTO_INCREMENT,
-            group_array VARCHAR(255) NOT NULL,
-            circle_id INT NOT NULL, 
-            circle_name VARCHAR(255) NOT NULL,
-            created_date DATETIME NOT NULL,
-            updated_date DATETIME ,
-            group_leader INT NOT NULL,
-            leader_since DATETIME NOT NULL,
-            leadership_expires DATETIME NOT NULL,
-            distribution_status ENUM('true', 'false', 'update_required'),
+            release_date DATETIME,
+            release_amount INT NOT NULL,
+            release_note VARCHAR(255) NOT NULL,
+            group_id INT,
             PRIMARY KEY (id)
         ) $charset_collate;";
-        dbDelta($group_details_sql);
-    endif;
-    
+        dbDelta($release_group_profit_query);
+    }
+
+    // Adding new database structure for mlm
+
+    // M.l.m users table
+    $mega_mlm_users =  $wpdb->prefix . 'mega_mlm_customers';
+
+    $group_details_table = $wpdb->prefix . 'mega_mlm_groups';
+
+    if ($wpdb->get_var("SHOW TABLES LIKE '{$mega_mlm_users}'") != $mega_mlm_users) {
+
+        $mega_mlm_users_query = "CREATE TABLE {$mega_mlm_users} (
+            id INT NOT NULL AUTO_INCREMENT,
+            user_id INT,
+            upline_id INT,
+            customer_group_id INT(11),
+            glassfrog_person_id BIGINT,
+            person_name VARCHAR(255),
+            circle_id INT(11),
+            created_date TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+            user_status INT(11) NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE(user_id),
+            INDEX(user_id),
+            FOREIGN KEY (customer_group_id) REFERENCES {$group_details_table}(group_id)
+        ) $charset_collate;";
+                
+        dbDelta($mega_mlm_users_query);
+    }
+
+        //mlm tree data
+
+        if ($wpdb->get_var("SHOW TABLES LIKE '{$group_details_table}'") != $group_details_table):
+            $group_details_sql = "CREATE TABLE $group_details_table (
+                group_id INT NOT NULL AUTO_INCREMENT,
+                group_members VARCHAR(255) NOT NULL,
+                circle_id INT NOT NULL,
+                circle_name VARCHAR(255) NOT NULL,
+                created_date DATETIME NOT NULL,
+                group_leader INT NOT NULL,
+                leader_since DATETIME NOT NULL,
+                leadership_expires DATETIME NOT NULL,
+                distribution_status TINYINT(2) NOT NULL,
+                total_group_profit VARCHAR(255),
+                PRIMARY KEY (group_id)
+            ) $charset_collate;"; 
+            dbDelta($group_details_sql);
+        endif;
+
+    //downline table
+    // $mega_mlm_downline =  $wpdb->prefix . 'mega_mlm_downline';
+
+    // if ($wpdb->get_var("SHOW TABLES LIKE '{$mega_mlm_downline}'") != $mega_mlm_downline) {
+
+    //     $mega_mlm_downline_query = "CREATE TABLE {$mega_mlm_downline} (
+    //         downline_id INT NOT NULL AUTO_INCREMENT,
+    //         user_id INT,
+    //         downline_user_id INT,
+    //         user_level INT, 
+    //         PRIMARY KEY (downline_id),
+    //         INDEX (user_id),
+    //         INDEX (downline_user_id),
+    //         FOREIGN KEY (user_id) REFERENCES {$mega_mlm_users}(user_id),
+    //         FOREIGN KEY (downline_user_id) REFERENCES {$mega_mlm_users}(user_id)
+    //     ) $charset_collate;";
+        
+    //     dbDelta($mega_mlm_downline_query);
+    // }
+
+    $mega_mlm_sales = $wpdb->prefix . 'mega_mlm_purchases';
+    if ($wpdb->get_var("SHOW TABLES LIKE '{$mega_mlm_sales}'") != $mega_mlm_sales) {
+        $mega_mlm_sales_query = "CREATE TABLE {$mega_mlm_sales} (
+            sale_id INT NOT NULL AUTO_INCREMENT,
+            sponsor_id INT,
+            customer_id INT,
+            order_id INT,
+            product_id INT,
+            product_name varchar(255),
+            product_price INT,
+            allocation_status TINYINT(2) NOT NULL,
+            PRIMARY KEY (sale_id),
+            FOREIGN KEY (customer_id) REFERENCES {$mega_mlm_users}(user_id),
+            FOREIGN KEY (sponsor_id) REFERENCES {$mega_mlm_users}(user_id)
+        ) $charset_collate;";
+       
+        dbDelta($mega_mlm_sales_query);
+    }
 
 }
 add_action('plugin_loaded', 'dongtrader_create_dbtable');
 
-
-
-function dongtrader_user_registration_hook($customer_id, $p_id, $oid){
+function dongtrader_user_registration_hook($customer_id, $p_id, $oid)
+{
 
     //global database variable
     global $wpdb;
@@ -507,54 +587,62 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid){
     //custom group table
     $group_table_name = $wpdb->prefix . 'glassfrog_group_data';
 
+    // Downline table 
+    $downline_table = $wpdb->prefix . 'mega_mlm_downline';
+
     //check if a person already exists in a database
-    $check_persons = $wpdb->get_row($wpdb->prepare("SELECT all_orders , group_id FROM $table_name WHERE user_id = %d", $customer_id),ARRAY_A);
+    $check_persons = $wpdb->get_row($wpdb->prepare("SELECT all_orders , group_id FROM $table_name WHERE user_id = %d", $customer_id), ARRAY_A);
 
+    if (!empty($check_persons)) {
 
+        if ($check_persons['group_id'] != 0) {
+            //query to update group distribution status to update_required when the person has already brought new product after distribution from cron job
+            $wpdb->query($wpdb->prepare("UPDATE $group_table_name SET distribution_status = 'update_required' WHERE group_id = %d", (int) $check_persons['group_id']));
 
-    if(!empty($check_persons)) {
-        
-        if($check_persons['group_id'] != 0){
-            //query to update group distribution status to update_required when the person has already brought product
-            $wpdb->query($wpdb->prepare("UPDATE $group_table_name SET distribution_status = 'update_required' WHERE id = %d",  (int) $check_persons['group_id']));
+        } elseif ($check_persons['group_id'] == 0) {
 
-        }elseif($check_persons['group_id'] == 0){
-
-            $unserialized_orders =  unserialize($check_persons['all_orders']);
+            $unserialized_orders = unserialize($check_persons['all_orders']);
 
             //check if order id is already on the list and append new order id to it
-            if(!in_array($oid ,$unserialized_orders)) {
+            if (!in_array($oid, $unserialized_orders)) {
 
                 $unserialized_orders[] = $oid;
 
                 //again serilize data to store in db
                 $new_serilized_orders = serialize($unserialized_orders);
-                    
+
                 //preapre and update serialized data
                 $wpdb->query($wpdb->prepare("UPDATE $table_name SET all_orders = %s WHERE user_id = %d", $new_serilized_orders, $customer_id));
 
             }
-    
-          
-        }
 
+        }
 
     } else {
         // Get the product object
         $product = wc_get_product($p_id);
-        
+
         //get parent id if product is variable
         $parent_id = $product->is_type('variation') ? $product->get_parent_id() : $p_id;
-       
+
         //for this case orders datas doesnt exists on our custom database table so we need to call the glassfrog api and insert data accordingly
         $gf_checkbox = get_post_meta($parent_id, '_glassfrog_checkbox', true);
- 
+
         //bool to check meta
-        $gf_check   = $gf_checkbox == 'on' ? true : false;
-        
-        if($gf_check) {
+        $gf_check = $gf_checkbox == 'on' ? true : false;
+
+        if ($gf_check) {
             //get user object
             $user_info = get_userdata($customer_id);
+
+            //order object
+            $orderobj = new WC_Order($oid);
+
+            // get sponsor id 
+            $sponsor_id =  $orderobj->get_meta('mega_affid');
+
+            //refferal
+            $refferal =  !empty($sponsor_id) ? (int) $sponsor_id : null;
 
             //get user email
             $email = $user_info->user_email;
@@ -567,20 +655,22 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid){
                 "tag_names": ["tag 1", "tag 2"]
                 }]
                 }';
-            
+
             //api call
             $samp = glassfrog_api_request('people', $str, "POST");
 
-            if($samp && isset($samp)) :
-            
+            if ($samp && isset($samp)):
+
                 //glassfrog id from the api
-                $gf_id   = $samp->people[0]->id;
+                $gf_id = $samp->people[0]->id;
 
                 //glassfrog persons  name
                 $gf_name = $samp->people[0]->name;
 
                 $all_orders = serialize(array($oid));
 
+                $wpdb->query("SET FOREIGN_KEY_CHECKS = 0");
+                
                 $wpdb->query(
                     $wpdb->prepare(
                         "INSERT INTO $table_name
@@ -590,26 +680,46 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid){
                             gf_name,
                             in_glassfrog,
                             all_orders,
-                            group_id
+                            group_id,
+                            upline_id
+
                         )
-                        VALUES ( %d,%d,%s,%d,%s,%d)",
+                        VALUES ( %d,%d,%s,%d,%s,%d,%d)",
                         $customer_id, // d
                         $gf_id, // d
                         $gf_name, // s
                         0, // d
                         $all_orders, // s
-                        0 // d
+                        0,// d
+                        $refferal //d
+
                     )
                 );
 
-            
-            endif;
-        }else {
+                if($refferal) {
+                    $wpdb->query(
+                        $wpdb->prepare(
+                            "INSERT INTO $downline_table
+                            (
+                                user_id,
+                                downline_user_id
+                            )
+                            VALUES ( %d,%d)",
+                            $refferal,
+                            $customer_id    
+                        )
+                    );
+    
+                }
 
-            //when order need not to be sent to glass frog where and how to manage it
+                $wpdb->query("SET FOREIGN_KEY_CHECKS = 1");
+
+            endif;
+        } else {
+
+            //when order need not to be sent to glass frog where and how to manage it??
 
         }
-    
 
     }
 
@@ -624,32 +734,32 @@ function dong_show_user_role($user)
     $dong_user_role = get_user_meta($user->ID, 'dong_user_role', true);
     /*   echo $dong_user_role . '-dong user role'; */
 
-?>
+    ?>
     <table class="form-table">
         <tr>
             <th><label for="city">Dong User Role</label></th>
             <td>
                 <select name="dong_user_role" id="">
                     <option value="Planning" <?php if ($dong_user_role == "Planning") {
-                                                    echo 'selected="selected"';
-                                                }
-                                                ?>>Planning (Purple)</option>
+        echo 'selected="selected"';
+    }
+    ?>>Planning (Purple)</option>
                     <option value="Budget" <?php if ($dong_user_role == "Budget") {
-                                                echo 'selected="selected"';
-                                            }
-                                            ?>>Budget (Orange)</option>
+        echo 'selected="selected"';
+    }
+    ?>>Budget (Orange)</option>
                     <option value="Media" <?php if ($dong_user_role == "Media") {
-                                                echo 'selected="selected"';
-                                            }
-                                            ?>>Media (Red)</option>
+        echo 'selected="selected"';
+    }
+    ?>>Media (Red)</option>
                     <option value="Distribution" <?php if ($dong_user_role == "Distribution") {
-                                                        echo 'selected="selected"';
-                                                    }
-                                                    ?>>Distribution (Green)</option>
+        echo 'selected="selected"';
+    }
+    ?>>Distribution (Green)</option>
                     <option value="Membership" <?php if ($dong_user_role == "Membership") {
-                                                    echo 'selected="selected"';
-                                                }
-                                                ?>>Membership (Blue)</option>
+        echo 'selected="selected"';
+    }
+    ?>>Membership (Blue)</option>
                 </select>
                 </select>
             </td>
@@ -710,7 +820,6 @@ function dongtrader_get_product_color($role)
     return $role;
 }
 
-
 /* dong order export form */
 
 /**
@@ -718,7 +827,7 @@ function dongtrader_get_product_color($role)
  */
 function dongtraders_order_export_form()
 {
-?>
+    ?>
     <form action="" method="POST" class="order-export-form">
         <!--   <div class="dong-notify-msg">
 
@@ -789,26 +898,26 @@ function dongtraders_order_export_form()
             <div class="form-control-wrap">
                 <select name="select-product" id="" class="form-control select-product" required="">
                     <?php
-                    echo '<option value="">Select Product</option>';
-                    $args = array(
-                        'post_type'      => 'product',
-                        'posts_per_page' => -1,
-                        'status' => 'published'
-                    );
+                        echo '<option value="">Select Product</option>';
+                        $args = array(
+                            'post_type' => 'product',
+                            'posts_per_page' => -1,
+                            'status' => 'published',
+                        );
 
-                    $loop = new WP_Query($args);
-                    //var_dump($loop);
-                    $product_ids = array();
-                    while ($loop->have_posts()) : $loop->the_post();
-                        $product = new WC_Product_Variable(get_the_ID());
-                        $terms = get_the_terms($product->get_id(), 'product_type');
-                        $product_type = (!empty($terms)) ? sanitize_title(current($terms)->name) : 'simple';
+                        $loop = new WP_Query($args);
+                        //var_dump($loop);
+                        $product_ids = array();
+                        while ($loop->have_posts()): $loop->the_post();
+                            $product = new WC_Product_Variable(get_the_ID());
+                            $terms = get_the_terms($product->get_id(), 'product_type');
+                            $product_type = (!empty($terms)) ? sanitize_title(current($terms)->name) : 'simple';
 
-                        echo '<option data-productType="' . $product_type . '" value="' . get_the_ID() . '">' . get_the_title() . '</option>';
-                        $product_ids[] = $product->get_id();
-                    endwhile;
+                            echo '<option data-productType="' . $product_type . '" value="' . get_the_ID() . '">' . get_the_title() . '</option>';
+                            $product_ids[] = $product->get_id();
+                        endwhile;
 
-                    wp_reset_query();
+                        wp_reset_query();
 
                     ?>
                 </select>
@@ -818,48 +927,44 @@ function dongtraders_order_export_form()
             <!--  <label for="">Select Variation Product</label> -->
             <div class="form-control-wrap">
                 <?php
-                foreach ($product_ids as $product_id) {
-                    $product = new WC_Product_Variable($product_id);
-                    $terms = get_the_terms($product_id, 'product_type');
-                    $product_type = (!empty($terms)) ? sanitize_title(current($terms)->name) : 'simple';
+                    foreach ($product_ids as $product_id) {
+                            $product = new WC_Product_Variable($product_id);
+                            $terms = get_the_terms($product_id, 'product_type');
+                            $product_type = (!empty($terms)) ? sanitize_title(current($terms)->name) : 'simple';
 
-                    if ($product_type == 'variable') {
-                        # code...
-                        $product = wc_get_product($product_id);
-                        $current_products = $product->get_children();
-                ?>
-                        <div id="varition-<?php echo $product_id; ?>" class="export_variation_product_hide">
-                            <label for="">Select Variation Product</label>
-                            <div class="form-control-wrap">
-                                <select name="variation-product[]" class="form-control variation-product">
+                            if ($product_type == 'variable') {
+                                # code...
+                                $product = wc_get_product($product_id);
+                                $current_products = $product->get_children();
+                                ?>
+                                            <div id="varition-<?php echo $product_id; ?>" class="export_variation_product_hide">
+                                                <label for="">Select Variation Product</label>
+                                                <div class="form-control-wrap">
+                                                    <select name="variation-product[]" class="form-control variation-product">
+                                                        <?php
+                                                        echo '<option value="0">Choose Variation Product</option>';
+                                                        foreach ($current_products as $current_product) {
+                                                            $variation = wc_get_product($current_product);
+                                                            $varition_name = $variation->get_name();
+                                                            echo '<option value="' . $current_product . '">' . $varition_name . '</option>';
+                                                        }
+
+                                                        ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+
                                     <?php
-                                    echo '<option value="0">Choose Variation Product</option>';
-                                    foreach ($current_products as $current_product) {
-                                        $variation = wc_get_product($current_product);
-                                        $varition_name = $variation->get_name();
-                                        echo '<option value="' . $current_product . '">' . $varition_name . '</option>';
-                                    }
 
-                                    ?>
-                                </select>
-                            </div>
-                        </div>
+                            }
+                        }
 
-                <?php
-
-                    }
-                }
-
-
-                //var_dump($product_ids);
-
-
-                ?>
+    ?>
 
             </div>
         </div>
         <div class="form-group">
-            <?php $user_ID = get_current_user_id(); ?>
+            <?php $user_ID = get_current_user_id();?>
             <div class="form-control-wrap">
                 <input type="hidden" name="affilate-user" class="form-control affilate-user" value="<?php echo $user_ID; ?>">
             </div>
@@ -870,7 +975,7 @@ function dongtraders_order_export_form()
     </form>
 
     <?php
-    /* insert date to database table */
+/* insert date to database table */
     $current_page = home_url($_SERVER['REQUEST_URI']);
     //echo $current_page;
 
@@ -887,10 +992,8 @@ function dongtraders_order_export_form()
         $customer_product_id = $_POST['select-product'];
         $customer_affilate_user_final = $_POST['affilate-user'];
 
-
         $created_date = date("Y-m-d");
         $customer_varition_product_id = $_POST['variation-product'];
-
 
         $get_final_vartion_id = (array_filter($customer_varition_product_id));
 
@@ -914,7 +1017,7 @@ function dongtraders_order_export_form()
         global $wpdb;
         $order_table_name = $wpdb->prefix . 'dong_order_export_table';
         $wpdb->query(
-            $order_insert =   $wpdb->prepare(
+            $order_insert = $wpdb->prepare(
                 "INSERT INTO $order_table_name
                (
                 customer_email,
@@ -929,7 +1032,7 @@ function dongtraders_order_export_form()
                 product_id,
                 product_varition_id,
                 affilate_user_id,
-                created_at 
+                created_at
                )
                VALUES ( %s, %s, %s, %d, %s, %s, %s, %s, %s, %d, %d, %d, %s )",
                 esc_attr($customer_email),
@@ -956,7 +1059,6 @@ function dongtraders_order_export_form()
     }
 }
 
-
 /* dongtraders custom export order list */
 
 function dongtraders_custom_order_created_list()
@@ -975,13 +1077,13 @@ function dongtraders_custom_order_created_list()
                 <input id="end-month" name="end_month" type="date" size="2" required>
                 <select name="affilate_id" id="affilate_id">
                     <?php
-                    $get_all_users = get_users();
-                    //var_dump($get_all_users);
-                    echo '<option value="">Select Affilate User</option>';
-                    foreach ($get_all_users as $get_all_user) {
-                        echo '<option value="' . $get_all_user->ID . '">' . $get_all_user->user_login . '</option>';
-                    }
-                    ?>
+$get_all_users = get_users();
+    //var_dump($get_all_users);
+    echo '<option value="">Select Affilate User</option>';
+    foreach ($get_all_users as $get_all_user) {
+        echo '<option value="' . $get_all_user->ID . '">' . $get_all_user->user_login . '</option>';
+    }
+    ?>
                 </select>
                 <button type="submit" class="button button-primary buttonload">Export CSV<i class="fa fa-spinner fa-spin export-loader"></i></button>
             </form>
@@ -1010,15 +1112,14 @@ function dongtraders_custom_order_created_list()
             <tbody>
                 <?php
 
-                $get_order_results  = $wpdb->get_results("SELECT *  FROM $order_table_name ORDER BY id DESC;");
+    $get_order_results = $wpdb->get_results("SELECT *  FROM $order_table_name ORDER BY id DESC;");
 
-                //$get_url = home_url() . '/wp-admin/admin.php?page=dongtrader_api_settings';
-                /* $current_page = ''; */
-                if (!empty($get_order_results)) {
-                    foreach ($get_order_results as $export_order) {
+    //$get_url = home_url() . '/wp-admin/admin.php?page=dongtrader_api_settings';
+    /* $current_page = ''; */
+    if (!empty($get_order_results)) {
+        foreach ($get_order_results as $export_order) {
 
-
-                        echo '
+            echo '
                      <tr>
                     <td>' . $export_order->id . '</td>
                      <td>' . $export_order->created_at . '</td>
@@ -1042,30 +1143,29 @@ function dongtraders_custom_order_created_list()
                         </td>
                 </tr>
                 ';
-                    }
-                } else {
-                    echo '<div class="error-box">No Records Found</div>';
-                }
+        }
+    } else {
+        echo '<div class="error-box">No Records Found</div>';
+    }
 
+    // Handle delete
+    if (isset($_POST['delete-export'])) {
 
-                // Handle delete
-                if (isset($_POST['delete-export'])) {
+        $delete_id = (int) $_POST['export-id'];
 
-                    $delete_id = (int) $_POST['export-id'];
+        // Delete data in mysql from row that has this id
+        $result = $wpdb->delete($order_table_name, array('id' => $delete_id));
 
-                    // Delete data in mysql from row that has this id 
-                    $result = $wpdb->delete($order_table_name, array('id' => $delete_id));
+        // if successfully deleted
+        if ($result) {
 
-                    // if successfully deleted
-                    if ($result) {
-
-                        echo '<div class="success-box">Deleted order ID-> ' . $delete_id . ' Successfully</div>';
-                    } else {
-                        echo '<div class="error-box">Order Data could not Deleted ! Please Try again</div>';
-                    }
-                    /*  wp_redirect($current_page); */
-                }
-                ?>
+            echo '<div class="success-box">Deleted order ID-> ' . $delete_id . ' Successfully</div>';
+        } else {
+            echo '<div class="error-box">Order Data could not Deleted ! Please Try again</div>';
+        }
+        /*  wp_redirect($current_page); */
+    }
+    ?>
 
 
             </tbody>
@@ -1088,21 +1188,19 @@ if (!function_exists('dong_custom_order_exporter_csv_files')) {
         $get_table_name = $wpdb->prefix . 'dong_order_export_table';
 
         if (!empty($get_start_date) && !empty($get_end_date) && !empty($get_affilate_user_id)) {
-            $get_custom_orders = $wpdb->get_results("SELECT * FROM $get_table_name WHERE created_at BETWEEN  '$get_start_date' AND '$get_end_date' AND affilate_user_id = 
+            $get_custom_orders = $wpdb->get_results("SELECT * FROM $get_table_name WHERE created_at BETWEEN  '$get_start_date' AND '$get_end_date' AND affilate_user_id =
             '$get_affilate_user_id' ", ARRAY_A);
         } elseif (!empty($get_start_date) && !empty($get_end_date) && empty($get_affilate_user_id)) {
             $get_custom_orders = $wpdb->get_results("SELECT * FROM $get_table_name WHERE created_at BETWEEN  '$get_start_date' AND '$get_end_date' ", ARRAY_A);
         }
 
-       
         if (!empty($get_custom_orders)) {
-            $cpm_order_exporter_generate_csv_filename =  'dongtraders-custom-orders' . date('Ymd_His') . '-export.csv';
+            $cpm_order_exporter_generate_csv_filename = 'dongtraders-custom-orders' . date('Ymd_His') . '-export.csv';
             header('Content-Type: application/csv');
             header('Content-Disposition: attachment; filename={$cpm_comment_exporter_generate_csv_filename}');
             $output = fopen('php://output', 'w');
 
-            fputcsv($output, ['csv_id', 'customer_email',   'billing_first_name', 'billing_last_name', 'billing_phone',   'billing_address_1',   'billing_postcode',   'billing_city', 'billing_state', 'billing_country', 'product_id', 'variation_id',   'affilate_user_id']);
-
+            fputcsv($output, ['csv_id', 'customer_email', 'billing_first_name', 'billing_last_name', 'billing_phone', 'billing_address_1', 'billing_postcode', 'billing_city', 'billing_state', 'billing_country', 'product_id', 'variation_id', 'affilate_user_id']);
 
             foreach ($get_custom_orders as $get_custom_order) {
                 $export_id = $get_custom_order['id'];
@@ -1119,20 +1217,16 @@ if (!function_exists('dong_custom_order_exporter_csv_files')) {
                 $export_product_varition_id = $get_custom_order['product_varition_id'];
                 $export_affilate_user_id = $get_custom_order['affilate_user_id'];
 
-                fputcsv($output, [$export_id,  $export_customer_email, $export_customer_first_name, $export_customer_last_name, $export_customer_phone, $export_customer_address, $export_customer_postcode, $export_customer_city, $export_customer_state, $export_customer_country, $export_product_id, $export_product_varition_id, $export_affilate_user_id]);
+                fputcsv($output, [$export_id, $export_customer_email, $export_customer_first_name, $export_customer_last_name, $export_customer_phone, $export_customer_address, $export_customer_postcode, $export_customer_city, $export_customer_state, $export_customer_country, $export_product_id, $export_product_varition_id, $export_affilate_user_id]);
             }
             fclose($output);
         }
-
-
 
         die();
     }
 
     add_action('wp_ajax_dong_custom_order_exporter_csv_files', 'dong_custom_order_exporter_csv_files');
 }
-
-
 
 /* show current user added affilate order and exporter */
 
@@ -1142,7 +1236,7 @@ function dongtraders_show_user_affilate_order()
     $order_table_name = $wpdb->prefix . 'dong_order_export_table';
     $user_ID = get_current_user_id();
 
-?>
+    ?>
     <div class="cpm-table-wrap">
         <div class="export-section">
 
@@ -1184,14 +1278,13 @@ function dongtraders_show_user_affilate_order()
             <tbody>
                 <?php
 
-                $get_order_results = $wpdb->get_results("SELECT *  FROM $order_table_name WHERE affilate_user_id = '$user_ID' ORDER BY id DESC;");
-                //$get_url = home_url() . '/wp-admin/admin.php?page=dongtrader_api_settings';
-                $current_page = home_url($_SERVER['REQUEST_URI']);
-                if (!empty($get_order_results)) {
-                    foreach ($get_order_results as $export_order) {
+    $get_order_results = $wpdb->get_results("SELECT *  FROM $order_table_name WHERE affilate_user_id = '$user_ID' ORDER BY id DESC;");
+    //$get_url = home_url() . '/wp-admin/admin.php?page=dongtrader_api_settings';
+    $current_page = home_url($_SERVER['REQUEST_URI']);
+    if (!empty($get_order_results)) {
+        foreach ($get_order_results as $export_order) {
 
-
-                        echo '
+            echo '
                      <tr>
                     <td>' . $export_order->id . '</td>
                      <td>' . $export_order->created_at . '</td>
@@ -1215,30 +1308,29 @@ function dongtraders_show_user_affilate_order()
                         </td>
                 </tr>
                 ';
-                    }
-                } else {
-                    echo '<div class="error-box">No Records Found</div>';
-                }
+        }
+    } else {
+        echo '<div class="error-box">No Records Found</div>';
+    }
 
+    // Handle delete
+    if (isset($_POST['delete-export'])) {
 
-                // Handle delete
-                if (isset($_POST['delete-export'])) {
+        $delete_id = (int) $_POST['export-id'];
 
-                    $delete_id = (int) $_POST['export-id'];
+        // Delete data in mysql from row that has this id
+        $result = $wpdb->delete($order_table_name, array('id' => $delete_id));
 
-                    // Delete data in mysql from row that has this id 
-                    $result = $wpdb->delete($order_table_name, array('id' => $delete_id));
+        // if successfully deleted
+        if ($result) {
 
-                    // if successfully deleted
-                    if ($result) {
-
-                        echo '<div class="success-box">Deleted order ID-> ' . $delete_id . ' Successfully</div>';
-                    } else {
-                        echo '<div class="error-box">Order Data could not Deleted ! Please Try again</div>';
-                    }
-                    wp_redirect($current_page);
-                }
-                ?>
+            echo '<div class="success-box">Deleted order ID-> ' . $delete_id . ' Successfully</div>';
+        } else {
+            echo '<div class="error-box">Order Data could not Deleted ! Please Try again</div>';
+        }
+        wp_redirect($current_page);
+    }
+    ?>
 
 
             </tbody>
@@ -1248,10 +1340,7 @@ function dongtraders_show_user_affilate_order()
     <?php
 }
 
-
 // set quantity product for yam sticker as 10 quantity
-
-
 
 // Displaying quantity setting fields on admin product pages
 add_action('woocommerce_product_options_pricing', 'wc_qty_add_product_field');
@@ -1265,26 +1354,24 @@ function wc_qty_add_product_field()
     <style>div.qty-args.hidden { display:none; }</style>';
 
     woocommerce_wp_checkbox(array( // Checkbox.
-        'id'            => 'qty_args',
-        'label'         => __('Quantity settings', 'woocommerce'),
-        'value'         => empty($values) ? 'no' : 'yes',
-        'description'   => __('Enable this to show and enable the additional quantity setting fields.', 'woocommerce'),
+        'id' => 'qty_args',
+        'label' => __('Quantity settings', 'woocommerce'),
+        'value' => empty($values) ? 'no' : 'yes',
+        'description' => __('Enable this to show and enable the additional quantity setting fields.', 'woocommerce'),
     ));
 
     echo '<div class="qty-args hidden">';
 
     woocommerce_wp_text_input(array(
-        'id'                => 'qty_min',
-        'type'              => 'number',
-        'label'             => __('Set Quantity', 'woocommerce-max-quantity'),
-        'placeholder'       => '',
-        'desc_tip'          => 'true',
-        'description'       => __('Set a minimum allowed quantity limit (a number greater than 0).', 'woocommerce'),
-        'custom_attributes' => array('step'  => 'any', 'min'   => '0'),
-        'value'             => isset($values['qty_min']) && $values['qty_min'] > 0 ? (int) $values['qty_min'] : 10,
+        'id' => 'qty_min',
+        'type' => 'number',
+        'label' => __('Set Quantity', 'woocommerce-max-quantity'),
+        'placeholder' => '',
+        'desc_tip' => 'true',
+        'description' => __('Set a minimum allowed quantity limit (a number greater than 0).', 'woocommerce'),
+        'custom_attributes' => array('step' => 'any', 'min' => '0'),
+        'value' => isset($values['qty_min']) && $values['qty_min'] > 0 ? (int) $values['qty_min'] : 10,
     ));
-
-
 
     echo '</div>';
 }
@@ -1295,7 +1382,7 @@ function product_type_selector_filter_callback()
 {
     global $pagenow, $post_type;
 
-    if (in_array($pagenow, array('post-new.php', 'post.php')) && $post_type === 'product') :
+    if (in_array($pagenow, array('post-new.php', 'post.php')) && $post_type === 'product'):
     ?>
         <script>
             jQuery(function($) {
@@ -1312,7 +1399,7 @@ function product_type_selector_filter_callback()
             });
         </script>
 <?php
-    endif;
+endif;
 }
 
 // Save quantity setting fields values
@@ -1338,9 +1425,9 @@ function filter_wc_quantity_input_args($args, $product)
 {
     if ($product->is_type('variation')) {
         $parent_product = wc_get_product($product->get_parent_id());
-        $values  = $parent_product->get_meta('_qty_args');
+        $values = $parent_product->get_meta('_qty_args');
     } else {
-        $values  = $product->get_meta('_qty_args');
+        $values = $product->get_meta('_qty_args');
     }
 
     if (!empty($values)) {
@@ -1360,7 +1447,7 @@ function filter_wc_quantity_input_args($args, $product)
 add_filter('woocommerce_loop_add_to_cart_args', 'filter_loop_add_to_cart_quantity_arg', 10, 2);
 function filter_loop_add_to_cart_quantity_arg($args, $product)
 {
-    $values  = $product->get_meta('_qty_args');
+    $values = $product->get_meta('_qty_args');
 
     if (!empty($values)) {
         // Min value
@@ -1375,7 +1462,7 @@ function filter_loop_add_to_cart_quantity_arg($args, $product)
 add_filter('woocommerce_available_variation', 'filter_wc_available_variation_price_html', 10, 3);
 function filter_wc_available_variation_price_html($data, $product, $variation)
 {
-    $values  = $product->get_meta('_qty_args');
+    $values = $product->get_meta('_qty_args');
 
     if (!empty($values)) {
         if (isset($values['qty_min']) && $values['qty_min'] > 1) {
@@ -1395,24 +1482,299 @@ function dongtraders_set_product_quantity($product_id)
     //return 0;
 }
 
-
-
-add_action('wp', 'pf_rb_install');
-function pf_rb_install() {
+function dongtrader_release_funds_tablelist()
+{
     global $wpdb;
-    $table_name = $wpdb->prefix . 'pf_parts';
-    $pf_parts_db_version = '1.0.0';
-    $charset_collate = $wpdb->get_charset_collate();
 
-    if ( $wpdb->get_var( "SHOW TABLES LIKE '{$table_name}'" ) != $table_name ) {
+    $release_fund = $wpdb->prefix . 'release_groups_profit';
+    $group_table = $wpdb->prefix . 'mega_mlm_groups';
 
-        $sql = "CREATE TABLE $table_name (
-                        id mediumint(9) NOT NULL AUTO_INCREMENT,
-                        PRIMARY KEY  (id)
-                        ) $charset_collate;";
+    // Filter variables
+    $filter_type = isset($_GET['filter_type']) ? sanitize_text_field($_GET['filter_type']) : '';
+    $group_name = isset($_GET['group_name']) ? sanitize_text_field($_GET['group_name']) : '';
+    $start_date = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_date']) : '';
+    $end_date = isset($_GET['end_date']) ? sanitize_text_field($_GET['end_date']) : '';
 
-        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-        dbDelta( $sql );
-        add_option( 'pf_parts_db_version', $pf_parts_db_version );
+    // Build the SQL query with filter conditions
+    $release_fund_prepared_query = "SELECT * FROM $release_fund";
+
+    if ($filter_type === 'date-range' && $start_date && $end_date) {
+        $release_fund_prepared_query .= $wpdb->prepare(" WHERE release_date BETWEEN %s AND %s", $start_date, $end_date);
+    } elseif ($filter_type === 'group-name' && $group_name) {
+        $release_fund_prepared_query .= $wpdb->prepare(" WHERE group_id IN (SELECT group_id FROM $group_table WHERE circle_name LIKE %s)", "%{$group_name}%");
+    } elseif ($filter_type === 'all') {
+        // No specific filter selected, return all data
+    }
+
+    $release_fund_prepared_query .= " ORDER BY release_date DESC";
+
+    // Get results from the SQL query
+    $release_fund_results = $wpdb->get_results($release_fund_prepared_query, ARRAY_A);
+
+    $items_per_page = 10; // Number of items to display per page
+    $paged = isset($_GET['rfapaged']) ? (int) $_GET['rfapaged'] : 1; // Get current page number
+
+
+    ?>
+    <h3>Disaster Relief Funds List</h3>
+    <form method="get" action="<?php echo admin_url('admin.php'); ?>" class="filter-form" id="posts-filter">
+        <input type="hidden" name="page" value="dongtrader_api_settings">
+        <div class="tablenav top">
+        <div class="post_filter">
+            <select name="filter_type" id="filter-type">
+                <option value="all" <?php selected($filter_type, 'all');?>>All</option>
+                <option value="group-name" <?php selected($filter_type, 'group-name');?>>By Group Name</option>
+                <option value="date-range" <?php selected($filter_type, 'date-range');?>>By Date Range</option>
+            </select>
+            <div id="group-name-filter" class="filter-field" <?php if ($filter_type !== 'group-name') {?>style="display: none;"<?php }?>>
+                <input type="text" name="group_name" id="group-name-input" placeholder="Enter group name" value="<?php echo $group_name; ?>">
+            </div>
+            <div id="date-range-filter" class="filter-field" <?php if ($filter_type !== 'date-range') {?>style="display: none;"<?php }?>>
+                <input type="date" name="start_date" id="start-date-input" placeholder="Start date" value="<?php echo $start_date; ?>">
+                <input type="date" name="end_date" id="end-date-input" placeholder="End date" value="<?php echo $end_date; ?>">
+            </div>
+            <button type="submit" id="apply-filter">Apply Filter</button>
+            <button type="reset" id="reset-filter">Reset Filter</button>
+        </div>
+        </div>
+    </form>
+    <div class="cpm-table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>S.N.</th>
+                    <th>Released Date</th>
+                    <th>Group Name</th>
+                    <th>Released Amount</th>
+                    <th>Release Cause</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+if (!empty($release_fund_results)) {
+        $symbol = get_woocommerce_currency_symbol();
+        // Split array into chunks based on items per page
+        $paginated_release_fund_results = array_chunk($release_fund_results, $items_per_page);
+
+        $current_items = $paginated_release_fund_results[$paged - 1]; // Get the items for the current page
+        $i=1;
+        foreach ($current_items as $gr) {
+
+            $group_name = $wpdb->get_var($wpdb->prepare("SELECT circle_name FROM $group_table WHERE group_id = %d", (int) $gr['group_id']));
+            ?>
+                        <tr>
+                            <td><?php echo $i; ?></td>
+                            <td><?php echo $gr['release_date'] ?></td>
+                            <td><?php echo $group_name ?></td>
+                            <td><?php echo $symbol.$gr['release_amount'] ?></td>
+                            <td><?php echo $gr['release_note'] ?></td>
+                            <td><button class="rf-del" data-rfid="<?php echo $gr['id'] ?>">Delete</td>
+                        </tr>
+                    <?php $i++;}?>
+                <?php } else {?>
+                    <tr>
+                        <td style="text-align:center;" colspan="4">Details Not Found</td>
+                    </tr>
+                <?php }?>
+            </tbody>
+        </table>
+    </div>
+
+    <?php
+if (!empty($release_fund_results)) {
+        // Pagination links
+        echo '<div class="pagination" style="float:right">';
+        echo paginate_links(array(
+            'base' => add_query_arg('rfapaged', '%#%'), // Base URL with page number placeholder
+            'format' => '&rfapaged=%#%', // Add the paged parameter to the URL
+            'prev_text' => __('&laquo; Previous', 'text-domain'),
+            'next_text' => __('Next &raquo;', 'text-domain'),
+            'total' => count($paginated_release_fund_results), // Total number of pages
+            'current' => $paged, // Current page number
+        ));
+        echo '</div>';
+    }
+    ?>
+    <script>
+       jQuery(document).ready(function($) {
+    // Show/hide filter fields based on selected filter type
+    $('#filter-type').on('change', function() {
+        var filterType = $(this).val();
+        $('.filter-field').hide();
+        $('#' + filterType + '-filter').val('');
+        $('#' + filterType + '-filter').show();
+    });
+
+    // Reset filter form
+    $('#reset-filter').on('click', function() {
+        $('.filter-form')[0].reset();
+        $('.filter-field').hide(); // Hide all filter fields
+        $('#filter-type').trigger('change'); // Trigger change event to show/hide fields based on selected filter type
+
+        var url = removeURLParameter(window.location.href, 'filter_type');
+        url = removeURLParameter(url, 'group_name');
+        url = removeURLParameter(url, 'start_date');
+        url = removeURLParameter(url, 'end_date');
+
+        window.history.replaceState({}, document.title, url);
+
+        window.location.reload();
+    });
+
+    // On page load, trigger change event to show/hide fields based on selected filter type
+    $('#filter-type').trigger('change');
+
+    // Helper function to remove a parameter from the URL
+    function removeURLParameter(url, parameter) {
+    var urlParts = url.split('?');
+    if (urlParts.length >= 2) {
+        var prefix = encodeURIComponent(parameter) + '=';
+        var params = urlParts[1].split(/[&;]/g);
+
+        for (var i = params.length - 1; i >= 0; i--) {
+            if (params[i].lastIndexOf(prefix, 0) !== -1) {
+                params.splice(i, 1);
+            }
+        }
+
+        url = urlParts[0] + (params.length > 0 ? '?' + params.join('&') : '');
+        url = url.replace(/[?&]$/, ''); // Remove trailing ? or & if present
+    }
+    return url;
+}
+});
+
+    </script>
+    <?php
+}
+
+add_action('wp_ajax_dongtrader_delete_funds', 'dongtrader_delete_funds');
+function dongtrader_delete_funds() {
+    $row_id = isset($_POST['rowid']) ? absint($_POST['rowid']) : 0;
+
+    if ($row_id != 0) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'release_groups_profit';
+
+        // Delete the row with the specified ID
+        $result = $wpdb->delete($table_name, array('id' => $row_id), array('%d'));
+
+        if ($result !== false) {
+            wp_send_json_success('Row with ID ' . $row_id . ' has been deleted.');
+        } else {
+            wp_send_json_error('Failed to delete the row.');
+        }
+    } else {
+        wp_send_json_error('Invalid row ID.');
     }
 }
+
+
+function dongtrader_compare_released_funds($group_id, $current_releasing_amount){
+
+    global $wpdb;
+
+    $customers_table = $wpdb->prefix.'mega_mlm_customers';
+
+    $rfund_table = $wpdb->prefix . 'release_groups_profit';
+
+
+    $total_release_amount = $wpdb->get_var($wpdb->prepare(
+        "SELECT SUM(release_amount) AS total_release_amount 
+          FROM $rfund_table
+          WHERE group_id = %d", (int) $group_id
+    ));
+
+    $current_amount = $total_release_amount + $current_releasing_amount;
+
+    $all_gr_user = $wpdb->prepare("SELECT user_id FROM $customers_table WHERE customer_group_id=%d", (int) $group_id);
+
+    $users =  $wpdb->get_results($all_gr_user,ARRAY_A);
+
+    $users_arrays = array_column($users,'user_id');
+
+    $total_group_profit_sum = NULL;
+
+    foreach($users_arrays as $ua){
+        
+        $group_prof_metas =  get_user_meta($ua,'_group_details', true);
+
+        if(empty($group_prof_metas)) continue;
+        
+        foreach($group_prof_metas as $gpm){
+
+            $total_group_profit_sum += $gpm['profit_amount'];
+           
+        }
+    }
+
+    return array(
+        'compare' => $total_group_profit_sum >= $current_amount,
+        'total_profit'=> $total_group_profit_sum,
+        'total_released'=>$total_release_amount,
+        'total_releaseable' => $total_group_profit_sum-$total_release_amount
+    );
+
+    
+}
+
+
+add_action('wp_ajax_dongtrader_release_funds', 'dongtrader_release_funds');
+function dongtrader_release_funds()
+{
+
+    global $wpdb;
+
+    $table_name = $wpdb->prefix . 'release_groups_profit';
+
+    $customers_table = $wpdb->prefix.'mega_mlm_groups';
+
+    $form_data = $_POST['formdatas'];
+
+    parse_str($form_data, $form_array);
+
+    $rfund_group = intval($form_array['rfund-group']);
+
+    $rfund_note = sanitize_text_field($form_array['rfund-note']);
+
+    $rfund_amount = intval($form_array['rfund-amount']);
+
+    if (empty($rfund_group) || empty($rfund_note) || empty($rfund_amount)) {
+        wp_send_json_error('Please fill in all fields');
+        return;
+    }
+
+    $compare = dongtrader_compare_released_funds($rfund_group , $rfund_amount);
+
+    if($compare['compare']){
+
+        $data = array(
+            'release_date' => date('Y-m-d H:i:s'),
+            'release_amount' => $rfund_amount,
+            'release_note' => $rfund_note,
+            'group_id' => $rfund_group,
+        );
+    
+        
+    
+        $result = $wpdb->insert($table_name, $data);
+    
+        // Check if data insertion was successful
+        if ($result === false) {
+            wp_send_json_error('Some error occured.Please Try again');
+            return;
+        }
+    
+        wp_send_json_success('Group profit has been released successfully');
+
+    }else{
+        
+        wp_send_json_error('The released amount must not exceed '.$compare['total_releaseable'] );
+        return;
+    }
+
+
+}
+
+

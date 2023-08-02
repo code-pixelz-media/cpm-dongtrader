@@ -17,7 +17,7 @@ extract($args);
                 <tr>
                     <th><?php esc_html_e('Order ID/Date', 'cpm-dongtrader'); ?>
                     <th><?php esc_html_e('Product', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('7% Rebate', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('7% Cashback', 'cpm-dongtrader'); ?></th>
                     <th><?php esc_html_e('3% Process', 'cpm-dongtrader'); ?></th>
                     <th><?php esc_html_e('Individual Profit', 'cpm-dongtrader'); ?></th>
                     <th><?php esc_html_e('Total', 'cpm-dongtrader'); ?></th>
