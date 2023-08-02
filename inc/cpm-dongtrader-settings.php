@@ -1,6 +1,22 @@
 <?php
 if (!defined('ABSPATH')) exit;
 $dong_qr_array = get_option('dong_user_qr_values');
+
+global $wpdb;
+
+$group_data_table = $wpdb->prefix . 'mega_mlm_groups';
+
+$release_fund = $wpdb->prefix . 'release_groups_profit';
+    
+//sql query to get list of groups and group leader where distribution is not done or just a update is required
+$group_prepared_query = $wpdb->prepare("SELECT group_id , circle_name, circle_id FROM $group_data_table WHERE distribution_status= 1 OR distribution_status=2 ");
+
+//get results from above sql query
+$group_results = $wpdb->get_results($group_prepared_query, ARRAY_A);
+
+
+$release_profits = $wpdb->prepare("SELECT * FROM $release_fund ORDER BY release_date DESC");
+
 ?>
 
 <div class="cpm-plugin-wrap">
@@ -37,7 +53,7 @@ $dong_qr_array = get_option('dong_user_qr_values');
 				<li class="nav-tab" id="fourth"><a href="#advanced" class="dashicons-before dashicons-admin-settings"><?php _e('Orders', 'dongtraders'); ?></a></li>
 				<li class="nav-tab" id="fifth"><a href="#import-order" class="dashicons-before dashicons-admin-tools"><?php _e('Import Order', 'dongtraders'); ?></a></li>
 				<li class="nav-tab" id="seven"><a href="#export-order-list" class="dashicons-before dashicons-admin-tools"><?php _e('Export Order List', 'dongtraders'); ?></a></li>
-
+				<li class="nav-tab" id="eight"><a href="#release-funds" class="dashicons-before dashicons-admin-tools"><?php _e('Release Disaster relief funds', 'dongtraders'); ?></a></li>
 			</ul>
 
 			<div class="tab-content">
@@ -46,13 +62,6 @@ $dong_qr_array = get_option('dong_user_qr_values');
 						<p>Add new QR image by providing color ,size and URL of QR code.</p>
 						<form action="" method="POST" class="qrtiger-form">
 							<div class="dong-notify-msg">
-								<!-- 
-										purple(planning) rgb(153,0,153) 
-										budget(orange) rgb(241 104 60),
-										media(red) rgb(204,0,0),
-										distribution(green) rgb(0,153,0),
-										membership(blue) rgb(0,0,204)
-										-->
 							</div>
 							<div class="form-group">
 								<label for=""><?php _e('QR Size', 'cpm-dongtrader') ?></label>
@@ -271,8 +280,53 @@ $dong_qr_array = get_option('dong_user_qr_values');
 					dongtraders_custom_order_created_list();
 					?>
 				</div>
+				<div id="release-funds">
+					<h2 class="tab-title">Release Disaster relief's funds</h2>
+					<form action="" method="POST" class="rfund-form">
+							<div class="rfund-notify-msg">
+							</div>
+							<div class="form-group">
+								<label for=""><?php _e('Select Group', 'cpm-dongtrader') ?></label>
+								<div class="form-control-wrap">
+									<select name="rfund-group" id="" class="form-control rfund-group" required>
+										<option value="">Select Group </option>
+										<?php 
+										if(!empty($group_results)) {
+											foreach($group_results as $gr) {
 
-
+												echo '<option value="'.$gr['group_id'].'">'.$gr['circle_name'].'</option>';
+											}
+										}
+										?>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for=""><?php _e('Disaster Release Cause', 'cpm-dongtrader') ?></label>
+								<div class="form-control-wrap">
+									<input name="rfund-note" class="form-control rfund-note" type="text" placeholder="<?php _e('Enter release note', 'cpm-dongtrader') ?>" onfocus="this.placeholder=''" onblur="this.placeholder='<?php _e('Enter release note', 'cpm-dongtrader') ?>'" required >
+								</div>
+							</div>
+							<div class="form-group">
+								<label for=""><?php _e('Disaster Release Amount', 'cpm-dongtrader') ?></label>
+								<div class="form-control-wrap">
+									<input name="rfund-amount" class="form-control rfund-amount" type="number" placeholder="<?php _e('Enter release amount', 'cpm-dongtrader') ?>" onfocus="this.placeholder=''" onblur="this.placeholder='<?php _e('Enter release amount', 'cpm-dongtrader') ?>'" required >
+								</div>
+							</div>
+				
+							<div class="form-group">
+								<button type="submit" class="cpm-btn submit  real-button" style="">
+									Release Funds
+								</button>
+								<button style="display: none;" type="submit" class="cpm-btn submit  anim-button">
+									Releasing <i class="fa fa-spinner fa-spin custom-load"></i>
+								</button>
+							</div>
+							
+					</form>
+					<hr/>
+					<?php dongtrader_release_funds_tablelist() ?>
+				</div>
 			</div>
 
 			<div class="footer-wrap">

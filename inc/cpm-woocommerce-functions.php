@@ -216,23 +216,28 @@ function dongtraders_product_link_with_membership_goes_checkoutpage()
 
             if (isset($_GET['varid'])) {
                 $check_add_varition_product = $_GET['varid'];
-
                 $variation = wc_get_product($check_add_varition_product);
-                $product = wc_get_product($variation->get_parent_id());
-                $parent_id = $product->id;
 
-                $get_quantity_yam =  dongtraders_set_product_quantity($parent_id);
+                if($variation) {
+                    $product = wc_get_product($variation->get_parent_id());
+                    $parent_id = $product->id;
 
-                if (!empty($get_quantity_yam)) {
-                    WC()->cart->add_to_cart($check_add_varition_product, $get_quantity_yam);
-                } else {
-                    WC()->cart->add_to_cart($check_add_varition_product);
+                    $get_quantity_yam =  dongtraders_set_product_quantity($parent_id);
+
+                    if (!empty($get_quantity_yam)) {
+                        WC()->cart->add_to_cart($check_add_varition_product, $get_quantity_yam);
+                    } else {
+                        WC()->cart->add_to_cart($check_add_varition_product);
+                    }
+
+
+
+                    wp_redirect($checkout_url);
+                    exit();
+                }else{
+                    
+                    exit();
                 }
-
-
-
-                wp_redirect($checkout_url);
-                exit();
             }
         }
     }
@@ -327,35 +332,27 @@ function dongtrader_membership_level_fields($f, $type)
     //$type must be true or false if pmpro true else if order false
     $display_text = $type ? __('Rate (%):', 'cpm-dongtrader') : __('Total Amount:', 'cpm-dongtrader');
     $fields = array(
-        'dong_reabate'      => sprintf(__('Rebate  %s', 'cpm-dongtrader'), $display_text),
-        'dong_processamt'   => sprintf(__('Process %s', 'cpm-dongtrader'), $display_text),
-        //Is used only for orders meta
-        'dong_profitamt'    => sprintf(__('Profit %s', 'cpm-dongtrader'), $display_text),
-        'dong_reserve'      => sprintf(__('Reserve Amount: ', 'cpm-dongtrader')),
-        'dong_earning_amt'   => sprintf(__('Earnings Amount: ', 'cpm-dongtrader')),
-        //Extra Fields Ends
-        'dong_cost'         => sprintf(__('Total Cost: ', 'cpm-dongtrader')),
-        'dong_profit_di'    => sprintf(__('Profit To Individual %s', 'cpm-dongtrader'), $display_text),
-        'dong_profit_dg'    => sprintf(__('Profit To Group  %s', 'cpm-dongtrader'), $display_text),
-        'dong_profit_dca'   => sprintf(__('Commision From Profit %s', 'cpm-dongtrader'), $display_text),
-        'dong_comm_cdi'     => sprintf(__('Commision To Individual %s', 'cpm-dongtrader'), $display_text),
-        'dong_comm_cdg'     => sprintf(__('Commision To Group %s', 'cpm-dongtrader'), $display_text),
-        'dong_earning_per'  => sprintf(__('Earning %s', 'cpm-dongtrader'), $display_text),
-        'dong_discounts'    => sprintf(__('Discount %s', 'cpm-dongtrader'), $display_text),
-        //dong_affiliates
-        'dong_affid'        => sprintf(__('Refferal Id :', 'cpm-dongtrader'))
+        'mega_cashback_v'  => sprintf(__('Cashback To Voter  %s', 'cpm-dongtrader'), $display_text),
+        'mega_cashback_d'  => sprintf(__('Cashback To Distributor  %s', 'cpm-dongtrader'), $display_text),
+        'mega_reserve'     => sprintf(__('Reserve Savings %s ', 'cpm-dongtrader'),$display_text),
+        'mega_cashout_e'   => sprintf(__('Early Cashout %s ', 'cpm-dongtrader'), $display_text),
+        'mega_platform_c'  => sprintf(__('Platform Costs %s', 'cpm-dongtrader'), $display_text),
+        'mega_members_r'   => sprintf(__('Members Reward %s', 'cpm-dongtrader'), $display_text),
+        'mega_mr_di'       => sprintf(__('Reward To Individual %s', 'cpm-dongtrader'), $display_text),
+        'mega_mr_dg'       => sprintf(__('Reward To Group  %s', 'cpm-dongtrader'), $display_text),
+        'mega_mr_dca'      => sprintf(__('Commision From Reward %s', 'cpm-dongtrader'), $display_text),
+        'mega_mr_c_di'     => sprintf(__('Commision To Individual %s', 'cpm-dongtrader'), $display_text),
+        'mega_mr_c_dg'     => sprintf(__('Commision To Group %s', 'cpm-dongtrader'), $display_text),
+        'mega_comm_c_ds'   => sprintf(__('Commission To Smallstreet  %s', 'cpm-dongtrader'), $display_text),
+        'mega_affid'       => sprintf(__('Affiliate Id :', 'cpm-dongtrader')),
+        'mega_treasury'    => sprintf(__('Treasury :', 'cpm-dongtrader'))
+        
 
     );
-    if ($type) {
-        unset($fields['dong_profitamt']);
-        unset($fields['dong_earnings']);
-        unset($fields['dong_affid']);
-    } else {
-        unset($fields['dong_reserve']);
-        unset($fields['dong_earning_per']);
-        unset($fields['dong_cost']);
-    }
 
+    //fields not to display on pmpro backend
+    if ($type)  unset($fields['mega_affid']) ; unset($fields['mega_treasury']) ;
+    
     return $fields;
 }
 
@@ -380,7 +377,7 @@ function dong_editable_order_meta_general($order)
         <?php
         foreach ($fields as $key => $value) {
             $meta_val = !empty($order->get_meta($key)) ? $order->get_meta($key) : 0;
-            $printables = $key != 'dong_affid' ? '<p>' . $value . ' $' . $meta_val . '</p>' : '<p>' . $value . ' ' . $meta_val . '</p>';
+            $printables = $key != 'mega_affid' ? '<p>' . $value . ' $' . $meta_val . '</p>' : '<p>' . $value . ' ' . $meta_val . '</p>';
             echo $printables;
         }
         ?>
@@ -474,6 +471,32 @@ function get_pmpro_extrafields_meta($memId)
     return $new_pm_vals;
 }
 
+function round_decimal_ifneeded($number) {
+    $integerPart = floor($number);
+    $decimalPart = $number - $integerPart;
+    
+    if ($decimalPart > 0.5) {
+        $roundedNumber = ceil($number);
+    } else {
+        $roundedNumber = $integerPart + $decimalPart;
+    }
+    
+    return $roundedNumber;
+}
+
+function get_numeric_price($price) {
+    $formatted_price = wc_price($price); // Format the price
+
+    // Remove any HTML tags from the formatted price
+    $plain_text_price = strip_tags($formatted_price);
+
+    $currency_symbol = get_woocommerce_currency_symbol(); // Get the currency symbol
+
+    // Remove the currency symbol from the plain text price
+    $numeric_value = str_replace($currency_symbol, '', $plain_text_price);
+
+    return $numeric_value;
+}
 
 
 /**
@@ -485,139 +508,113 @@ function get_pmpro_extrafields_meta($memId)
  */
 function dongtrader_product_price_distribution($price, $proId, $oid, $cid)
 {
-    
+
     $gf_membership_checkbox = get_post_meta($proId, '_glassfrog_checkbox', true);
     // Get boolean by checking checkbox
     $checkgf = $gf_membership_checkbox == 'on' ? true : false;
-    // $pm_fields      = apply_filters('membership_level_fields', array(), true);
-    $member_level   = get_post_meta($proId, '_membership_product_level', true);
-    // $order_fields   = apply_filters('membership_level_fields', array(), true);
-    $pm_meta_vals   = get_pmpro_extrafields_meta($member_level);
 
-    /*Rebate Calculation */
-    $rebate_amount  = number_format($pm_meta_vals['dong_reabate'] / 100 * $price,2);
-    /*Process Amount */
-    $process_amount = number_format(($pm_meta_vals['dong_processamt'] / 100) * $price, 2);
-    /**Sum of data recieved from pmpro membership levels */
-    $constant_sum = number_format($pm_meta_vals['dong_cost'] + $pm_meta_vals['dong_reserve'] + $pm_meta_vals['dong_earning_amt'],2);
-    /*Profit after deduction from rebate and process */
+    // Get membership level of the product
+    $member_level = get_post_meta($proId, '_membership_product_level', true);
 
-    //when gf(enabled) was used for t-shirts it worked perfectly but when the requirement was changed later it did not worked 
-    // $remining_profit_amount = $checkgf ? number_format($price - $constant_sum,2) : number_format($price - $rebate_amount - $process_amount,2);
+    // Get the pmpro custom fields in an array
+    $pm_meta_vals = get_pmpro_extrafields_meta($member_level);
 
-    $remining_profit_amount = number_format($price - $constant_sum,2) ;
-    /*Total Profit that must be distributed to individual */
-    $profit_amt_individual  = number_format($remining_profit_amount * $pm_meta_vals['dong_profit_di'] / 100,2);
-    /*Total Profit that must be distributed to group */
-    $profit_amt_group       = number_format($remining_profit_amount * $pm_meta_vals['dong_profit_dg'] / 100,2);
-    /*commision amount from profit */
-    $profit_commission_amt  = number_format($remining_profit_amount * $pm_meta_vals['dong_profit_dca'] / 100,2);
-    /*commision amount from individual */
-    $commission_amt_to_individual = number_format($profit_commission_amt * $pm_meta_vals['dong_comm_cdi'] / 100,2);
-    /*commision amount from individual */
-    $commission_amt_to_group      = number_format($profit_commission_amt * $pm_meta_vals['dong_comm_cdg'] / 100,2);
-    /*Treasury Amount Calculation */
-    $treasury_amount = $checkgf ? '0' : $remining_profit_amount;
-    /*Discount Amount */
-    $early_discount = number_format($pm_meta_vals['dong_discounts'] / 100  * $remining_profit_amount ,2);
-    /**Earnings */
-    //$earnings = $checkgf ? number_format($pm_meta_vals['dong_earning_per'] / 100 * $pm_meta_vals['dong_earning_amt'],2) : '0';
-    $earnings = number_format($pm_meta_vals['dong_earning_per'] / 100 * $pm_meta_vals['dong_earning_amt'],2);
+    //convert pmpro rates to the values
+    $cashback_v     = $pm_meta_vals['mega_cashback_v']/100*$price;
+    $cashback_d     = $pm_meta_vals['mega_cashback_d']/100*$price;
+    $reserve        = $pm_meta_vals['mega_reserve']/100*$price;
+    $cashout_e      = $pm_meta_vals['mega_cashout_e']/100*$price;
+    $platform_c     = $pm_meta_vals['mega_platform_c']/100*$price;
+    $members_reward = $pm_meta_vals['mega_members_r']/100*$price;
+    $mr_di          = $pm_meta_vals['mega_mr_di']/100*$members_reward;
+    $mr_dg          = $pm_meta_vals['mega_mr_dg']/100*$members_reward;
+    $mr_c           = $pm_meta_vals['mega_mr_dca']/100*$members_reward;
+    $mr_c_di        = $pm_meta_vals['mega_mr_c_di']/100*$mr_c;
+    $mr_c_dg        = $pm_meta_vals['mega_mr_c_dg']/100*$mr_c;
+    $mr_c_ds        = $pm_meta_vals['mega_comm_c_ds']/100*$mr_c;
+    $treasury       = $price-$cashback_v+$cashback_d;
 
-    $aid = get_post_meta($oid, 'dong_affid', true);
 
-    $order_items = [
-        'dong_reabate'   => $rebate_amount,
-        'dong_processamt' => $process_amount,
-        'dong_profitamt' => $remining_profit_amount,
-        'dong_profit_di' => $profit_amt_individual,
-        'dong_profit_dg' => $profit_amt_group,
-        'dong_profit_dca' => $profit_commission_amt,
-        'dong_comm_cdi'  => $commission_amt_to_individual,
-        'dong_comm_cdg'  => $commission_amt_to_group,
-        'dong_treasury'  => $treasury_amount,
-        'dong_earning_amt'  => $earnings,
-        'dong_discounts' => $early_discount,
-        'dong_reserve'   => $pm_meta_vals['dong_reserve'],
-        'dong_cost'      => $pm_meta_vals['dong_cost'],
-        'dong_affid'        => $aid
+    $aid = get_post_meta($oid, 'mega_affid', true);
 
-    ];
+    if($checkgf) :
 
-    //update all data to order meta
-    foreach ($order_items as $k => $v) {
-        update_post_meta($oid, $k, wc_clean($v));
-    }
-    $update_check = get_post_meta($oid, 'distributn_succed', true);
-    if ($cid && $update_check != 'yes' && !$checkgf) :
+        $order_items=[
+            'mega_cashback_v' =>get_numeric_price($cashback_v), 
+            'mega_cashback_d' =>get_numeric_price($cashback_d),
+            'mega_reserve'    =>get_numeric_price($reserve),
+            'mega_cashout_e'  =>get_numeric_price($cashout_e),
+            'mega_platform_c' =>get_numeric_price($platform_c),
+            'mega_members_r'  =>get_numeric_price($members_reward),
+            'mega_mr_di'      =>get_numeric_price($mr_di),
+            'mega_mr_dg'      =>get_numeric_price($mr_dg),
+            'mega_mr_dca'     =>get_numeric_price($mr_c),
+            'mega_mr_c_di'    =>get_numeric_price($mr_c_di),
+            'mega_mr_c_dg'    =>get_numeric_price($mr_c_dg),
+            'mega_comm_c_ds'  =>get_numeric_price($mr_c_ds),
+            'mega_affid'      =>$aid
+        ];
+    
+        // $order_items = [
+        //     'dong_reabate'    => number_format($rebate_amount, 2),
+        //     'dong_process'    => number_format($process_amount, 2),
+        //     'dong_reserve'    => number_format(round_decimal_ifneeded($reserve_amount), 2),
+        //     'dong_cost'       => number_format(round_decimal_ifneeded($cost_amount), 2),
+        //     'dong_profit'     => number_format(round_decimal_ifneeded($profit_amount), 2),
+        //     'dong_earning'    => number_format(round_decimal_ifneeded($earning_amount), 2),
+        //     'dong_profit_di'  => number_format(round_decimal_ifneeded($dong_profit_affiliate), 2),
+        //     'dong_profit_dg'  => number_format(round_decimal_ifneeded($dong_profit_group), 2),
+        //     'dong_profit_dca' => number_format(round_decimal_ifneeded($dong_profit_commission), 2),
+        //     'dong_comm_cdi'   => number_format(round_decimal_ifneeded($dong_commission_affiliate), 2),
+        //     'dong_comm_cdg'   => number_format(round_decimal_ifneeded($dong_commission_group), 2),
+        //     'dong_comm_cde'   => number_format(round_decimal_ifneeded($dong_commission_earning), 2),
+        //     'dong_treasury'   => 0, 
+        //     'mega_affid'      => $aid
+        // ];
+    else :
 
-        $not_gf_trading_details_user_meta = get_user_meta($cid, '_user_trading_details', true);
+        // $order_items = [
+        //     'dong_reabate'    => number_format($rebate_amount, 2),
+        //     'dong_process'    => number_format($process_amount, 2),
+        //     'dong_reserve'    => number_format(round_decimal_ifneeded($reserve_amount), 2),
+        //     'dong_cost'       => number_format(round_decimal_ifneeded($cost_amount), 2),
+        //     'dong_profit'     => number_format(round_decimal_ifneeded($profit_amount), 2),
+        //     'dong_earning'    => number_format(round_decimal_ifneeded($earning_amount), 2),
+        //     'dong_profit_di'  => 0,
+        //     'dong_profit_dg'  => 0,
+        //     'dong_profit_dca' => 0,
+        //     'dong_comm_cdi'   => 0,
+        //     'dong_comm_cdg'   => 0,
+        //     'dong_comm_cde'   => 0, 
+        //     'dong_treasury'   => number_format($profit_amount, 2),
+        //     'mega_affid'      => $aid
+        // ];
 
-        $not_gf_trading_details_user_metas = !empty($not_gf_trading_details_user_meta) ? $not_gf_trading_details_user_meta : [];
-
-        $not_gf_trading_details_user_metas[] = [
-            'order_id' => $oid,
-            'rebate' => $rebate_amount,
-            'dong_profit_dg' => 0,
-            'dong_profit_di' => 0,
-            'dong_comm_dg' => 0,
-            'dong_comm_cdi' => 0,
-            'dong_total'  => $rebate_amount
-
+        $order_items=[
+            'mega_cashback_v' =>get_numeric_price($cashback_v), 
+            'mega_cashback_d' =>get_numeric_price($cashback_d),
+            'mega_reserve'    =>get_numeric_price($reserve),
+            'mega_cashout_e'  =>get_numeric_price($cashout_e),
+            'mega_platform_c' =>get_numeric_price($platform_c),
+            'mega_members_r'  =>get_numeric_price($members_reward),
+            'mega_mr_di'      =>get_numeric_price($mr_di),
+            'mega_mr_dg'      =>get_numeric_price($mr_dg),
+            'mega_mr_dca'     =>get_numeric_price($mr_c),
+            'mega_mr_c_di'    =>get_numeric_price($mr_c_di),
+            'mega_mr_c_dg'    =>get_numeric_price($mr_c_dg),
+            'mega_comm_c_ds'  =>get_numeric_price($mr_c_ds),
+            'mega_affid'      => $aid,
+            'mega_treasury'   => get_numeric_price($treasury)
         ];
 
-        if (update_user_meta($cid, '_user_trading_details', $not_gf_trading_details_user_metas)) {
-            update_post_meta($oid, 'distributn_succed', 'yes');
-        }
     endif;
-}
 
-/**
- * Save User data to glassfrog api from orderid
- *  
- */
-add_action('woocommerce_thankyou', 'dongtrader_after_order_received_process', 10);
 
-function dongtrader_after_order_received_process($order_id)
-{
-    $order          = wc_get_order($order_id);
-
-    $customer_id    = $order->get_user_id();
-
-    $items          =  $order->get_items();
-
-    $product_info = [];
-
-    foreach ($items as $item) {
-        
-        $product = $item->get_product();
-
-        if($product->is_type('variation')){
-
-            $product_info[] = [ 'var' => true ,'var_id'=>$product->get_id() , 'parent_id' => $item->get_product_id() ];
-
-        }else{
-
-            $product_info[] = [ 'var' => false ,'var_id'=>null , 'parent_id' => $item->get_product_id() ];
-        }
-
+    // Update all data to order meta
+    foreach ($order_items as $k => $v) {
+        update_post_meta($oid, $k, sanitize_text_field($v));
     }
-
-    $filtered_id = $product_info[0]['var'] ? $product_info[0]['var_id'] : $product_info[0]['parent_id'];
-
-    dongtrader_user_registration_hook($customer_id, $filtered_id, $order_id );
-   
-    $current_pro = wc_get_product($filtered_id);
-
-    $current_price = $current_pro->get_price();
-
-    dongtrader_product_price_distribution($current_price,$product_info[0]['parent_id'], $order_id, $customer_id);
-    
-    dong_set_user_role($customer_id, $filtered_id);
 }
-
-
-
 
 /* check if provided product id from csv is on product */
 if (!function_exists('is_product_check')) {
@@ -627,7 +624,7 @@ if (!function_exists('is_product_check')) {
     }
 }
 /* uploader order csv  */
-function dongtraders_csv_order_importer()
+function dongtraders_csv_order_importer1()
 {
 
     if (isset($_POST['import_csv'])) {
@@ -725,7 +722,7 @@ function dongtraders_csv_order_importer()
                     
                     $order->set_customer_id($user_id);
 
-                    $order->update_meta_data('dong_affid', $affiliate_user_id);
+                    $order->update_meta_data('mega_affid', $affiliate_user_id);
                     
                     $get_quantity_yam = get_post_meta($product_id, '_qty_args', true);
                     
@@ -756,7 +753,9 @@ function dongtraders_csv_order_importer()
                     // calculate and save
                     $order->calculate_totals();
 
+                    
                     $order->save();
+                    
 
                     $product = wc_get_product($product_id_csv);
                     $product_price =  $product->get_price();
@@ -765,9 +764,11 @@ function dongtraders_csv_order_importer()
                     $order_id = $order->get_id();
                     if ($order_id) {
                         $order_status_msg = '<div class="success-box">Order Data Imported Sucessfully. Please Refresh Order Table.</div>';
+                          $order_obj= wc_get_order($order_id); 
+                          
+                          mega_manage_custom_mlm_operations($order_obj);
                     }
-                    dongtrader_user_registration_hook($user_id, $product_id, $order_id);
-                    dongtrader_product_price_distribution($product_price, $product_id, $order_id, $user_id);
+                  
                 }
                 //}
             }
@@ -775,5 +776,354 @@ function dongtraders_csv_order_importer()
         }
     }
 }
+/* end of original  */
 
 
+/* edited by dr start */
+
+
+// Step 1: Import CSV and parse the data
+function dongtraders_csv_order_importer() {
+    if (isset($_POST['import_csv'])) {
+        $upload_dir = wp_upload_dir();
+        $file = $upload_dir['basedir'] . '/' . $_FILES['get_file']['name'];
+        $fileurl = $upload_dir['baseurl'] . '/' . $_FILES['get_file']['name'];
+        if (!move_uploaded_file($_FILES['get_file']['tmp_name'], $file)) {
+            print_r('Failed to move the uploaded file.');
+        }
+
+        if (($open = fopen($fileurl, "r")) !== FALSE) {
+            $first_row = true;
+            $get_orders = array();
+            $headers = array();
+
+            while (($data = fgetcsv($open, 1000, ",")) !== FALSE) {
+                if ($first_row) {
+                    $headers = $data;
+                    $first_row = false;
+                } else {
+                    $get_orders[] = array_combine($headers, array_values($data));
+                }
+            }
+            fclose($open);
+
+            // Step 2: Process each order from CSV data
+            $order_status_msg = '<div class="error-box">Order Data could not be imported! Please try again.</div>';
+            foreach ($get_orders as $get_order) {
+                $billing_first_name = $get_order['billing_first_name'];
+                $billing_last_name = $get_order['billing_last_name'];
+                $billing_phone = $get_order['billing_phone'];
+                $billing_address_1 = $get_order['billing_address_1'];
+                $billing_postcode = $get_order['billing_postcode'];
+                $billing_city = $get_order['billing_city'];
+                $billing_state = $get_order['billing_state'];
+                $billing_country = $get_order['billing_country'];
+                $product_id = $get_order['product_id'];
+                $variation_id = $get_order['variation_id'];
+                $customer_email = $get_order['customer_email'];
+                $affiliate_user_id = $get_order['affilate_user_id'];
+
+                // Step 3: Check if the product exists and customer email doesn't exist
+                if (is_product_check($product_id) && !email_exists($customer_email)) {
+                    $random_password = wp_generate_password();
+                    $get_product_membership_level = get_post_meta($product_id, '_membership_product_level', true);
+                    $display_name = $billing_first_name . ' ' . $billing_last_name;
+                   // $user_id = wc_create_new_customer($customer_email, $billing_first_name . rand(10, 100), $random_password);
+                    $user_id = wc_create_new_customer($customer_email, $display_name, $random_password);
+
+                    // Set the display name
+
+//wp_update_user(array('ID' => $user_id, 'display_name' => $display_name));
+
+                    pmpro_changeMembershipLevel($get_product_membership_level, $user_id);
+
+                    // Step 4: Create the order
+                    $order = wc_create_order();
+                    $order->set_customer_id($user_id);
+                    $order->update_meta_data('mega_affid', $affiliate_user_id);
+
+                    // Step 5: Add products to the order
+                    $get_quantity_yam = get_post_meta($product_id, '_qty_args', true);
+                    $product_id_csv = $variation_id == '0' ? $product_id : $variation_id;
+                    if (is_array($get_quantity_yam) && !empty($get_quantity_yam)) {
+                        $get_quantity_yam_no = dongtraders_set_product_quantity($product_id);
+                       // $get_quantity_yam_no = '7';
+                        $order->add_product(wc_get_product($product_id_csv), $get_quantity_yam_no);
+                    } else {
+                        $get_quantity_yam_no = '1'; 
+                        $order->add_product(wc_get_product($product_id_csv), 1);
+                    }
+
+                    // Step 6: Add shipping
+                    $shipping = new WC_Order_Item_Shipping();
+                    $shipping->set_method_title('Free shipping');
+                    $shipping->set_method_id('free_shipping:1'); // set an existing Shipping method ID
+                    $shipping->set_total(0); // optional
+                    $order->add_item($shipping);
+
+                    // Step 7: Set billing and shipping addresses
+                    $address = array(
+                        'first_name' => $billing_first_name,
+                        'last_name'  => $billing_last_name,
+                        'company'    => '',
+                        'email'      => $customer_email,
+                        'phone'      => $billing_phone,
+                        'address_1'  => $billing_address_1,
+                        'address_2'  => '',
+                        'city'       => $billing_city,
+                        'state'      => $billing_state,
+                        'postcode'   => $billing_postcode,
+                        'country'    => $billing_country
+                    );
+                    $order->set_address($address, 'billing');
+                    $order->set_address($address, 'shipping');
+
+                    // Step 8: Add payment method and set order status
+                    $order->set_payment_method('cod');
+                    $order->set_status('wc-completed', 'Order is created From Importer');
+
+                    // Step 9: Calculate and save the order
+                    $order->calculate_totals();
+                    $order->save();
+  // Step 10: Handle variation product price and quantity
+  if ($variation_id != '0') {
+    $order_items = $order->get_items();
+    foreach ($order_items as $order_item_id => $order_item) {
+        $product_id_in_order = $order_item->get_product_id();
+        if ($product_id_in_order == $product_id_csv) {
+            $product = wc_get_product($product_id_csv);
+            $order_item->set_quantity($get_quantity_yam_no);
+
+            // Update variation data
+            $variation_data = array(
+                'variation_id' => $variation_id,
+                'quantity' => $get_quantity_yam_no,
+            );
+
+            // Update the order item with variation data
+            wc_update_order_item($order_item_id, $variation_data);
+        }
+    }
+}
+
+                    // Step 11: Update the order status message
+                    $order_id = $order->get_id();
+                    if ($order_id) {
+                        $order_status_msg = '<div class="success-box">Order Data Imported Successfully. Please Refresh the Order Table.</div>';
+                        $order_obj = wc_get_order($order_id);
+                        mega_manage_custom_mlm_operations($order_obj);
+                    }
+                }
+            }
+            echo $order_status_msg;
+        }
+    }
+}
+
+
+/* edited by dr end */
+
+
+/**
+ * Save User data to glassfrog api from orderid
+ *  
+ */
+// add_action('woocommerce_thankyou', 'dongtrader_after_order_received_process', 10);
+
+function dongtrader_after_order_received_process($order_id)
+{
+    $order          = wc_get_order($order_id);
+
+    $customer_id    = $order->get_user_id();
+
+    $items          =  $order->get_items();
+
+    $product_info = [];
+
+    foreach ($items as $item) {
+        
+        $product = $item->get_product();
+
+        if($product->is_type('variation')){
+
+            $product_info[] = [ 'var' => true ,'var_id'=>$product->get_id() , 'parent_id' => $item->get_product_id() ];
+
+        }else{
+
+            $product_info[] = [ 'var' => false ,'var_id'=>null , 'parent_id' => $item->get_product_id() ];
+        }
+
+    }
+
+    $filtered_id = $product_info[0]['var'] ? $product_info[0]['var_id'] : $product_info[0]['parent_id'];
+
+    // dongtrader_user_registration_hook($customer_id, $filtered_id, $order_id );
+
+    // mega_manage_mlm_user($customer_id, $filtered_id ,$order_id);
+   
+    $current_pro = wc_get_product($filtered_id);
+
+    $current_price = $current_pro->get_price();
+
+    dongtrader_product_price_distribution($current_price,$product_info[0]['parent_id'], $order_id, $customer_id);
+    
+    dong_set_user_role($customer_id, $filtered_id);
+}
+
+add_action('woocommerce_checkout_order_created', 'mega_manage_custom_mlm_operations');
+function mega_manage_custom_mlm_operations($order){
+
+    //global database variable
+    global $wpdb;
+
+    //mlm customer user table from our database
+    $mlm_users_table = $wpdb->prefix . 'mega_mlm_customers';
+
+    //mlm customer sales custom table
+    $mlm_sales_table = $wpdb->prefix . 'mega_mlm_purchases';
+
+    // mlm downline table
+    $mlm_downline_table = $wpdb->prefix . 'mega_mlm_downline';
+
+    // mlm groups table
+    $mlm_group_table  = $wpdb->prefix . 'mega_mlm_groups';
+    
+    // Customer id
+    $customer_id    = $order->get_user_id();
+
+    //all items of an order
+    $items          =  $order->get_items();
+
+    // get sponsor id 
+    $sponsor_id     =  $order->get_meta('mega_affid');
+
+    //set booleans to check
+    $refferal =  !empty($sponsor_id) ? (int) $sponsor_id : null;
+    
+    // looping inside all items inside order
+    foreach($items as $item){
+
+        $product            = $item->get_product();
+
+        $parent_product_id  = $item->get_product_id();
+
+        $actual_product_id  = $product->is_type('variation') ? $item->get_variation_id() : $item->get_product_id();
+
+        $product_name       = $item->get_name();
+
+        $price              = $product->get_price();
+
+        $product_quantity   = $item->get_quantity();
+
+        dongtrader_product_price_distribution($price, $parent_product_id, $order->get_id(), $customer_id);
+
+        // lets check if the customer already exists
+        $check_customer = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT user_id FROM $mlm_users_table WHERE user_id = %d",
+                $customer_id
+            )
+        );
+
+        dong_set_user_role($customer_id, $actual_product_id);
+        //if $check_customer == null customer doesnot exists and vice versa 
+        $customer_exists = is_null($check_customer) ? false : true;
+
+        //insertable data on mlm_sales_table
+        $mlm_purchase_data = array(
+            'customer_id' => (int) $check_customer,
+            'order_id' => (int) $order->get_id(),
+            'allocation_status' =>0
+        );
+
+        if(!is_null($refferal)) $mlm_purchase_data['sponsor_id'] = $refferal;
+
+        //if customer alredy in mlm database
+        if($customer_exists){
+
+            $group_id =  $wpdb->get_var($wpdb->prepare("SELECT customer_group_id FROM $mlm_users_table WHERE user_id=%d", (int) $check_customer));
+
+            $wpdb->insert($mlm_sales_table, $mlm_purchase_data); 
+
+            if(isset($group_id)){
+
+                // prepare for update to group table
+                $group_update = $wpdb->prepare("UPDATE $mlm_group_table SET distribution_status = 2 WHERE group_id = %d", (int) $group_id);
+                
+                $wpdb->query($group_update);
+            }
+
+        } 
+
+        if(!$customer_exists) {
+
+            //for this case orders datas doesnt exists on our custom database table so we need to call the glassfrog api and insert data accordingly
+            $gf_checkbox = get_post_meta($parent_product_id, '_glassfrog_checkbox', true);
+
+            //bool to check meta
+            $gf_check = $gf_checkbox == 'on' ? true : false;
+
+            if ($gf_check) {
+
+                //get user object
+                $user_info = get_userdata($customer_id);
+
+                //get user email
+                $email = $user_info->user_email;
+
+                //api request string
+                $str = '{"people": [{
+                    "name": "' . $user_info->display_name . '",
+                    "email": "' . $email . '",
+                    "external_id": "' . $customer_id . '",
+                    "tag_names": ["tag 1", "tag 2"]
+                    }]
+                    }';
+
+                //api call
+                $samp = glassfrog_api_request('people', $str, "POST");
+
+                if ($samp && isset($samp)):
+
+                    // glassfrog id from the api
+                    $gf_id = $samp->people[0]->id;
+
+                    // glassfrog persons  name
+                    $gf_name = $samp->people[0]->name;
+
+                    // inserting data to the customers
+                    $customer_data = array(
+                        'user_id'             => (int) $customer_id,
+                        'upline_id'           => $refferal,
+                        'glassfrog_person_id' => (int) $gf_id,
+                        'person_name'         => $gf_name,	
+                        'user_status'         => 0,
+                    );
+
+                    if(is_null($refferal)) unset($customer_data['upline_id']);
+
+                    $wpdb->insert($mlm_users_table, $customer_data);
+
+                    $downline_data = array(
+                        'user_id' => $refferal,
+                        'downline_user_id' => $customer_id,
+                    );
+                    
+                    $wpdb->insert($mlm_downline_table, $downline_data);
+
+                    $mlm_purchase_data['customer_id'] =  (int) $customer_id;
+
+                    $mlm_purchase_data['allocation_status'] = 1;
+
+                    $wpdb->insert($mlm_sales_table, $mlm_purchase_data);
+
+                endif;
+
+            } 
+
+        }
+
+    }
+
+
+}

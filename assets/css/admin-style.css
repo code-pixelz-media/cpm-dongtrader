@@ -1503,7 +1503,6 @@ span.select2-search.select2-search--inline,
 }
 
 @media (max-width: 767px) {
-
   .cpm-plugin-wrap .pull-left,
   .cpm-plugin-wrap .pull-right {
     float: none !important;
@@ -1564,6 +1563,24 @@ span.select2-search.select2-search--inline,
 
   .cpm-plugin-wrap form .cpm-btn {
     margin-left: 0;
+  }
+
+  /* ------------------------
+    RELEASE FUNDS TABLE 
+ -------------------------- */
+  #release-funds form .tablenav .post_filter{
+    display: grid;
+    justify-content: start;
+  }
+  #release-funds form .tablenav .post_filter select, 
+  #release-funds form .tablenav .post_filter .filter-field,
+  #release-funds form .tablenav .post_filter button[type=submit]{
+    margin-right: 0;
+    margin-bottom: 10px;
+    display: block;
+  }
+  #release-funds form .tablenav .post_filter button{
+    padding: 10px 0;
   }
 }
 
@@ -1659,4 +1676,25 @@ button.cpm-btn.export-delete.dashicons-before.dashicons-trash {
 
 i.fa.fa-spinner.fa-spin.export-loader {
   margin-left: 8%;
+}
+
+/* ------------------------
+    RELEASE FUNDS TABLE 
+ -------------------------- */
+#release-funds .tablenav{
+  padding-top: 0;
+}
+#release-funds .tablenav .post_filter{
+  display: flex;
+  justify-content: end;
+  width: 100%;
+  float: none;
+}
+#release-funds .tablenav .post_filter select, 
+#release-funds .tablenav .post_filter .filter-field,
+#release-funds .tablenav .post_filter button[type=submit]{
+    margin-right: 8px;
+}
+#release-funds .cpm-table-wrap, #release-funds .cpm-table-wrap table{
+  margin-top: 0;
 }
