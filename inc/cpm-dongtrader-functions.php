@@ -1778,3 +1778,236 @@ function dongtrader_release_funds()
 }
 
 
+function dongtrader_patron_form( $atts ) {
+
+    // Attributes
+    $atts = shortcode_atts(
+        array(
+        ),
+        $atts,
+        'patron_form'
+    );
+
+    ob_start(); // Start output buffering
+
+    ?>
+    <style>
+        /* Basic form styling */
+        #mega-patron-credentials {
+           
+            margin: 0 auto;
+            padding: 20px;
+           
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        
+        .form-group {
+          
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            margin: 20px auto;
+            width: 80%;
+        }
+
+        .group-heading {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+          
+            border-radius: 3px;
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        p {
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <form action="" method="post" id= "mega-patron-credentials">
+        <div class="form-group">
+            <p class="group-heading"><b>Patron Complete Credentials</b></p>
+            <p>Underlined links will require Patron applicants to submit these form fields with valid platform ID credentials or access. Individual accounts only.</p>
+            <label for="mega-email">Email:</label>
+            <input type="text" id="mega-email" name="mega-email" >
+            
+            <label for="mega-name">User Name:</label>
+            <input type="text" id="mega-name" name="mega-name" >
+            
+            <label for="user_pass">Password:</label>
+            <input type="password" id="user_pass" name="mega-password" pattern="^(?=.*[A-Z])(?=.*[a-zA-Z]).{7,}$" minlength="8" class="input password-input" required >
+            <p><a href="https://www.qrcode-tiger.com/payment" target="_blank">QR Tiger v-card with social media links (Free account)</a></p>
+            
+            <label for="mega-mobile">Mobile number:</label>
+            <input type="tel" id="mega-mobile" name="mega-mobile" >
+            
+            <label for="mega-v-card">V Card:</label>
+            <input title= "Create vcard form here" type="text" id="mega-v-card" name="mega-v-card" >
+            <p><a href="https://www.qrcode-tiger.com/payment" target="_blank">QR Tiger v-card with social media links (Free account)</a></p>
+            
+            <label for="mega-paypal">Paypal:</label>
+            <input type="text" id="mega-paypal" name="mega-paypal" >
+            <p><a href="https://www.paypal.com/us/welcome/signup/#/login_info"target="_blank">PayPal with banking links</a></p>
+            
+            <label for="mega-venmo">Venmo:</label>
+            <input type="text" id="mega-venmo" name="mega-venmo" >
+            <p><a href="https://venmo.com/signup/"target="_blank">Venmo with banking links</a></p>
+            
+            <label for="mega-glassfrog">Glassfrog Profile:</label>
+            <input type="text" id="mega-glassfrog" name="mega-glassfrog" >
+            <p><a href="https://app.glassfrog.com/accounts/new" target="_blank">Glassfrog (Free account)</a></p>
+            
+            <label for="mega-crowdsignal">Crowdsignal:</label>
+            <input type="text" id="mega-crowdsignal" name="mega-crowdsignal" >
+            <p><a href="https://crowdsignal.com/pricing/" target="_blank">Crowdsignal (Free account)</a></p> 
+        </div>
+        <!-- Grouped Form: Patron Organizing Communities (POC) Leadership -->
+        <div class="form-group">
+            <p class="group-heading"><b>Patron Organizing Communities (POC) Leadership</b></p>
+                <label for="mega-precoro">Precoro.com:</label>
+                <input type="text" id="mega-precoro" name="mega-precoro">
+                <p><a href="https://precoro.com/get-a-trial" target="_blank">Precoro.com (Get a Trial)</a></p>
+    
+                <label for="mega-amazon-business">Amazon Business:</label>
+                <input type="text" id="mega-amazon-business" name="mega-amazon-business">
+                <p><a href="https://business.amazon.com/en/find-solutions/punchout" target="_blank">Amazon Business (Punchout)</a></p>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Submit">
+        </div>
+
+    </form>
+    <script>
+        jQuery(document).ready(function($) {
+            $('#mega-patron-credentials').submit(function(event) {
+                event.preventDefault(); 
+
+                var formData = new FormData(this);
+                
+                $.ajax({
+                    url:  '<?php echo admin_url( 'admin-ajax.php' ); ?>',
+                    type: 'POST',
+                    data: {
+                        action:'mega_credentials_save',
+                        
+                    },
+                    success: function(response) {
+                        // Process the response from the server if needed
+                        console.log(response);
+                    },
+                    error: function() {
+                        console.error('Form submission failed');
+                    }
+                });
+            });
+        });
+
+
+    </script>
+    <?php
+
+    return ob_get_clean(); 
+}
+add_shortcode( 'patron_form', 'dongtrader_patron_form' );
+
+add_action( 'wp_ajax_mega_credentials_save', 'mega_credentials_save' );
+add_action( 'wp_ajax_nopriv_mega_credentials_save', 'mega_credentials_save' );
+
+function mega_credentials_save(){
+    
+    $email = sanitize_email($_POST['mega-email']);
+    $username = sanitize_text_field($_POST['mega-name']);
+    $password = sanitize_text_field($_POST['mega-password']);
+    $mobile = sanitize_text_field($_POST['mega-mobile']);
+    $v_card =  sanitize_text_field($_POST['mega-v-card']);
+    $pay_pal = sanitize_text_field($_POST['mega-paypal']);
+    $mega_venmo=sanitize_text_field($_POST['mega-venmo']);
+    $mega_glassfrog=sanitize_text_field($_POST['mega-glassfrog']);
+    $mega_crowdsignal=sanitize_text_field($_POST['mega-crowdsignal']);
+   
+    $mega_precoro=sanitize_text_field($_POST['mega-precoro']);
+    $mega_amazon_business=sanitize_text_field($_POST['mega-amazon-business']);
+    // Similarly, sanitize and retrieve other form data
+    
+    if ( email_exists( $email ) || username_exists( $username ) ) {
+       wp_send_json_error("User Already Exists");
+       return; // Terminate the script
+    }
+    
+    $user_id = wp_create_user( $username, $password, $email );
+    
+    // Check if user creation was successful
+    if ( is_wp_error( $user_id ) ) {
+        wp_send_json_error("User cannot be created! Please try again");
+       return; // Terminate the script
+    }
+    
+    $details_array = array(
+        'mobile' => $mobile,
+        'v_card' => $v_card,
+        'pay_pal' => $pay_pal,
+        'mega_venmo' => $mega_venmo,
+        'mega_glassfrog' => $mega_glassfrog,
+        'mega_crowdsignal' => $mega_crowdsignal,
+        'mega_precoro' => $mega_precoro,
+        'mega_amazon_business' => $mega_amazon_business,
+    );
+    update_user_meta( $user_id, 'mega_patron_credentials',$details_array );
+    
+    $user_data = get_userdata( $user_id );
+    
+    if($user_data){
+        
+        $to = $email;
+        $subject = 'Your Account Details';
+        $tem_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'content-email-welcome.php';
+        ob_start();
+        if (file_exists($tem_path)) {
+            load_template($tem_path,true);
+        }
+        $message = ob_get_clean();
+        $headers = array('Content-Type: text/html; charset=UTF-8');
+        
+        wp_mail( $to, $subject, $message, $headers );
+    }
+
+    
+    
+    
+    
+    wp_die();
+}
