@@ -1867,9 +1867,10 @@ function dongtrader_patron_form( $atts ) {
             
             <label for="mega-name">User Name:</label>
             <input type="text" id="mega-name" name="mega-name" >
-            
+            <?php wp_nonce_field('mega_nonce', 'mega_nonce'); ?>
             <label for="user_pass">Password:</label>
-            <input type="password" id="user_pass" name="mega-password" pattern="^(?=.*[A-Z])(?=.*[a-zA-Z]).{7,}$" minlength="8" class="input password-input" required >
+            <!-- ^(?=.*[A-Z])(?=.*[a-zA-Z]).{7,}$ -->
+            <input type="password" id="user_pass" name="mega-password"  minlength="8" class="input password-input" required >
             <p><a href="https://www.qrcode-tiger.com/payment" target="_blank">QR Tiger v-card with social media links (Free account)</a></p>
             
             <label for="mega-mobile">Mobile number:</label>
@@ -1916,14 +1917,15 @@ function dongtrader_patron_form( $atts ) {
             $('#mega-patron-credentials').submit(function(event) {
                 event.preventDefault(); 
 
-                var formData = new FormData(this);
+                var formData = $(this).serialize();
+                console.log(formData);
                 
                 $.ajax({
                     url:  '<?php echo admin_url( 'admin-ajax.php' ); ?>',
                     type: 'POST',
                     data: {
-                        action:'mega_credentials_save',
-                        
+                        action : 'mega_credentials_save',
+                        formdata:formData,
                     },
                     success: function(response) {
                         // Process the response from the server if needed
@@ -1949,50 +1951,48 @@ add_action( 'wp_ajax_nopriv_mega_credentials_save', 'mega_credentials_save' );
 
 function mega_credentials_save(){
     
-    $email = sanitize_email($_POST['mega-email']);
-    $username = sanitize_text_field($_POST['mega-name']);
-    $password = sanitize_text_field($_POST['mega-password']);
-    $mobile = sanitize_text_field($_POST['mega-mobile']);
-    $v_card =  sanitize_text_field($_POST['mega-v-card']);
-    $pay_pal = sanitize_text_field($_POST['mega-paypal']);
-    $mega_venmo=sanitize_text_field($_POST['mega-venmo']);
-    $mega_glassfrog=sanitize_text_field($_POST['mega-glassfrog']);
-    $mega_crowdsignal=sanitize_text_field($_POST['mega-crowdsignal']);
-   
-    $mega_precoro=sanitize_text_field($_POST['mega-precoro']);
-    $mega_amazon_business=sanitize_text_field($_POST['mega-amazon-business']);
-    // Similarly, sanitize and retrieve other form data
+    if(isset($_POST['formdata'])) {
     
-    if ( email_exists( $email ) || username_exists( $username ) ) {
-       wp_send_json_error("User Already Exists");
-       return; // Terminate the script
-    }
+    parse_str($_POST['formdata'], $form_data_array);
     
-    $user_id = wp_create_user( $username, $password, $email );
     
-    // Check if user creation was successful
-    if ( is_wp_error( $user_id ) ) {
-        wp_send_json_error("User cannot be created! Please try again");
-       return; // Terminate the script
-    }
-    
-    $details_array = array(
-        'mobile' => $mobile,
-        'v_card' => $v_card,
-        'pay_pal' => $pay_pal,
-        'mega_venmo' => $mega_venmo,
-        'mega_glassfrog' => $mega_glassfrog,
-        'mega_crowdsignal' => $mega_crowdsignal,
-        'mega_precoro' => $mega_precoro,
-        'mega_amazon_business' => $mega_amazon_business,
+    $sanitization_mapping = array(
+        'mega_email'    =>'sanitize_email',
+        'mega_name'     =>'sanitize_text_field',
+        'mega_password' =>'sanitize_text_field',
+        'mega_mobile'   =>'sanitize_text_field',
+        'mega_v-card'   =>'sanitize_text_field',
+        'mega_paypal'   =>'sanitize_text_field',
+        'mega_venmo'    =>'sanitize_text_field',
+        'mega_glassfrog'=>'sanitize_text_field',
+        'mega_crowdsignal'  =>'sanitize_text_field',
+        'mega_precoro'      =>'sanitize_text_field',
+        'mega_amazon-business'=>'sanitize_text_field'
     );
-    update_user_meta( $user_id, 'mega_patron_credentials',$details_array );
+
+    $sanitized_data = array();
+    foreach ($form_data_array as $field => $value) {
+        if (isset($sanitization_mapping[$field]) && function_exists($sanitization_mapping[$field])) {
+            $sanitized_data[$field] = call_user_func($sanitization_mapping[$field], $value);
+        } else {
+            $sanitized_data[$field] = $value;
+        }
+    }
+
+     extract($sanitized_data);
+     
+     $user_id = wp_create_user($sanitized_data['mega-name'],$sanitized_data['mega_password'],$sanitized_data['mega-email']);
+     
+     if(is_wp_error($user_id)){
+        wp_send_json_error(__('User cannot be created','dongtrader'));
+        return;
+     } 
     
     $user_data = get_userdata( $user_id );
     
     if($user_data){
-        
-        $to = $email;
+        $user_name = $user_info->display_name;
+        $to = $user_info->user_email;
         $subject = 'Your Account Details';
         $tem_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'content-email-welcome.php';
         ob_start();
@@ -2001,7 +2001,20 @@ function mega_credentials_save(){
         $headers = array('Content-Type: text/html; charset=UTF-8');
         
         wp_mail( $to, $subject, $message, $headers );
+        
     }
+     
+    
+}
 
     wp_die();
 }
+
+
+add_action('wp_head' , function(){
+
+    // $user_id = wp_create_user( 'najar21','@@Anil21@@', 'najar87244@dusyum.com' );
+    
+    // var_dump($user_id);
+
+});
