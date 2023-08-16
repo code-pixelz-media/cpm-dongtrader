@@ -1996,18 +1996,12 @@ function mega_credentials_save(){
         $subject = 'Your Account Details';
         $tem_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'content-email-welcome.php';
         ob_start();
-        if (file_exists($tem_path)) {
-            load_template($tem_path,true);
-        }
+        if (file_exists($tem_path)) load_template($tem_path,true);
         $message = ob_get_clean();
         $headers = array('Content-Type: text/html; charset=UTF-8');
         
         wp_mail( $to, $subject, $message, $headers );
     }
 
-    
-    
-    
-    
     wp_die();
 }
