@@ -1,4 +1,5 @@
 <?php
+use const Automattic\Jetpack\Extensions\Story\IMAGE_BREAKPOINTS;
 
 /**
  * It returns the API credentials for the API name passed to it
@@ -1787,7 +1788,7 @@ function dongtrader_patron_form( $atts ) {
         $atts,
         'patron_form'
     );
-
+    $error_message = ' <span class="error-message"></span>';
     ob_start(); // Start output buffering
 
     ?>
@@ -1816,7 +1817,10 @@ function dongtrader_patron_form( $atts ) {
             margin-bottom: 15px;
             text-align: center;
         }
-
+        .error-message::after{
+            content: "\A"; 
+            white-space: pre;
+        }
         label {
             font-weight: bold;
         }
@@ -1858,43 +1862,65 @@ function dongtrader_patron_form( $atts ) {
             text-decoration: underline;
         }
     </style>
-    <form action="" method="post" id= "mega-patron-credentials">
+    <form action="" method="post" id= "mega-patron-credentials" autocomplete="off">
         <div class="form-group">
             <p class="group-heading"><b>Patron Complete Credentials</b></p>
-            <p>Underlined links will require Patron applicants to submit these form fields with valid platform ID credentials or access. Individual accounts only.</p>
-            <label for="mega-email">Email:</label>
-            <input type="text" id="mega-email" name="mega-email" >
+            <p>
             
-            <label for="mega-name">User Name:</label>
-            <input type="text" id="mega-name" name="mega-name" >
+            Underlined links will require Patron applicants to submit these form fields with valid platform ID credentials or access. Individual accounts only.
+            
+            
+            </p>
+            <p>
+                <b>All fields with * are mandatory.</b>
+            </p>
+            <div class="mega-notices"></div>
+            <label for="mega-email">Email*:</label>
+            <input type="text" id="mega-email" name="mega-email" required >
+            <?php echo $error_message?>
+            
+            <label for="mega-name">User Name*:</label>
+            <input type="text" id="mega-name" name="mega-name" required>
+            <?php echo $error_message?>
             <?php wp_nonce_field('mega_nonce', 'mega_nonce'); ?>
-            <label for="user_pass">Password:</label>
+            <label for="user_pass">Password*:</label>
             <!-- ^(?=.*[A-Z])(?=.*[a-zA-Z]).{7,}$ -->
-            <input type="password" id="user_pass" name="mega-password"  minlength="8" class="input password-input" required >
-            <p><a href="https://www.qrcode-tiger.com/payment" target="_blank">QR Tiger v-card with social media links (Free account)</a></p>
+            <input type="password" id="mega-password" name="mega-password"  minlength="8" class="input password-input" placeholder="" required >
+            <?php echo $error_message?>
             
-            <label for="mega-mobile">Mobile number:</label>
+            <label for="mega-mobile">Mobile number*:</label>
             <input type="tel" id="mega-mobile" name="mega-mobile" >
+            <?php echo $error_message?>
             
-            <label for="mega-v-card">V Card:</label>
-            <input title= "Create vcard form here" type="text" id="mega-v-card" name="mega-v-card" >
+            <label for="mega-v-card">V Card*:</label>
+            <input title= "Create vcard form here" type="text" id="mega-v-card" name="mega-v-card"  >
+            <?php echo $error_message?>
             <p><a href="https://www.qrcode-tiger.com/payment" target="_blank">QR Tiger v-card with social media links (Free account)</a></p>
+         
             
             <label for="mega-paypal">Paypal:</label>
-            <input type="text" id="mega-paypal" name="mega-paypal" >
+            <input type="text" id="mega-paypal" name="mega-paypal"  >
+            <?php echo $error_message?>
             <p><a href="https://www.paypal.com/us/welcome/signup/#/login_info"target="_blank">PayPal with banking links</a></p>
             
+            
             <label for="mega-venmo">Venmo:</label>
-            <input type="text" id="mega-venmo" name="mega-venmo" >
+            <input type="text" id="mega-venmo" name="mega-venmo"  >
+            <?php echo $error_message?>
             <p><a href="https://venmo.com/signup/"target="_blank">Venmo with banking links</a></p>
+           
             
             <label for="mega-glassfrog">Glassfrog Profile:</label>
             <input type="text" id="mega-glassfrog" name="mega-glassfrog" >
+            <?php echo $error_message?>
             <p><a href="https://app.glassfrog.com/accounts/new" target="_blank">Glassfrog (Free account)</a></p>
             
+            
             <label for="mega-crowdsignal">Crowdsignal:</label>
-            <input type="text" id="mega-crowdsignal" name="mega-crowdsignal" >
-            <p><a href="https://crowdsignal.com/pricing/" target="_blank">Crowdsignal (Free account)</a></p> 
+            <input type="text" id="mega-crowdsignal" name="mega-crowdsignal"  >
+            <?php echo $error_message?>
+            <p><a href="https://crowdsignal.com/pricing/" target="_blank">Crowdsignal (Free account)</a></p>
+            
         </div>
         <!-- Grouped Form: Patron Organizing Communities (POC) Leadership -->
         <div class="form-group">
@@ -1902,6 +1928,7 @@ function dongtrader_patron_form( $atts ) {
                 <label for="mega-precoro">Precoro.com:</label>
                 <input type="text" id="mega-precoro" name="mega-precoro">
                 <p><a href="https://precoro.com/get-a-trial" target="_blank">Precoro.com (Get a Trial)</a></p>
+                
     
                 <label for="mega-amazon-business">Amazon Business:</label>
                 <input type="text" id="mega-amazon-business" name="mega-amazon-business">
@@ -1909,6 +1936,11 @@ function dongtrader_patron_form( $atts ) {
         </div>
         <div class="form-group">
             <input type="submit" value="Submit">
+            <div id="loader" class="wp-admin-loading" style="display: none;">
+                <img src="<?php echo admin_url('images/loading.gif')?>" alt="loading">
+            </div>
+            <div id="server-message">
+            </div>
         </div>
 
     </form>
@@ -1916,10 +1948,13 @@ function dongtrader_patron_form( $atts ) {
         jQuery(document).ready(function($) {
             $('#mega-patron-credentials').submit(function(event) {
                 event.preventDefault(); 
-
+                var loader = $('#loader');
+                loader.show();
+                $(this).find('input').each(function() {
+                    var inputId = $(this).attr('id');
+                    $('#'+ inputId).css('border-color', '');
+                });
                 var formData = $(this).serialize();
-                console.log(formData);
-                
                 $.ajax({
                     url:  '<?php echo admin_url( 'admin-ajax.php' ); ?>',
                     type: 'POST',
@@ -1928,11 +1963,48 @@ function dongtrader_patron_form( $atts ) {
                         formdata:formData,
                     },
                     success: function(response) {
-                        // Process the response from the server if needed
-                        console.log(response);
+                   
+                        var parsed = JSON.parse(response);
+                        
+                        console.log(parsed);
+                       
+                        
+                        if ('errorClient' in parsed && parsed['errorClient'].length>0) {
+                            parsed.errorClient.forEach(function(error) {
+                                var $errorField = $('#' + error.field_name);
+                                console.log($errorField);
+                                if ($errorField.length > 0) {
+                                   
+                                    $('html, body').animate({
+                                        scrollTop: $errorField.offset().top - 100 
+                                    }, 1000); 
+                                    
+                                    
+                                    $errorField.focus();
+                                    $errorField.css('border-color', 'red');
+                                    $errorField.next('.error-message').text(error.message);
+                                }
+                            });
+                               
+                        }else if('errorServer' in parsed && parsed['errorServer'].length>0) {
+                            parsed.errorServer.forEach(function(error) {
+                               var serverErrorfield =  $('#server-message');
+                               serverErrorfield.focus();
+                               serverErrorfield.text(error.message);
+                                
+                            });
+                        }else if('valid' in parsed && parsed['valid']){
+                            window.location.reload();
+                        }
+                        
+                       loader.hide();
+                      
                     },
+
                     error: function() {
                         console.error('Form submission failed');
+                        loader.hide();
+                      
                     }
                 });
             });
@@ -1946,15 +2018,17 @@ function dongtrader_patron_form( $atts ) {
 }
 add_shortcode( 'patron_form', 'dongtrader_patron_form' );
 
+
+
+
 add_action( 'wp_ajax_mega_credentials_save', 'mega_credentials_save' );
 add_action( 'wp_ajax_nopriv_mega_credentials_save', 'mega_credentials_save' );
 
 function mega_credentials_save(){
     
-    if(isset($_POST['formdata'])) {
+    if(!isset($_POST['formdata'])) return;
     
     parse_str($_POST['formdata'], $form_data_array);
-    
     
     $sanitization_mapping = array(
         'mega_email'    =>'sanitize_email',
@@ -1978,43 +2052,128 @@ function mega_credentials_save(){
             $sanitized_data[$field] = $value;
         }
     }
-
-     extract($sanitized_data);
-     
-     $user_id = wp_create_user($sanitized_data['mega-name'],$sanitized_data['mega_password'],$sanitized_data['mega-email']);
-     
-     if(is_wp_error($user_id)){
-        wp_send_json_error(__('User cannot be created','dongtrader'));
-        return;
-     } 
-    
-    $user_data = get_userdata( $user_id );
-    
-    if($user_data){
-        $user_name = $user_info->display_name;
-        $to = $user_info->user_email;
-        $subject = 'Your Account Details';
-        $tem_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'content-email-welcome.php';
-        ob_start();
-        if (file_exists($tem_path)) load_template($tem_path,true);
-        $message = ob_get_clean();
-        $headers = array('Content-Type: text/html; charset=UTF-8');
         
-        wp_mail( $to, $subject, $message, $headers );
+        
+    $client_validation_check = mega_validation_check($sanitized_data);
+    
+    if(empty($client_validation_check)) {
+        $server_validation_check=[];
+        $new_user_id = wp_create_user($sanitized_data['mega-name'],$sanitized_data['mega-password'], $sanitized_data['mega-email']);
+        
+        if(!is_wp_error($new_user_id)){
+            
+            $u_data = get_userdata( $new_user_id );
+            
+            $new_meta_array = array_slice($sanitized_data, 3, null, true);
+            
+            update_user_meta($new_user_id, 'patron_details' , $new_meta_array);
+    
+            if($u_data){
+                $user_name = $u_data->display_name;
+                $to = $u_data->user_email;
+                $subject = 'Your Account Details';
+                $tem_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'content-email-welcome.php';
+                ob_start();
+                if (file_exists($tem_path)) load_template($tem_path,true);
+                $message = ob_get_clean();
+                $headers = array('Content-Type: text/html; charset=UTF-8');
+                wp_mail( $to, $subject, $message, $headers );
+            
+            }
+            if (class_exists('PMPro_Membership_Level')) {
+                
+                $current_level = pmpro_getMembershipLevelForUser($new_user_id);
+                $level_id = 16;
+
+                // If the user doesn't have the desired level, update it.
+                if ($current_level->ID != $level_id) {
+                    // Update membership level.
+                    pmpro_changeMembershipLevel($level_id, $new_user_id);
+                }
+            }
+            
+        }else{
+        
+            $server_validation_check[] = [
+                'valid'=>'false',
+                'message' => __('User Cannot be created','cpm-dongtrader')
+                
+            ]; 
+        }
         
     }
-     
     
-}
-
+    $validity = !empty($client_validation_check) 
+    ? ['errorClient' => $client_validation_check]
+    : (!empty($server_validation_check) 
+        ? ['errorServer' => $server_validation_check]
+        : ['valid' => true]);
+    
+    echo  wp_json_encode($validity);
+        
     wp_die();
 }
 
 
-add_action('wp_head' , function(){
 
-    // $user_id = wp_create_user( 'najar21','@@Anil21@@', 'najar87244@dusyum.com' );
+
+
+function mega_validation_check($sanitized_data){
+    $validation_check = [];
     
-    // var_dump($user_id);
+    foreach($sanitized_data as $attr=>$sv){
+    
+        if($attr == "mega-email"){
+            if (!filter_var($sv, FILTER_VALIDATE_EMAIL)) {
+            
+                $validation_check[] = [
+                    'valid'=> 'false',
+                    'field_name' => $attr,
+                    'message' => __("Please Enter Valid Email Address","cpm-dongtrader")
+                ];
+              break;
+            }elseif(email_exists($sv)){
+                
+                $validation_check[] = [
+                    'valid'=> 'false',
+                    'field_name' => $attr,
+                    'message' => __("This email address is already registered","cpm-dongtrader")
+                ];
+              break;
+                
+            }
+        }
+        
+        if($attr == "mega-name" ){
+            
+            if (!preg_match('/^.{5,}$/', $sv)){
+            
+                $validation_check[] = [
+                    'valid'=> 'false',
+                    'field_name' => $attr,
+                    'message' => __("Username must be at least 5 characters long.","cpm-dongtrader")
+                ];
+                
+             break;
+            } 
+        
+        }
+        
+        if($attr == "mega-password"){
+            if (!preg_match('/^(?=.*[A-Z])(?=.*[!@#$%^&*()\-_=+{};:,<.>]).{7,}$/' , $sv)){
+                $validation_check[] = [
+                    'valid'=> 'false',
+                    'field_name' => $attr,
+                    'message' => __("Password must be at least 7 characters long and include at least one uppercase letter and one special character.","cpm-dongtrader")
+                ];
+                break;
+            }
+            
+            
+        }
+    }
+        
+        return $validation_check;
+    
+}
 
-});
