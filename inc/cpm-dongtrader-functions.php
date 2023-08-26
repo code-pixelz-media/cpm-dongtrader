@@ -2288,7 +2288,7 @@ function save_custom_user_profile_field($user_id) {
     }
     $metas =  get_user_meta($user_id,'patron_details', true);
     $array_keys = array_keys($metas);
-    
+    if(empty($array_keys)) return;
     foreach($array_keys as $k){
         if(str_contains($k, 'password')) continue;
         update_user_meta($user_id, $k, sanitize_textarea_field($_POST[$k]));
