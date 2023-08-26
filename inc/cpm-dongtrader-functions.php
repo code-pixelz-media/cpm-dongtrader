@@ -2265,6 +2265,8 @@ if(empty($metas)) return;
      
        $label_text = str_replace("mega-", "", $k);
        $capital_label =  ucwords($label_text);
+       
+       if(str_contains($label_text, 'password')) continue;
         
        ?>
           <tr class="user-user-login-wrap">
@@ -2288,6 +2290,7 @@ function save_custom_user_profile_field($user_id) {
     $array_keys = array_keys($metas);
     
     foreach($array_keys as $k){
+        if(str_contains($k, 'password')) continue;
         update_user_meta($user_id, $k, sanitize_textarea_field($_POST[$k]));
     }
     
