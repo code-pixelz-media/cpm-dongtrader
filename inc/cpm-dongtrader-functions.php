@@ -1,4 +1,5 @@
 <?php
+
 use const Automattic\Jetpack\Extensions\Story\IMAGE_BREAKPOINTS;
 
 /**
@@ -27,7 +28,6 @@ function dongtrader_get_api_cred($apiname)
 
 function qrtiger_upload_logo()
 {
-
 }
 
 /*This function is used to make the Qrtiger API requests.
@@ -410,13 +410,11 @@ function dongtrader_delete_qr_items_settingspage()
         $reload = count($new_qr_array) == 0 ? true : false;
 
         $ajax_values = array('resp' => true, 'reload' => $reload);
-
     }
 
     wp_send_json($ajax_values);
 
     wp_die();
-
 }
 
 /*Create database tables where we can save api response details*/
@@ -431,7 +429,7 @@ function dongtrader_create_dbtable()
 
     /* create table to store custom order */
     $order_table_name = $wpdb->prefix . 'dong_order_export_table';
-    if ($wpdb->get_var("SHOW TABLES LIKE '{$order_table_name}'") != $order_table_name):
+    if ($wpdb->get_var("SHOW TABLES LIKE '{$order_table_name}'") != $order_table_name) :
         $export_sql = "CREATE TABLE $order_table_name (
             id INT NOT NULL AUTO_INCREMENT ,
             customer_email VARCHAR(255) NOT NULL ,
@@ -511,14 +509,14 @@ function dongtrader_create_dbtable()
             INDEX(user_id),
             FOREIGN KEY (customer_group_id) REFERENCES {$group_details_table}(group_id)
         ) $charset_collate;";
-                
+
         dbDelta($mega_mlm_users_query);
     }
 
-        //mlm tree data
+    //mlm tree data
 
-        if ($wpdb->get_var("SHOW TABLES LIKE '{$group_details_table}'") != $group_details_table):
-            $group_details_sql = "CREATE TABLE $group_details_table (
+    if ($wpdb->get_var("SHOW TABLES LIKE '{$group_details_table}'") != $group_details_table) :
+        $group_details_sql = "CREATE TABLE $group_details_table (
                 group_id INT NOT NULL AUTO_INCREMENT,
                 group_members VARCHAR(255) NOT NULL,
                 circle_id INT NOT NULL,
@@ -530,9 +528,9 @@ function dongtrader_create_dbtable()
                 distribution_status TINYINT(2) NOT NULL,
                 total_group_profit VARCHAR(255),
                 PRIMARY KEY (group_id)
-            ) $charset_collate;"; 
-            dbDelta($group_details_sql);
-        endif;
+            ) $charset_collate;";
+        dbDelta($group_details_sql);
+    endif;
 
     //downline table
     // $mega_mlm_downline =  $wpdb->prefix . 'mega_mlm_downline';
@@ -550,7 +548,7 @@ function dongtrader_create_dbtable()
     //         FOREIGN KEY (user_id) REFERENCES {$mega_mlm_users}(user_id),
     //         FOREIGN KEY (downline_user_id) REFERENCES {$mega_mlm_users}(user_id)
     //     ) $charset_collate;";
-        
+
     //     dbDelta($mega_mlm_downline_query);
     // }
 
@@ -569,10 +567,9 @@ function dongtrader_create_dbtable()
             FOREIGN KEY (customer_id) REFERENCES {$mega_mlm_users}(user_id),
             FOREIGN KEY (sponsor_id) REFERENCES {$mega_mlm_users}(user_id)
         ) $charset_collate;";
-       
+
         dbDelta($mega_mlm_sales_query);
     }
-
 }
 add_action('plugin_loaded', 'dongtrader_create_dbtable');
 
@@ -599,7 +596,6 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid)
         if ($check_persons['group_id'] != 0) {
             //query to update group distribution status to update_required when the person has already brought new product after distribution from cron job
             $wpdb->query($wpdb->prepare("UPDATE $group_table_name SET distribution_status = 'update_required' WHERE group_id = %d", (int) $check_persons['group_id']));
-
         } elseif ($check_persons['group_id'] == 0) {
 
             $unserialized_orders = unserialize($check_persons['all_orders']);
@@ -614,11 +610,8 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid)
 
                 //preapre and update serialized data
                 $wpdb->query($wpdb->prepare("UPDATE $table_name SET all_orders = %s WHERE user_id = %d", $new_serilized_orders, $customer_id));
-
             }
-
         }
-
     } else {
         // Get the product object
         $product = wc_get_product($p_id);
@@ -660,7 +653,7 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid)
             //api call
             $samp = glassfrog_api_request('people', $str, "POST");
 
-            if ($samp && isset($samp)):
+            if ($samp && isset($samp)) :
 
                 //glassfrog id from the api
                 $gf_id = $samp->people[0]->id;
@@ -671,7 +664,7 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid)
                 $all_orders = serialize(array($oid));
 
                 $wpdb->query("SET FOREIGN_KEY_CHECKS = 0");
-                
+
                 $wpdb->query(
                     $wpdb->prepare(
                         "INSERT INTO $table_name
@@ -691,13 +684,13 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid)
                         $gf_name, // s
                         0, // d
                         $all_orders, // s
-                        0,// d
+                        0, // d
                         $refferal //d
 
                     )
                 );
 
-                if($refferal) {
+                if ($refferal) {
                     $wpdb->query(
                         $wpdb->prepare(
                             "INSERT INTO $downline_table
@@ -707,10 +700,9 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid)
                             )
                             VALUES ( %d,%d)",
                             $refferal,
-                            $customer_id    
+                            $customer_id
                         )
                     );
-    
                 }
 
                 $wpdb->query("SET FOREIGN_KEY_CHECKS = 1");
@@ -721,9 +713,7 @@ function dongtrader_user_registration_hook($customer_id, $p_id, $oid)
             //when order need not to be sent to glass frog where and how to manage it??
 
         }
-
     }
-
 }
 
 /* add custom field to save user role on user profile */
@@ -735,32 +725,32 @@ function dong_show_user_role($user)
     $dong_user_role = get_user_meta($user->ID, 'dong_user_role', true);
     /*   echo $dong_user_role . '-dong user role'; */
 
-    ?>
+?>
     <table class="form-table">
         <tr>
             <th><label for="city">Dong User Role</label></th>
             <td>
                 <select name="dong_user_role" id="">
                     <option value="Planning" <?php if ($dong_user_role == "Planning") {
-        echo 'selected="selected"';
-    }
-    ?>>Planning (Purple)</option>
+                                                    echo 'selected="selected"';
+                                                }
+                                                ?>>Planning (Purple)</option>
                     <option value="Budget" <?php if ($dong_user_role == "Budget") {
-        echo 'selected="selected"';
-    }
-    ?>>Budget (Orange)</option>
+                                                echo 'selected="selected"';
+                                            }
+                                            ?>>Budget (Orange)</option>
                     <option value="Media" <?php if ($dong_user_role == "Media") {
-        echo 'selected="selected"';
-    }
-    ?>>Media (Red)</option>
+                                                echo 'selected="selected"';
+                                            }
+                                            ?>>Media (Red)</option>
                     <option value="Distribution" <?php if ($dong_user_role == "Distribution") {
-        echo 'selected="selected"';
-    }
-    ?>>Distribution (Green)</option>
+                                                        echo 'selected="selected"';
+                                                    }
+                                                    ?>>Distribution (Green)</option>
                     <option value="Membership" <?php if ($dong_user_role == "Membership") {
-        echo 'selected="selected"';
-    }
-    ?>>Membership (Blue)</option>
+                                                    echo 'selected="selected"';
+                                                }
+                                                ?>>Membership (Blue)</option>
                 </select>
                 </select>
             </td>
@@ -828,7 +818,7 @@ function dongtrader_get_product_color($role)
  */
 function dongtraders_order_export_form()
 {
-    ?>
+?>
     <form action="" method="POST" class="order-export-form">
         <!--   <div class="dong-notify-msg">
 
@@ -899,26 +889,26 @@ function dongtraders_order_export_form()
             <div class="form-control-wrap">
                 <select name="select-product" id="" class="form-control select-product" required="">
                     <?php
-                        echo '<option value="">Select Product</option>';
-                        $args = array(
-                            'post_type' => 'product',
-                            'posts_per_page' => -1,
-                            'status' => 'published',
-                        );
+                    echo '<option value="">Select Product</option>';
+                    $args = array(
+                        'post_type' => 'product',
+                        'posts_per_page' => -1,
+                        'status' => 'published',
+                    );
 
-                        $loop = new WP_Query($args);
-                        //var_dump($loop);
-                        $product_ids = array();
-                        while ($loop->have_posts()): $loop->the_post();
-                            $product = new WC_Product_Variable(get_the_ID());
-                            $terms = get_the_terms($product->get_id(), 'product_type');
-                            $product_type = (!empty($terms)) ? sanitize_title(current($terms)->name) : 'simple';
+                    $loop = new WP_Query($args);
+                    //var_dump($loop);
+                    $product_ids = array();
+                    while ($loop->have_posts()) : $loop->the_post();
+                        $product = new WC_Product_Variable(get_the_ID());
+                        $terms = get_the_terms($product->get_id(), 'product_type');
+                        $product_type = (!empty($terms)) ? sanitize_title(current($terms)->name) : 'simple';
 
-                            echo '<option data-productType="' . $product_type . '" value="' . get_the_ID() . '">' . get_the_title() . '</option>';
-                            $product_ids[] = $product->get_id();
-                        endwhile;
+                        echo '<option data-productType="' . $product_type . '" value="' . get_the_ID() . '">' . get_the_title() . '</option>';
+                        $product_ids[] = $product->get_id();
+                    endwhile;
 
-                        wp_reset_query();
+                    wp_reset_query();
 
                     ?>
                 </select>
@@ -928,44 +918,44 @@ function dongtraders_order_export_form()
             <!--  <label for="">Select Variation Product</label> -->
             <div class="form-control-wrap">
                 <?php
-                    foreach ($product_ids as $product_id) {
-                            $product = new WC_Product_Variable($product_id);
-                            $terms = get_the_terms($product_id, 'product_type');
-                            $product_type = (!empty($terms)) ? sanitize_title(current($terms)->name) : 'simple';
+                foreach ($product_ids as $product_id) {
+                    $product = new WC_Product_Variable($product_id);
+                    $terms = get_the_terms($product_id, 'product_type');
+                    $product_type = (!empty($terms)) ? sanitize_title(current($terms)->name) : 'simple';
 
-                            if ($product_type == 'variable') {
-                                # code...
-                                $product = wc_get_product($product_id);
-                                $current_products = $product->get_children();
-                                ?>
-                                            <div id="varition-<?php echo $product_id; ?>" class="export_variation_product_hide">
-                                                <label for="">Select Variation Product</label>
-                                                <div class="form-control-wrap">
-                                                    <select name="variation-product[]" class="form-control variation-product">
-                                                        <?php
-                                                        echo '<option value="0">Choose Variation Product</option>';
-                                                        foreach ($current_products as $current_product) {
-                                                            $variation = wc_get_product($current_product);
-                                                            $varition_name = $variation->get_name();
-                                                            echo '<option value="' . $current_product . '">' . $varition_name . '</option>';
-                                                        }
-
-                                                        ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-
+                    if ($product_type == 'variable') {
+                        # code...
+                        $product = wc_get_product($product_id);
+                        $current_products = $product->get_children();
+                ?>
+                        <div id="varition-<?php echo $product_id; ?>" class="export_variation_product_hide">
+                            <label for="">Select Variation Product</label>
+                            <div class="form-control-wrap">
+                                <select name="variation-product[]" class="form-control variation-product">
                                     <?php
+                                    echo '<option value="0">Choose Variation Product</option>';
+                                    foreach ($current_products as $current_product) {
+                                        $variation = wc_get_product($current_product);
+                                        $varition_name = $variation->get_name();
+                                        echo '<option value="' . $current_product . '">' . $varition_name . '</option>';
+                                    }
 
-                            }
-                        }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
 
-    ?>
+                <?php
+
+                    }
+                }
+
+                ?>
 
             </div>
         </div>
         <div class="form-group">
-            <?php $user_ID = get_current_user_id();?>
+            <?php $user_ID = get_current_user_id(); ?>
             <div class="form-control-wrap">
                 <input type="hidden" name="affilate-user" class="form-control affilate-user" value="<?php echo $user_ID; ?>">
             </div>
@@ -976,7 +966,7 @@ function dongtraders_order_export_form()
     </form>
 
     <?php
-/* insert date to database table */
+    /* insert date to database table */
     $current_page = home_url($_SERVER['REQUEST_URI']);
     //echo $current_page;
 
@@ -1078,13 +1068,13 @@ function dongtraders_custom_order_created_list()
                 <input id="end-month" name="end_month" type="date" size="2" required>
                 <select name="affilate_id" id="affilate_id">
                     <?php
-$get_all_users = get_users();
-    //var_dump($get_all_users);
-    echo '<option value="">Select Affilate User</option>';
-    foreach ($get_all_users as $get_all_user) {
-        echo '<option value="' . $get_all_user->ID . '">' . $get_all_user->user_login . '</option>';
-    }
-    ?>
+                    $get_all_users = get_users();
+                    //var_dump($get_all_users);
+                    echo '<option value="">Select Affilate User</option>';
+                    foreach ($get_all_users as $get_all_user) {
+                        echo '<option value="' . $get_all_user->ID . '">' . $get_all_user->user_login . '</option>';
+                    }
+                    ?>
                 </select>
                 <button type="submit" class="button button-primary buttonload">Export CSV<i class="fa fa-spinner fa-spin export-loader"></i></button>
             </form>
@@ -1113,14 +1103,14 @@ $get_all_users = get_users();
             <tbody>
                 <?php
 
-    $get_order_results = $wpdb->get_results("SELECT *  FROM $order_table_name ORDER BY id DESC;");
+                $get_order_results = $wpdb->get_results("SELECT *  FROM $order_table_name ORDER BY id DESC;");
 
-    //$get_url = home_url() . '/wp-admin/admin.php?page=dongtrader_api_settings';
-    /* $current_page = ''; */
-    if (!empty($get_order_results)) {
-        foreach ($get_order_results as $export_order) {
+                //$get_url = home_url() . '/wp-admin/admin.php?page=dongtrader_api_settings';
+                /* $current_page = ''; */
+                if (!empty($get_order_results)) {
+                    foreach ($get_order_results as $export_order) {
 
-            echo '
+                        echo '
                      <tr>
                     <td>' . $export_order->id . '</td>
                      <td>' . $export_order->created_at . '</td>
@@ -1144,29 +1134,29 @@ $get_all_users = get_users();
                         </td>
                 </tr>
                 ';
-        }
-    } else {
-        echo '<div class="error-box">No Records Found</div>';
-    }
+                    }
+                } else {
+                    echo '<div class="error-box">No Records Found</div>';
+                }
 
-    // Handle delete
-    if (isset($_POST['delete-export'])) {
+                // Handle delete
+                if (isset($_POST['delete-export'])) {
 
-        $delete_id = (int) $_POST['export-id'];
+                    $delete_id = (int) $_POST['export-id'];
 
-        // Delete data in mysql from row that has this id
-        $result = $wpdb->delete($order_table_name, array('id' => $delete_id));
+                    // Delete data in mysql from row that has this id
+                    $result = $wpdb->delete($order_table_name, array('id' => $delete_id));
 
-        // if successfully deleted
-        if ($result) {
+                    // if successfully deleted
+                    if ($result) {
 
-            echo '<div class="success-box">Deleted order ID-> ' . $delete_id . ' Successfully</div>';
-        } else {
-            echo '<div class="error-box">Order Data could not Deleted ! Please Try again</div>';
-        }
-        /*  wp_redirect($current_page); */
-    }
-    ?>
+                        echo '<div class="success-box">Deleted order ID-> ' . $delete_id . ' Successfully</div>';
+                    } else {
+                        echo '<div class="error-box">Order Data could not Deleted ! Please Try again</div>';
+                    }
+                    /*  wp_redirect($current_page); */
+                }
+                ?>
 
 
             </tbody>
@@ -1237,7 +1227,7 @@ function dongtraders_show_user_affilate_order()
     $order_table_name = $wpdb->prefix . 'dong_order_export_table';
     $user_ID = get_current_user_id();
 
-    ?>
+?>
     <div class="cpm-table-wrap">
         <div class="export-section">
 
@@ -1279,13 +1269,13 @@ function dongtraders_show_user_affilate_order()
             <tbody>
                 <?php
 
-    $get_order_results = $wpdb->get_results("SELECT *  FROM $order_table_name WHERE affilate_user_id = '$user_ID' ORDER BY id DESC;");
-    //$get_url = home_url() . '/wp-admin/admin.php?page=dongtrader_api_settings';
-    $current_page = home_url($_SERVER['REQUEST_URI']);
-    if (!empty($get_order_results)) {
-        foreach ($get_order_results as $export_order) {
+                $get_order_results = $wpdb->get_results("SELECT *  FROM $order_table_name WHERE affilate_user_id = '$user_ID' ORDER BY id DESC;");
+                //$get_url = home_url() . '/wp-admin/admin.php?page=dongtrader_api_settings';
+                $current_page = home_url($_SERVER['REQUEST_URI']);
+                if (!empty($get_order_results)) {
+                    foreach ($get_order_results as $export_order) {
 
-            echo '
+                        echo '
                      <tr>
                     <td>' . $export_order->id . '</td>
                      <td>' . $export_order->created_at . '</td>
@@ -1309,29 +1299,29 @@ function dongtraders_show_user_affilate_order()
                         </td>
                 </tr>
                 ';
-        }
-    } else {
-        echo '<div class="error-box">No Records Found</div>';
-    }
+                    }
+                } else {
+                    echo '<div class="error-box">No Records Found</div>';
+                }
 
-    // Handle delete
-    if (isset($_POST['delete-export'])) {
+                // Handle delete
+                if (isset($_POST['delete-export'])) {
 
-        $delete_id = (int) $_POST['export-id'];
+                    $delete_id = (int) $_POST['export-id'];
 
-        // Delete data in mysql from row that has this id
-        $result = $wpdb->delete($order_table_name, array('id' => $delete_id));
+                    // Delete data in mysql from row that has this id
+                    $result = $wpdb->delete($order_table_name, array('id' => $delete_id));
 
-        // if successfully deleted
-        if ($result) {
+                    // if successfully deleted
+                    if ($result) {
 
-            echo '<div class="success-box">Deleted order ID-> ' . $delete_id . ' Successfully</div>';
-        } else {
-            echo '<div class="error-box">Order Data could not Deleted ! Please Try again</div>';
-        }
-        wp_redirect($current_page);
-    }
-    ?>
+                        echo '<div class="success-box">Deleted order ID-> ' . $delete_id . ' Successfully</div>';
+                    } else {
+                        echo '<div class="error-box">Order Data could not Deleted ! Please Try again</div>';
+                    }
+                    wp_redirect($current_page);
+                }
+                ?>
 
 
             </tbody>
@@ -1383,7 +1373,7 @@ function product_type_selector_filter_callback()
 {
     global $pagenow, $post_type;
 
-    if (in_array($pagenow, array('post-new.php', 'post.php')) && $post_type === 'product'):
+    if (in_array($pagenow, array('post-new.php', 'post.php')) && $post_type === 'product') :
     ?>
         <script>
             jQuery(function($) {
@@ -1399,8 +1389,8 @@ function product_type_selector_filter_callback()
                 });
             });
         </script>
-<?php
-endif;
+    <?php
+    endif;
 }
 
 // Save quantity setting fields values
@@ -1521,22 +1511,22 @@ function dongtrader_release_funds_tablelist()
     <form method="get" action="<?php echo admin_url('admin.php'); ?>" class="filter-form" id="posts-filter">
         <input type="hidden" name="page" value="dongtrader_api_settings">
         <div class="tablenav top">
-        <div class="post_filter">
-            <select name="filter_type" id="filter-type">
-                <option value="all" <?php selected($filter_type, 'all');?>>All</option>
-                <option value="group-name" <?php selected($filter_type, 'group-name');?>>By Group Name</option>
-                <option value="date-range" <?php selected($filter_type, 'date-range');?>>By Date Range</option>
-            </select>
-            <div id="group-name-filter" class="filter-field" <?php if ($filter_type !== 'group-name') {?>style="display: none;"<?php }?>>
-                <input type="text" name="group_name" id="group-name-input" placeholder="Enter group name" value="<?php echo $group_name; ?>">
+            <div class="post_filter">
+                <select name="filter_type" id="filter-type">
+                    <option value="all" <?php selected($filter_type, 'all'); ?>>All</option>
+                    <option value="group-name" <?php selected($filter_type, 'group-name'); ?>>By Group Name</option>
+                    <option value="date-range" <?php selected($filter_type, 'date-range'); ?>>By Date Range</option>
+                </select>
+                <div id="group-name-filter" class="filter-field" <?php if ($filter_type !== 'group-name') { ?>style="display: none;" <?php } ?>>
+                    <input type="text" name="group_name" id="group-name-input" placeholder="Enter group name" value="<?php echo $group_name; ?>">
+                </div>
+                <div id="date-range-filter" class="filter-field" <?php if ($filter_type !== 'date-range') { ?>style="display: none;" <?php } ?>>
+                    <input type="date" name="start_date" id="start-date-input" placeholder="Start date" value="<?php echo $start_date; ?>">
+                    <input type="date" name="end_date" id="end-date-input" placeholder="End date" value="<?php echo $end_date; ?>">
+                </div>
+                <button type="submit" id="apply-filter">Apply Filter</button>
+                <button type="reset" id="reset-filter">Reset Filter</button>
             </div>
-            <div id="date-range-filter" class="filter-field" <?php if ($filter_type !== 'date-range') {?>style="display: none;"<?php }?>>
-                <input type="date" name="start_date" id="start-date-input" placeholder="Start date" value="<?php echo $start_date; ?>">
-                <input type="date" name="end_date" id="end-date-input" placeholder="End date" value="<?php echo $end_date; ?>">
-            </div>
-            <button type="submit" id="apply-filter">Apply Filter</button>
-            <button type="reset" id="reset-filter">Reset Filter</button>
-        </div>
         </div>
     </form>
     <div class="cpm-table-wrap">
@@ -1553,37 +1543,38 @@ function dongtrader_release_funds_tablelist()
             </thead>
             <tbody>
                 <?php
-if (!empty($release_fund_results)) {
-        $symbol = get_woocommerce_currency_symbol();
-        // Split array into chunks based on items per page
-        $paginated_release_fund_results = array_chunk($release_fund_results, $items_per_page);
+                if (!empty($release_fund_results)) {
+                    $symbol = get_woocommerce_currency_symbol();
+                    // Split array into chunks based on items per page
+                    $paginated_release_fund_results = array_chunk($release_fund_results, $items_per_page);
 
-        $current_items = $paginated_release_fund_results[$paged - 1]; // Get the items for the current page
-        $i=1;
-        foreach ($current_items as $gr) {
+                    $current_items = $paginated_release_fund_results[$paged - 1]; // Get the items for the current page
+                    $i = 1;
+                    foreach ($current_items as $gr) {
 
-            $group_name = $wpdb->get_var($wpdb->prepare("SELECT circle_name FROM $group_table WHERE group_id = %d", (int) $gr['group_id']));
-            ?>
+                        $group_name = $wpdb->get_var($wpdb->prepare("SELECT circle_name FROM $group_table WHERE group_id = %d", (int) $gr['group_id']));
+                ?>
                         <tr>
                             <td><?php echo $i; ?></td>
                             <td><?php echo $gr['release_date'] ?></td>
                             <td><?php echo $group_name ?></td>
-                            <td><?php echo $symbol.$gr['release_amount'] ?></td>
+                            <td><?php echo $symbol . $gr['release_amount'] ?></td>
                             <td><?php echo $gr['release_note'] ?></td>
                             <td><button class="rf-del" data-rfid="<?php echo $gr['id'] ?>">Delete</td>
                         </tr>
-                    <?php $i++;}?>
-                <?php } else {?>
+                    <?php $i++;
+                    } ?>
+                <?php } else { ?>
                     <tr>
                         <td style="text-align:center;" colspan="4">Details Not Found</td>
                     </tr>
-                <?php }?>
+                <?php } ?>
             </tbody>
         </table>
     </div>
 
     <?php
-if (!empty($release_fund_results)) {
+    if (!empty($release_fund_results)) {
         // Pagination links
         echo '<div class="pagination" style="float:right">';
         echo paginate_links(array(
@@ -1598,60 +1589,60 @@ if (!empty($release_fund_results)) {
     }
     ?>
     <script>
-       jQuery(document).ready(function($) {
-    // Show/hide filter fields based on selected filter type
-    $('#filter-type').on('change', function() {
-        var filterType = $(this).val();
-        $('.filter-field').hide();
-        $('#' + filterType + '-filter').val('');
-        $('#' + filterType + '-filter').show();
-    });
+        jQuery(document).ready(function($) {
+            // Show/hide filter fields based on selected filter type
+            $('#filter-type').on('change', function() {
+                var filterType = $(this).val();
+                $('.filter-field').hide();
+                $('#' + filterType + '-filter').val('');
+                $('#' + filterType + '-filter').show();
+            });
 
-    // Reset filter form
-    $('#reset-filter').on('click', function() {
-        $('.filter-form')[0].reset();
-        $('.filter-field').hide(); // Hide all filter fields
-        $('#filter-type').trigger('change'); // Trigger change event to show/hide fields based on selected filter type
+            // Reset filter form
+            $('#reset-filter').on('click', function() {
+                $('.filter-form')[0].reset();
+                $('.filter-field').hide(); // Hide all filter fields
+                $('#filter-type').trigger('change'); // Trigger change event to show/hide fields based on selected filter type
 
-        var url = removeURLParameter(window.location.href, 'filter_type');
-        url = removeURLParameter(url, 'group_name');
-        url = removeURLParameter(url, 'start_date');
-        url = removeURLParameter(url, 'end_date');
+                var url = removeURLParameter(window.location.href, 'filter_type');
+                url = removeURLParameter(url, 'group_name');
+                url = removeURLParameter(url, 'start_date');
+                url = removeURLParameter(url, 'end_date');
 
-        window.history.replaceState({}, document.title, url);
+                window.history.replaceState({}, document.title, url);
 
-        window.location.reload();
-    });
+                window.location.reload();
+            });
 
-    // On page load, trigger change event to show/hide fields based on selected filter type
-    $('#filter-type').trigger('change');
+            // On page load, trigger change event to show/hide fields based on selected filter type
+            $('#filter-type').trigger('change');
 
-    // Helper function to remove a parameter from the URL
-    function removeURLParameter(url, parameter) {
-    var urlParts = url.split('?');
-    if (urlParts.length >= 2) {
-        var prefix = encodeURIComponent(parameter) + '=';
-        var params = urlParts[1].split(/[&;]/g);
+            // Helper function to remove a parameter from the URL
+            function removeURLParameter(url, parameter) {
+                var urlParts = url.split('?');
+                if (urlParts.length >= 2) {
+                    var prefix = encodeURIComponent(parameter) + '=';
+                    var params = urlParts[1].split(/[&;]/g);
 
-        for (var i = params.length - 1; i >= 0; i--) {
-            if (params[i].lastIndexOf(prefix, 0) !== -1) {
-                params.splice(i, 1);
+                    for (var i = params.length - 1; i >= 0; i--) {
+                        if (params[i].lastIndexOf(prefix, 0) !== -1) {
+                            params.splice(i, 1);
+                        }
+                    }
+
+                    url = urlParts[0] + (params.length > 0 ? '?' + params.join('&') : '');
+                    url = url.replace(/[?&]$/, ''); // Remove trailing ? or & if present
+                }
+                return url;
             }
-        }
-
-        url = urlParts[0] + (params.length > 0 ? '?' + params.join('&') : '');
-        url = url.replace(/[?&]$/, ''); // Remove trailing ? or & if present
-    }
-    return url;
-}
-});
-
+        });
     </script>
-    <?php
+<?php
 }
 
 add_action('wp_ajax_dongtrader_delete_funds', 'dongtrader_delete_funds');
-function dongtrader_delete_funds() {
+function dongtrader_delete_funds()
+{
     $row_id = isset($_POST['rowid']) ? absint($_POST['rowid']) : 0;
 
     if ($row_id != 0) {
@@ -1672,11 +1663,12 @@ function dongtrader_delete_funds() {
 }
 
 
-function dongtrader_compare_released_funds($group_id, $current_releasing_amount){
+function dongtrader_compare_released_funds($group_id, $current_releasing_amount)
+{
 
     global $wpdb;
 
-    $customers_table = $wpdb->prefix.'mega_mlm_customers';
+    $customers_table = $wpdb->prefix . 'mega_mlm_customers';
 
     $rfund_table = $wpdb->prefix . 'release_groups_profit';
 
@@ -1684,40 +1676,38 @@ function dongtrader_compare_released_funds($group_id, $current_releasing_amount)
     $total_release_amount = $wpdb->get_var($wpdb->prepare(
         "SELECT SUM(release_amount) AS total_release_amount 
           FROM $rfund_table
-          WHERE group_id = %d", (int) $group_id
+          WHERE group_id = %d",
+        (int) $group_id
     ));
 
     $current_amount = $total_release_amount + $current_releasing_amount;
 
     $all_gr_user = $wpdb->prepare("SELECT user_id FROM $customers_table WHERE customer_group_id=%d", (int) $group_id);
 
-    $users =  $wpdb->get_results($all_gr_user,ARRAY_A);
+    $users =  $wpdb->get_results($all_gr_user, ARRAY_A);
 
-    $users_arrays = array_column($users,'user_id');
+    $users_arrays = array_column($users, 'user_id');
 
     $total_group_profit_sum = NULL;
 
-    foreach($users_arrays as $ua){
-        
-        $group_prof_metas =  get_user_meta($ua,'_group_details', true);
+    foreach ($users_arrays as $ua) {
 
-        if(empty($group_prof_metas)) continue;
-        
-        foreach($group_prof_metas as $gpm){
+        $group_prof_metas =  get_user_meta($ua, '_group_details', true);
+
+        if (empty($group_prof_metas)) continue;
+
+        foreach ($group_prof_metas as $gpm) {
 
             $total_group_profit_sum += $gpm['profit_amount'];
-           
         }
     }
 
     return array(
         'compare' => $total_group_profit_sum >= $current_amount,
-        'total_profit'=> $total_group_profit_sum,
-        'total_released'=>$total_release_amount,
-        'total_releaseable' => $total_group_profit_sum-$total_release_amount
+        'total_profit' => $total_group_profit_sum,
+        'total_released' => $total_release_amount,
+        'total_releaseable' => $total_group_profit_sum - $total_release_amount
     );
-
-    
 }
 
 
@@ -1729,7 +1719,7 @@ function dongtrader_release_funds()
 
     $table_name = $wpdb->prefix . 'release_groups_profit';
 
-    $customers_table = $wpdb->prefix.'mega_mlm_groups';
+    $customers_table = $wpdb->prefix . 'mega_mlm_groups';
 
     $form_data = $_POST['formdatas'];
 
@@ -1746,9 +1736,9 @@ function dongtrader_release_funds()
         return;
     }
 
-    $compare = dongtrader_compare_released_funds($rfund_group , $rfund_amount);
+    $compare = dongtrader_compare_released_funds($rfund_group, $rfund_amount);
 
-    if($compare['compare']){
+    if ($compare['compare']) {
 
         $data = array(
             'release_date' => date('Y-m-d H:i:s'),
@@ -1756,60 +1746,54 @@ function dongtrader_release_funds()
             'release_note' => $rfund_note,
             'group_id' => $rfund_group,
         );
-    
-        
-    
+
+
+
         $result = $wpdb->insert($table_name, $data);
-    
+
         // Check if data insertion was successful
         if ($result === false) {
             wp_send_json_error('Some error occured.Please Try again');
             return;
         }
-    
-        wp_send_json_success('Group profit has been released successfully');
 
-    }else{
-        
-        wp_send_json_error('The released amount must not exceed '.$compare['total_releaseable'] );
+        wp_send_json_success('Group profit has been released successfully');
+    } else {
+
+        wp_send_json_error('The released amount must not exceed ' . $compare['total_releaseable']);
         return;
     }
-
-
 }
 
 
-function dongtrader_patron_form( $atts ) {
+function dongtrader_patron_form($atts)
+{
 
     // Attributes
     $atts = shortcode_atts(
-        array(
-        ),
+        array(),
         $atts,
         'patron_form'
     );
     $error_message = ' <span class="error-message"></span>';
     ob_start(); // Start output buffering
 
-    ?>
+?>
     <style>
         /* Basic form styling */
         #mega-patron-credentials {
-           
+
             margin: 0 auto;
-            padding: 20px;
-           
+            padding: 50px 70px;
+
             border-radius: 5px;
             background-color: #f9f9f9;
         }
-        
+
         .form-group {
-          
             border-radius: 5px;
-            padding: 20px;
+            /* padding: 15px; */
             background-color: #f9f9f9;
-            margin: 20px auto;
-            width: 80%;
         }
 
         .group-heading {
@@ -1817,22 +1801,24 @@ function dongtrader_patron_form( $atts ) {
             margin-bottom: 15px;
             text-align: center;
         }
-        .error-message::after{
-            content: "\A"; 
+
+        .error-message::after {
+            content: "\A";
             white-space: pre;
         }
-        
-        .error-message{
+
+        .error-message {
             color: #d9534f;
         }
-        
-        .error-message{
+
+        .error-message {
             color: #d9534f;
         }
-        
-        .server-message{
+
+        .server-message {
             color: #d9534f;
         }
+
         label {
             font-weight: bold;
         }
@@ -1840,8 +1826,7 @@ function dongtrader_patron_form( $atts ) {
         input[type="text"],
         input[type="email"],
         input[type="tel"],
-        input[type="password"]
-        {
+        input[type="password"] {
             width: 100%;
             padding: 10px;
             margin-bottom: 8px;
@@ -1856,21 +1841,17 @@ function dongtrader_patron_form( $atts ) {
             border-radius: 5px;
             cursor: pointer;
         }
+
         .toggle-password {
             position: relative;
             float: right;
             cursor: pointer;
-            margin-right: 1px;
+            margin-right: 15px;
             margin-top: -40px;
             font-size: 15px;
+
         }
-           
-        .flex-container {
-            display: flex;
-            justify-content: space-between;
-        }
- 
-   
+
         input[type="submit"]:hover {
             background-color: #0056b3;
         }
@@ -1888,13 +1869,47 @@ function dongtrader_patron_form( $atts ) {
         a:hover {
             text-decoration: underline;
         }
+
+        @media (min-width: 991px) {
+            .flex-container {
+                display: flex;
+                justify-content: space-between;
+                gap: 10px;
+            }
+
+            .input-wrapper {
+                flex: 0 0 49%;
+            }
+        }
+
+        p.detente-mega-info {
+            margin-top: 0;
+        }
+
+        p.detente-mega-info a {
+            font-size: 14px;
+        }
+
+        .form-group.detente-poc-form-group {
+            padding-top: 15px;
+        }
+
+        @media (max-width: 767px) {
+            #mega-patron-credentials {
+                padding: 40px;
+            }
+            .group-heading{
+                text-align: left;
+                font-size: 20px;
+            }
+        }
     </style>
-    <form action="" method="post" id= "mega-patron-credentials" autocomplete="off">
+    <form action="" method="post" id="mega-patron-credentials" autocomplete="off">
         <div class="form-group">
             <p class="group-heading"><b>Patron Complete Credentials</b></p>
             <p>
                 Underlined links will require Patron applicants to submit these form fields with valid platform ID credentials or access. Individual accounts only.
-            
+
             </p>
             <p>
                 <b>All fields with * are mandatory.</b>
@@ -1903,80 +1918,80 @@ function dongtrader_patron_form( $atts ) {
             <div class="flex-container">
                 <div class="input-wrapper">
                     <label for="mega-email">Email*:</label>
-                    <input type="text" id="mega-email" name="mega-email" placeholder="<?php _e('Enter Your Email Address', 'cpm-dongtrader') ?>" required >
-                    <?php echo $error_message?>
+                    <input type="text" id="mega-email" name="mega-email" placeholder="<?php _e('Enter your email address', 'cpm-dongtrader') ?>" required >
+                    <?php echo $error_message ?>
                 </div>
                 <div class="input-wrapper">
                     <label for="mega-name">User Name*:</label>
-                    <input type="text" id="mega-name" name="mega-name" placeholder="<?php _e('Enter Your Username', 'cpm-dongtrader') ?>"  required >
-                    <?php echo $error_message?>
+                    <input type="text" id="mega-name" name="mega-name" placeholder="<?php _e('Enter your username', 'cpm-dongtrader') ?>" required>
+                    <?php echo $error_message ?>
                 </div>
             </div>
             <div class="flex-container">
                 <div class="input-wrapper">
                     <label for="user_pass">Password*:</label>
-                    <input type="password" id="mega-password" name="mega-password"  minlength="7"  placeholder="<?php _e('Enter Your Password', 'cpm-dongtrader') ?>" required >
+                    <input type="password" id="mega-password" name="mega-password" minlength="7" placeholder="<?php _e('Enter your password', 'cpm-dongtrader') ?>" required>
                     <i class="toggle-password fa fa-fw fa-eye-slash"></i>
-                    <?php echo $error_message?>
+                    <?php echo $error_message ?>
                 </div>
                 <div class="input-wrapper">
                     <label for="user_pass">Confirm Password*:</label>
-                    <input type="password" id="mega-confirm-password" name="mega-confirm-password"  minlength="7"  placeholder="<?php _e('Retype Your Password', 'cpm-dongtrader') ?>" required >
+                    <input type="password" id="mega-confirm-password" name="mega-confirm-password" minlength="7" placeholder="<?php _e('Retype your password', 'cpm-dongtrader') ?>" required>
                     <i class="toggle-password fa fa-fw fa-eye-slash"></i>
-                    <?php echo $error_message?>
-                    
+                    <?php echo $error_message ?>
+
                 </div>
             </div>
             <label for="mega-mobile">Mobile number*:</label>
-            <input type="tel" id="mega-mobile" name="mega-mobile" placeholder="<?php _e('Enter your telephone number', 'cpm-dongtrader') ?>">
-            <?php echo $error_message?>
-            
+            <input type="tel" id="mega-mobile" name="mega-mobile" placeholder="<?php _e('Enter your telephone number', 'cpm-dongtrader') ?>" required>
+            <?php echo $error_message ?>
+
             <label for="mega-v-card">V Card*:</label>
-            <input  type="text" id="mega-v-card" name="mega-v-card" placeholder="<?php _e('Enter your V-card URL', 'cpm-dongtrader') ?>" >
-            <?php echo $error_message?>
-            <p><a href="https://www.qrcode-tiger.com/payment" target="_blank">QR Tiger v-card with social media links (Free account)</a></p>
-         
-            
+            <input type="text" id="mega-v-card" name="mega-v-card" placeholder="<?php _e('Enter your V-card URL', 'cpm-dongtrader') ?>" required>
+            <?php echo $error_message ?>
+            <p class="detente-mega-info"><a href="https://www.qrcode-tiger.com/payment" target="_blank">QR Tiger v-card with social media links (Free account)</a></p>
+
+
             <label for="mega-paypal">Paypal:</label>
-            <input type="text" id="mega-paypal" name="mega-paypal" placeholder="<?php _e('Enter your paypal Id', 'cpm-dongtrader'); ?>" >
-            <?php echo $error_message?>
-            <p><a href="https://www.paypal.com/us/welcome/signup/#/login_info"target="_blank">PayPal with banking links</a></p>
-            
-            
+            <input type="text" id="mega-paypal" name="mega-paypal" placeholder="<?php _e('Enter your paypal Id', 'cpm-dongtrader'); ?>">
+            <?php echo $error_message ?>
+            <p class="detente-mega-info"><a href="https://www.paypal.com/us/welcome/signup/#/login_info" target="_blank">PayPal with banking links</a></p>
+
+
             <label for="mega-venmo">Venmo:</label>
-            <input type="text" id="mega-venmo" name="mega-venmo" placeholder="<?php _e('Enter your venmo Id', 'cpm-dongtrader'); ?>" >
-            <?php echo $error_message?>
-            <p><a href="https://venmo.com/signup/"target="_blank">Venmo with banking links</a></p>
-           
-            
+            <input type="text" id="mega-venmo" name="mega-venmo" placeholder="<?php _e('Enter your venmo Id', 'cpm-dongtrader'); ?>">
+            <?php echo $error_message ?>
+            <p class="detente-mega-info"><a href="https://venmo.com/signup/" target="_blank">Venmo with banking links</a></p>
+
+
             <label for="mega-glassfrog">Glassfrog Profile:</label>
             <input type="text" id="mega-glassfrog" name="mega-glassfrog" placeholder="<?php _e('Enter your glassfrog user id', 'cpm-dongtrader'); ?>">
-            <?php echo $error_message?>
-            <p><a href="https://app.glassfrog.com/accounts/new" target="_blank">Glassfrog (Free account)</a></p>
-            
-            
+            <?php echo $error_message ?>
+            <p class="detente-mega-info"><a href="https://app.glassfrog.com/accounts/new" target="_blank">Glassfrog (Free account)</a></p>
+
+
             <label for="mega-crowdsignal">Crowdsignal:</label>
-            <input type="text" id="mega-crowdsignal" name="mega-crowdsignal" placeholder="<?php _e('Enter your crowdsignal id', 'cpm-dongtrader'); ?>" >
-            <?php echo $error_message?>
-            <p><a href="https://crowdsignal.com/pricing/" target="_blank">Crowdsignal (Free account)</a></p>
-            
+            <input type="text" id="mega-crowdsignal" name="mega-crowdsignal" placeholder="<?php _e('Enter your crowdsignal id', 'cpm-dongtrader'); ?>">
+            <?php echo $error_message ?>
+            <p class="detente-mega-info"><a href="https://crowdsignal.com/pricing/" target="_blank">Crowdsignal (Free account)</a></p>
+
         </div>
         <!-- Grouped Form: Patron Organizing Communities (POC) Leadership -->
-        <div class="form-group">
+        <div class="form-group detente-poc-form-group">
             <p class="group-heading"><b>Patron Organizing Communities (POC) Leadership</b></p>
-                <label for="mega-precoro">Precoro.com:</label>
-                <input type="text" id="mega-precoro" name="mega-precoro" placeholder="<?php _e('Enter your precoro details', 'cpm-dongtrader'); ?>">
-                <p><a href="https://precoro.com/get-a-trial" target="_blank">Precoro.com (Get a Trial)</a></p>
-                
-    
-                <label for="mega-amazon-business">Amazon Business:</label>
-                <input type="text" id="mega-amazon-business" name="mega-amazon-business" placeholder="<?php _e('Enter your amazon business id', 'cpm-dongtrader'); ?>">
-                <p><a href="https://business.amazon.com/en/find-solutions/punchout" target="_blank">Amazon Business (Punchout)</a></p>
+            <label for="mega-precoro">Precoro.com:</label>
+            <input type="text" id="mega-precoro" name="mega-precoro" placeholder="<?php _e('Enter your precoro details', 'cpm-dongtrader'); ?>">
+            <p class="detente-mega-info"><a href="https://precoro.com/get-a-trial" target="_blank">Precoro.com (Get a Trial)</a></p>
+
+
+            <label for="mega-amazon-business">Amazon Business:</label>
+            <input type="text" id="mega-amazon-business" name="mega-amazon-business" placeholder="<?php _e('Enter your amazon business id', 'cpm-dongtrader'); ?>">
+            <p class="detente-mega-info"><a href="https://business.amazon.com/en/find-solutions/punchout" target="_blank">Amazon Business (Punchout)</a></p>
         </div>
-        <div class="form-group">
+        <div class="form-group detente-submit-form-group">
             <input type="submit" value="Submit">
             <div id="loader" class="wp-admin-loading" style="display: none;">
-                <img src="<?php echo admin_url('images/loading.gif')?>" alt="loading">
+                <img src="<?php echo admin_url('images/loading.gif') ?>" alt="loading">
             </div>
             <div class="server-message">
             </div>
@@ -1987,107 +2002,116 @@ function dongtrader_patron_form( $atts ) {
         jQuery(document).ready(function($) {
             $(".toggle-password").click(function() {
                 $(this).toggleClass("fa-eye fa-eye-slash");
-                input = $(this).parent().find("input");
+                var input = $(this).parent().find("input");
+
                 if (input.attr("type") == "password") {
                     input.attr("type", "text");
                 } else {
                     input.attr("type", "password");
                 }
+               
             });
             $('#mega-patron-credentials').submit(function(event) {
-                event.preventDefault(); 
+                event.preventDefault();
+
                 var loader = $('#loader');
                 var form = $('#mega-patron-credentials');
                 loader.show();
                 $(this).find('input').each(function() {
                     var inputId = $(this).attr('id');
-                    $('#'+ inputId).css('border-color', '');
-                   
+                    $('#' + inputId).css('border-color', '');
+                    $('#' + inputId).parent().find('span').empty();
+
                 });
                 var formData = $(this).serialize();
                 $.ajax({
-                    url:  '<?php echo admin_url( 'admin-ajax.php' ); ?>',
+                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
                     type: 'POST',
                     data: {
-                        action : 'mega_credentials_save',
-                        formdata:formData,
+                        action: 'mega_credentials_save',
+                        formdata: formData,
                     },
                     success: function(response) {
                         var parsed = JSON.parse(response);
-                        console.log(parsed);
-                        if ('errorClient' in parsed && parsed['errorClient'].length>0) {
+                        if ('errorClient' in parsed && parsed['errorClient'].length > 0) {
                             parsed.errorClient.forEach(function(error) {
                                 var $errorField = $('#' + error.field_name);
-                                console.log($errorField);
+                                // console.log($errorField);
                                 if ($errorField.length > 0) {
                                     $('html, body').animate({
-                                        scrollTop: $errorField.offset().top - 100 
-                                    }, 1000); 
+                                        scrollTop: $errorField.offset().top - 100
+                                    }, 1000);
                                     $errorField.focus();
                                     $errorField.css('border-color', '#d9534f');
-                                    $errorField.next('.error-message').text(error.message);
-                                    console.log(error.message);
+                                    if(error.field_name.indexOf("password") != -1){
+                                        $errorField.parent().find('span').text(error.message);
+                                    }else{
+                                        $errorField.next('span').text(error.message);
+                                    }
+                   
+                                    console.log($errorField.parent().find('span'));
+                                    
+
                                 }
                             });
-                               
-                        }else if('errorServer' in parsed && parsed['errorServer'].length>0) {
+
+                        } else if ('errorServer' in parsed && parsed['errorServer'].length > 0) {
                             parsed.errorServer.forEach(function(error) {
-                               var serverErrorfield =  $('#server-message');
-                               serverErrorfield.focus();
-                               serverErrorfield.text(error.message);
-                                
+                                var serverErrorfield = $('#server-message');
+                                serverErrorfield.focus();
+                                serverErrorfield.text(error.message);
+
                             });
-                        }else if('valid' in parsed && parsed['valid']){
-                          form.empty();
-                          form.text('Congartulations!! Now you are member of Megavoters');
+                        } else if ('valid' in parsed && parsed['valid']) {
+                            form.empty();
+                            form.html('<p>Congratulations on successfully becoming a valued member of MEGAvoter! Kindly check your email for further details and exciting updates.</p>');
                         }
-                        
-                       loader.hide();
-                      
+
+                        loader.hide();
+
                     },
 
                     error: function() {
                         console.error('Form submission failed');
                         loader.hide();
-                      
+
                     }
                 });
             });
         });
-
-
     </script>
-    <?php
+<?php
 
-    return ob_get_clean(); 
+    return ob_get_clean();
 }
-add_shortcode( 'patron_form', 'dongtrader_patron_form' );
+add_shortcode('patron_form', 'dongtrader_patron_form');
 
 
 
 
-add_action( 'wp_ajax_mega_credentials_save', 'mega_credentials_save' );
-add_action( 'wp_ajax_nopriv_mega_credentials_save', 'mega_credentials_save' );
+add_action('wp_ajax_mega_credentials_save', 'mega_credentials_save');
+add_action('wp_ajax_nopriv_mega_credentials_save', 'mega_credentials_save');
 
-function mega_credentials_save(){
-    
-    if(!isset($_POST['formdata'])) return;
-    
+function mega_credentials_save()
+{
+
+    if (!isset($_POST['formdata'])) return;
+
     parse_str($_POST['formdata'], $form_data_array);
-    
+
     $sanitization_mapping = array(
-        'mega_email'    =>'sanitize_email',
-        'mega_name'     =>'sanitize_text_field',
-        'mega_password' =>'sanitize_text_field',
-        'mega-confirm-password'=> 'sanitize_text_field',
-        'mega_mobile'   =>'sanitize_text_field',
-        'mega_v-card'   =>'sanitize_text_field',
-        'mega_paypal'   =>'sanitize_text_field',
-        'mega_venmo'    =>'sanitize_text_field',
-        'mega_glassfrog'=>'sanitize_text_field',
-        'mega_crowdsignal'  =>'sanitize_text_field',
-        'mega_precoro'      =>'sanitize_text_field',
-        'mega_amazon-business'=>'sanitize_text_field'
+        'mega_email'    => 'sanitize_email',
+        'mega_name'     => 'sanitize_text_field',
+        'mega_password' => 'sanitize_text_field',
+        'mega-confirm-password' => 'sanitize_text_field',
+        'mega_mobile'   => 'sanitize_text_field',
+        'mega_v-card'   => 'sanitize_text_field',
+        'mega_paypal'   => 'sanitize_text_field',
+        'mega_venmo'    => 'sanitize_text_field',
+        'mega_glassfrog' => 'sanitize_text_field',
+        'mega_crowdsignal'  => 'sanitize_text_field',
+        'mega_precoro'      => 'sanitize_text_field',
+        'mega_amazon-business' => 'sanitize_text_field'
     );
 
     $sanitized_data = array();
@@ -2098,37 +2122,34 @@ function mega_credentials_save(){
             $sanitized_data[$field] = $value;
         }
     }
-        
-   
-        
+
     $client_validation_check = mega_validation_check($sanitized_data);
-    
-    if(empty($client_validation_check)) {
-        $server_validation_check=[];
-        $new_user_id = wp_create_user($sanitized_data['mega-name'],$sanitized_data['mega-password'], $sanitized_data['mega-email']);
-        
-        if(!is_wp_error($new_user_id)){
-            
-            $u_data = get_userdata( $new_user_id );
-            
+
+    if (empty($client_validation_check)) {
+        $server_validation_check = [];
+        $new_user_id = wp_create_user($sanitized_data['mega-name'], $sanitized_data['mega-password'], $sanitized_data['mega-email']);
+
+        if (!is_wp_error($new_user_id)) {
+
+            $u_data = get_userdata($new_user_id);
+
             $new_meta_array = array_slice($sanitized_data, 4, null, true);
-            
-            update_user_meta($new_user_id, 'patron_details' , $new_meta_array);
-    
-            if($u_data){
-                $user_name = $u_data->display_name;
+
+            update_user_meta($new_user_id, 'patron_details', $new_meta_array);
+
+            if ($u_data) {
+                $name = $u_data->user_login;
                 $to = $u_data->user_email;
-                $subject = 'Your Account Details';
-                $tem_path = CPM_DONGTRADER_PLUGIN_DIR.'template-parts'.DIRECTORY_SEPARATOR.'content-email-welcome.php';
+                $subject = __('Registration Confirmation', 'cpm-dongtrader');
+                $tem_path = CPM_DONGTRADER_PLUGIN_DIR . 'template-parts' . DIRECTORY_SEPARATOR . 'content-email-welcome.php';
                 ob_start();
-                if (file_exists($tem_path)) load_template($tem_path,true);
+                if (file_exists($tem_path)) load_template($tem_path, true, ['username' => $name]);
                 $message = ob_get_clean();
                 $headers = array('Content-Type: text/html; charset=UTF-8');
-                wp_mail( $to, $subject, $message, $headers );
-            
+                wp_mail($to, $subject, $message, $headers);
             }
             if (class_exists('PMPro_Membership_Level')) {
-                
+
                 $current_level = pmpro_getMembershipLevelForUser($new_user_id);
                 $level_id = 16;
 
@@ -2138,26 +2159,24 @@ function mega_credentials_save(){
                     pmpro_changeMembershipLevel($level_id, $new_user_id);
                 }
             }
-            
-        }else{
-        
+        } else {
+
             $server_validation_check[] = [
-                'valid'=>'false',
-                'message' => __('User Cannot be created','cpm-dongtrader')
-                
-            ]; 
+                'valid' => 'false',
+                'message' => __('User Cannot be created', 'cpm-dongtrader')
+
+            ];
         }
-        
     }
-    
-    $validity = !empty($client_validation_check) 
-    ? ['errorClient' => $client_validation_check]
-    : (!empty($server_validation_check) 
-        ? ['errorServer' => $server_validation_check]
-        : ['valid' => true]);
-    
-     echo  wp_json_encode($validity);
-        
+
+    $validity = !empty($client_validation_check)
+        ? ['errorClient' => $client_validation_check]
+        : (!empty($server_validation_check)
+            ? ['errorServer' => $server_validation_check]
+            : ['valid' => true]);
+
+    echo  wp_json_encode($validity);
+
     wp_die();
 }
 
@@ -2165,135 +2184,130 @@ function mega_credentials_save(){
 
 
 
-function mega_validation_check($sanitized_data){
+function mega_validation_check($sanitized_data)
+{
     $validation_check = [];
-    
-    foreach($sanitized_data as $attr=>$sv){
-    
-        if($attr == "mega-email"){
-            if(email_exists($sv)){
-                
-                $validation_check[] = [
-                    'valid'=> 'false',
-                    'field_name' => $attr,
-                    'message' => __("This email address is already registered","cpm-dongtrader")
-                ];
-              break;
-                
-            }
-            if (!filter_var($sv, FILTER_VALIDATE_EMAIL)) {
-            
-                $validation_check[] = [
-                    'valid'=> 'false',
-                    'field_name' => $attr,
-                    'message' => __("Please Enter Valid Email Address","cpm-dongtrader")
-                ];
-              break;
-            }
-            
 
-        }
-        
-        if($attr == "mega-name" ){
-        
-            if(username_exists($sv)){
+    foreach ($sanitized_data as $attr => $sv) {
+
+        if ($attr == "mega-email") {
+            if (email_exists($sv)) {
+
                 $validation_check[] = [
-                    'valid'=> 'false',
+                    'valid' => 'false',
                     'field_name' => $attr,
-                    'message' => __("Username already exist","cpm-dongtrader")
-                ];
-            }
-            
-            if (!preg_match('/^.{5,}$/', $sv)){
-            
-                $validation_check[] = [
-                    'valid'=> 'false',
-                    'field_name' => $attr,
-                    'message' => __("Username must be at least 5 characters long.","cpm-dongtrader")
-                ];
-                
-             break;
-            } 
-            
-           
-        
-        }
-        
-        if($attr == "mega-password"){
-            if (!preg_match('/^(?=.*[A-Z])(?=.*[!@#$%^&*()\-_=+{};:,<.>]).{7,}$/' , $sv)){
-                $validation_check[] = [
-                    'valid'=> 'false',
-                    'field_name' => $attr,
-                    'message' => __("Password must be at least 7 characters long and include at least one uppercase letter and one special character.","cpm-dongtrader")
+                    'message' => __("This email address is already registered", "cpm-dongtrader")
                 ];
                 break;
             }
-            
-            
-        }
-        
-        if($attr = "mega-confirm-password"){
-        
-            if($sanitized_data['mega-password'] != $sanitized_data['mega-confirm-password']){
+            if (!filter_var($sv, FILTER_VALIDATE_EMAIL)) {
+
                 $validation_check[] = [
-                    'valid'=> 'false',
+                    'valid' => 'false',
                     'field_name' => $attr,
-                    'message' => __("Passwords doesnt match ","cpm-dongtrader")
+                    'message' => __("Please Enter Valid Email Address", "cpm-dongtrader")
+                ];
+                break;
+            }
+        }
+
+        if ($attr == "mega-name") {
+
+            if (username_exists($sv)) {
+                $validation_check[] = [
+                    'valid' => 'false',
+                    'field_name' => $attr,
+                    'message' => __("Username already exists", "cpm-dongtrader")
+                ];
+                
+                break;
+            }
+
+            if (!preg_match('/^.{5,}$/', $sv)) {
+
+                $validation_check[] = [
+                    'valid' => 'false',
+                    'field_name' => $attr,
+                    'message' => __("Username must be at least 5 characters long.", "cpm-dongtrader")
+                ];
+
+                break;
+            }
+        }
+
+        if ($attr == "mega-password") {
+            if (!preg_match('/^(?=.*[A-Z])(?=.*[!@#$%^&*()\-_=+{};:,<.>]).{7,}$/', $sv)) {
+                $validation_check[] = [
+                    'valid' => 'false',
+                    'field_name' => $attr,
+                    'message' => __("Password must be at least 7 characters long and include at least one uppercase letter and one special character.", "cpm-dongtrader")
+                ];
+                break;
+            }
+        }
+
+        if ($attr = "mega-confirm-password") {
+
+            if ($sanitized_data['mega-password'] != $sanitized_data['mega-confirm-password']) {
+                $validation_check[] = [
+                    'valid' => 'false',
+                    'field_name' => $attr,
+                    'message' => __("Passwords doesnt match ", "cpm-dongtrader")
                 ];
                 break;
             }
         }
     }
-        
-        return $validation_check;
-    
+
+    return $validation_check;
 }
 
 // Add a custom text area field to user profiles
-function add_custom_user_profile_field($user) {
+function add_custom_user_profile_field($user)
+{
 
 
-$metas =  get_user_meta($user->ID,'patron_details', true);
+    $metas =  get_user_meta($user->ID, 'patron_details', true);
 
-if(empty($metas)) return;
-    ?>
+    if (empty($metas)) return;
+?>
 
     <h3><?php _e('Extra User Details', 'cpm-dongtrader'); ?></h3>
     <table class="form-table" role="presentation">
-       <tbody>
-       <?php foreach($metas as $k=>$v){ 
-     
-       $label_text = str_replace("mega-", "", $k);
-       $capital_label =  ucwords($label_text);
-       
-       if(str_contains($label_text, 'password')) continue;
-        
-       ?>
-          <tr class="user-user-login-wrap">
-             <th><label for="<?=$k?>"><?=$capital_label?></label></th>
-             <td><input type="text" name="<?=$k?>" id="<?=$k?>" value="<?=$v?>" class="regular-text"></td>
-          </tr>
-        <?php } ?>
-       </tbody>
+        <tbody>
+            <?php foreach ($metas as $k => $v) {
+
+                $label_text = str_replace("mega-", "", $k);
+                $capital_label =  ucwords($label_text);
+
+                if (str_contains($label_text, 'password')) continue;
+
+            ?>
+                <tr class="user-user-login-wrap">
+                    <th><label for="<?= $k ?>"><?= $capital_label ?></label></th>
+                    <td><input type="text" name="<?= $k ?>" id="<?= $k ?>" value="<?= $v ?>" class="regular-text"></td>
+                </tr>
+            <?php } ?>
+        </tbody>
     </table>
-    <?php
+<?php
 }
 add_action('show_user_profile', 'add_custom_user_profile_field');
 add_action('edit_user_profile', 'add_custom_user_profile_field');
 
 // Save the custom field data
-function save_custom_user_profile_field($user_id) {
+function save_custom_user_profile_field($user_id)
+{
     if (!current_user_can('edit_user', $user_id)) {
         return false;
     }
-    $metas =  get_user_meta($user_id,'patron_details', true);
+    $metas =  get_user_meta($user_id, 'patron_details', true);
     $array_keys = array_keys($metas);
-    if(empty($array_keys)) return;
-    foreach($array_keys as $k){
-        if(str_contains($k, 'password')) continue;
+    if (empty($array_keys)) return;
+    foreach ($array_keys as $k) {
+        if (str_contains($k, 'password')) continue;
         update_user_meta($user_id, $k, sanitize_textarea_field($_POST[$k]));
     }
-    
 }
 add_action('personal_options_update', 'save_custom_user_profile_field');
 add_action('edit_user_profile_update', 'save_custom_user_profile_field');

@@ -123,10 +123,10 @@ $release_profits = $wpdb->prepare("SELECT * FROM $release_fund ORDER BY release_
 									$custom_editor_id = "dongchange_welcome_email";
 									$custom_editor_name = "dongtraders_api_settings_fields[dong_change_welcome_text]";
 									$args = array(
-											'media_buttons' => false, // This setting removes the media button.
+											'media_buttons' => true, // This setting removes the media button.
 											'textarea_name' => $custom_editor_name, // Set custom name.
 											'textarea_rows' => get_option('default_post_edit_rows', 10), //Determine the number of rows.
-											'quicktags' => true, // Remove view as HTML button.
+											// 'quicktags' => true, // Remove view as HTML button.
 										);
 									wp_editor( $content, $custom_editor_id, $args );
 								?>
