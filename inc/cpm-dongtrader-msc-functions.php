@@ -1,4 +1,6 @@
 <?php
+//Cronjob filters
+
 
 /**
  * Interval Settings filters For the cron job
@@ -32,43 +34,39 @@ function dongtrader_schedule_cron_job()
     }
 }
 
+function delete_data(){
+   
+ 
+    $users = [293, 294, 295];
+    foreach($users as $u){
+         delete_user_meta( $u,  '_buyer_details' );
+         delete_user_meta( $u,  '_commission_details' );
+         delete_user_meta( $u,  '_treasury_details' );
+         delete_user_meta( $u,  '_group_details' );
+    }
+
+}
+
 /**
  * Add a custom hook to the cron job, and then run a function when that hook is called.
  */
-add_action('dongtrader_cron_job_hook', 'dongtrader_cron_job');
+ 
+ add_action('dongtrader_cron_job_hook', 'dongtrader_cron_job');
+ 
+//  add_action('wp_head' , 'dongtrader_cron_job');
 function dongtrader_cron_job()
 {
+
     mega_rotate_leadership();
     glassfrog_api_get_persons_of_circles();
     mega_save_price_allocation_to_group_members();
 
 }
 
-//always required for debugging purpose delete it and regret later
-add_action('wp_head', function(){
-
-    // mega_rotate_leadership();
-    // glassfrog_api_get_persons_of_circles();
-    // mega_save_price_allocation_to_group_members();
-    
-    $uid = [145,146,147];
-
-    // foreach($uid as $u){
-    //     delete_user_meta($u, '_group_details');
-    //     delete_user_meta($u, '_commission_details');
-    //     delete_user_meta($u, '_treasury_details');
-    //     delete_user_meta($u, '_buyer_details');
-    // }
-
-    $o_id = 2573;
-
-    
-});
 
 /**
- *communicates and syncs with glassfrog api
+ *Communicates and syncs with glassfrog api
  */
-
 function glassfrog_api_get_persons_of_circles()
 {
     global $wpdb;
@@ -80,8 +78,8 @@ function glassfrog_api_get_persons_of_circles()
     $mega_mlm_users = $wpdb->prefix . 'mega_mlm_customers';
 
     // get glassfrog id and user id from custom table manage_glassfrogs_api
-    $results = $wpdb->get_results("SELECT user_id, glassfrog_person_id FROM $mega_mlm_users WHERE user_status = 0  LIMIT 5", ARRAY_A);
-   
+    $results = $wpdb->get_results("SELECT user_id, glassfrog_person_id FROM $mega_mlm_users WHERE user_status = 0 LIMIT 5 ", ARRAY_A);
+    
     // if no results, exit
     if (!$results){
         return ;
@@ -100,8 +98,10 @@ function glassfrog_api_get_persons_of_circles()
     foreach ($all_users as $gfid => $uid) {
 
         // call the glassfrog api
-        $api_call = glassfrog_api_request('people/' . $gfid . '/roles', '', 'GET');
-
+        $api_call = glassfrog_api_request('people/' . $gfid . '/roles', '');
+        
+        // vdd($api_call);
+        
         // check if api call is successful
         if ($api_call) {
 
@@ -147,6 +147,7 @@ function glassfrog_api_get_persons_of_circles()
             }
         }
     }
+    
 
     mega_insert_group_details_to_db($members);
 }
@@ -216,7 +217,7 @@ function mega_rotate_leadership(){
 
     $mega_mlm_groups = $wpdb->prefix . 'mega_mlm_groups';
 
-    $mega_mlm_customers = $wpdb->prefix . 'mega_mlm_groups';
+    $mega_mlm_customers = $wpdb->prefix . 'mega_mlm_customers';
 
     $current_leaders = $wpdb->get_results(
         $wpdb->prepare(
@@ -248,7 +249,7 @@ function mega_rotate_leadership(){
                 $new_leader = $group_array[$current_leader_index + 1];
 
             else :
-
+                
                 //create new array if not fount
                 $new_leader = $group_array[0];
 
@@ -268,14 +269,12 @@ function mega_rotate_leadership(){
                 $mega_mlm_groups,
                 array(
                     'group_leader' => $new_leader,
-                    'updated_date' => $updated_date,
                     'leader_since' => $updated_date, // Update the leader_since column with the new date
                     'leadership_expires' => $expiry_date // Update the leadership_expires column with the new expiry date
                 ),
-                array('id' => $current_leader->id),
+                array('group_id' => $current_leader->group_id),
                 array(
                     '%d', // leader ID format
-                    '%s', // updated_date format
                     '%s', // leader_since format
                     '%s' // leadership_expires format
                 ),
@@ -311,7 +310,6 @@ function dongtrader_get_orders_by_user($user_id , $group_table_orders) {
 }
 
 
-
 function mega_save_price_allocation_to_group_members(){
 
     global $wpdb;
@@ -326,7 +324,7 @@ function mega_save_price_allocation_to_group_members(){
     $mlm_purchase =  $wpdb->prefix . 'mega_mlm_purchases';
     
     //sql query to get list of groups and group leader where distribution is not done or just a update is required
-    $group_prepared_query = $wpdb->prepare("SELECT group_id , group_leader , distribution_status FROM $mlm_groups WHERE distribution_status=0 OR distribution_status=2");
+    $group_prepared_query = $wpdb->prepare("SELECT group_id , group_leader , distribution_status FROM $mlm_groups WHERE distribution_status=%d OR distribution_status=%d",0,2);
     
     //get results from above sql query
     $group_results = $wpdb->get_results($group_prepared_query, ARRAY_A);
@@ -368,9 +366,8 @@ function mega_save_price_allocation_to_group_members(){
 
         foreach($all_members_id as $user_id) {
 
-
             //get all order foreach group members from mega_mlm_purchase table
-            $user_orders = $wpdb->get_results($wpdb->prepare("SELECT order_id FROM $mlm_purchase WHERE customer_id = %d AND allocation_status=%d", (int) $user_id,1), ARRAY_A);
+            $user_orders = $wpdb->get_results($wpdb->prepare("SELECT order_id FROM $mlm_purchase WHERE customer_id = %d AND allocation_status = %d", (int) $user_id, 0), ARRAY_A);
 
             //get all orders of each users
             $user_orders_id = array_column( $user_orders ,'order_id');
@@ -395,8 +392,11 @@ function mega_save_price_allocation_to_group_members(){
                 // find the diference between orders stored on custom dbase and woocommerce
                 $diff = dongtrader_get_orders_by_user($user_id , $user_orders_id);
 
+
                 if(!empty($diff)){
 
+                 
+                    //update $users_order array format = [user_id1 => [order_id2 order_id3]]
                     $users_order[$user_id] = $user_orders_id;
                     
                     foreach($diff as $d){
@@ -441,21 +441,23 @@ function mega_save_price_allocation_to_group_members(){
   
     }, $group_results);
 
-
     //looping inside the created array format 
     foreach($groups_details as $gd){
         
-        // // saving all order details
-        mega_save_order_details($gd['user_orders']);
+        // saving all order details
+        // mega_save_order_details($gd['user_orders']);
 
         // saving all commission details
-        mega_save_commission_details($gd['orders_user'],$gd['all_members'], (int) $gd['parent_user_id']);
+        mega_save_commission_details($gd['orders_user'], true , (int) $gd['parent_user_id']);
 
         // save all treasury details
-        mega_save_treasury_details($gd['orders_user'] , $gd['all_members']); 
+        // mega_save_treasury_details($gd['orders_user'] , $gd['all_members']); 
 
         // saving all group details
         mega_save_group_details($gd['orders_user'] , (int) $gd['parent_user_id'] , (int) $gd['group_id']);
+
+        // update allocation status of each orders id to 1 wp_mega_mlm_purchases
+        mega_update_allocation_status($gd['orders_user']);
         
         // update distribution status
         mega_update_group_distribution_status($gd['group_id']);
@@ -465,9 +467,8 @@ function mega_save_price_allocation_to_group_members(){
 
 function mega_save_order_details($user_orders){
 
-    
    foreach($user_orders as $member=>$order){
-
+   
         $buyer_meta =  get_user_meta($member , '_buyer_details', true);
 
         //assign empty array if $buyer_meta is empty 
@@ -478,47 +479,57 @@ function mega_save_order_details($user_orders){
 
         //looping inside all orders of this user
         foreach($order as $ao){
-
+            
             //check if order id exists in database
             if(get_post_type($ao) != 'shop_order') continue;
 
             //get affiliate from order meta
-            $seller_id    = dongtrader_get_order_meta($ao, 'mega_affid');
+            $sponsor    = dongtrader_get_order_meta($ao, 'mega_affid');
             
-            //get seller or affiliate id we might not need this for instance
-            $seller_name  = dongtrader_check_user($seller_id , false);
-
             //cashback amount from order meta distributeable to voter
             $rebate       = dongtrader_get_order_meta($ao, 'mega_cashback_v');
-        
-            //get title of the product
-            $product_name = dongtrader_get_product($ao,true);
-
-            //get actual process amount for distributor
-            $process_amt  = dongtrader_get_order_meta($ao,'mega_cashback_d');
-
-            //get seller or affiliate profit amount from order meta
-            $seller_profit= dongtrader_get_order_meta($ao,'mega_mr_di'); 
-
-            //if seller is buyer himself compare ids and then set process amount 
-            $process_amount  = $member == $seller_id ? $process_amt : 0;
-
-            //total amount 
-            $totals = number_format($rebate + $process_amount + $seller_profit, 2);
-
+            
+            //will next time after reconfirming it 
+            $rebate_d       = dongtrader_get_order_meta($ao, 'mega_cashback_d');
+            
+            // Get membership 
+            $membership_name = dongtrader_get_order_meta($ao,'_membership_name'); 
+            
             //new array for new order which we will append to 
             $buyer_metas[] = [
                 'order_id'      => $ao,
                 'name'          => $buyer_name,
-                'product_title' => $product_name,
+                'membership'    => $membership_name,
                 'rebate'        => $rebate,
-                'process'       => $process_amount,
-                'seller_profit' => $seller_profit,
-                'total'         => $totals,
+                'rebate_d'      => 0,
+                'total'         => $rebate,
                
             ];
-
-            update_user_meta($member,'_buyer_details',$buyer_metas);
+            
+     
+             update_user_meta($member,'_buyer_details',$buyer_metas);
+             
+           // new we need to update tresury details to sponsor 
+           if($sponsor!=0 && dongtrader_check_user($sponsor,true)){
+           
+                // Get previously stored sponsors treasury    
+                $sponsor_buyer_meta  = get_user_meta($sponsor, '_buyer_details', true);
+                    
+                //assign empty array if $treasury_meta is empty 
+                $sponsor_buyer_metas = !empty($sponsor_buyer_meta) ? $sponsor_buyer_meta : [];
+                
+                //new array for new order which we will append to 
+                $sponsor_buyer_metas[] = [
+                    'order_id'      => $ao,
+                    'name'          => $buyer_name,
+                    'membership'    => $membership_name,
+                    'rebate'        => 0,
+                    'rebate_d'      => $rebate_d,
+                    'total'         => $rebate_d,
+                   
+                ];
+                update_user_meta($sponsor,'_buyer_details',$sponsor_buyer_metas);
+           }
 
         }
         
@@ -526,14 +537,116 @@ function mega_save_order_details($user_orders){
 }
 
 /**
+ * Saving treasury related details to user meta function
+ * @return void
+ */
+function mega_save_my_treasury($orders_members){
+
+    if(empty($orders_members)) return;
+
+    foreach($orders_members as $order=>$user){
+            
+        //check if order id exists in database
+        if(get_post_type($order) != 'shop_order') continue;
+         
+        //get previous seller trading details saved in user meta
+        $treasury_meta  = get_user_meta($user, '_treasury_details', true);
+        
+        //Get the sponsor id 
+        $sponsor =  dongtrader_get_order_meta($order,'mega_affid'); 
+        
+        //assign empty array if $treasury_meta is empty 
+        $treasury_metas = !empty($treasury_meta) ? $treasury_meta : [];
+          
+        //get title of the product
+        $membership_name =  dongtrader_get_order_meta($order,'_membership_name');
+                  
+        //constant cost from pmpro custom fields
+        $members_reward = dongtrader_get_order_meta($order, 'mega_members_r');
+         
+        //50% to seller
+        $member_reward_50_i = $members_reward* 50/100;
+         
+        //40% to group
+        $member_reward_40_g = $members_reward* 40/100;
+         
+        //10% as commission
+        $smallstreet_reward_10_c = $members_reward * 10/100;
+        
+        // get actual buyer name 
+        $buyer_name   = dongtrader_check_user($user , false);
+        
+        // treasury metas arrays
+        $treasury_metas[] = [
+            'order_id'      => $order,
+            'name'          => $buyer_name,
+            'membership'    => $membership_name,
+            'seller_reward' => 0,
+            'group_reward'  => 0,
+            'smallstreet_reward' => $smallstreet_reward_10_c,
+            'totals' => $smallstreet_reward_10_c
+        ];
+        
+        // updating treasury details to the current user 
+        update_user_meta($user,'_treasury_details',$treasury_metas);
+        
+       // new we need to update tresury details to sponsor 
+       if($sponsor!=0 && dongtrader_check_user($sponsor,true)){
+       
+            // Get previously stored sponsors treasury    
+            $sponsor_treasury_meta  = get_user_meta($sponsor, '_treasury_details', true);
+                
+            //assign empty array if $treasury_meta is empty 
+            $sponsor_treasury_metas = !empty($sponsor_treasury_meta) ? $sponsor_treasury_meta : [];
+            
+            $sponsor_treasury_metas[] = [
+                'order_id'      => $order,
+                'name'          => $buyer_name,
+                'membership'    => $membership_name,
+                'seller_reward' => $member_reward_50_i,
+                'group_reward'  => 0,
+                'smallstreet_reward' => $smallstreet_reward_10_c,
+                'totals' => $smallstreet_reward_10_c+$member_reward_50_i
+            ];
+            
+            update_user_meta($sponsor,'_treasury_details',$sponsor_treasury_metas);
+            
+            
+            $seller_income_meta     = get_user_meta($sponsor, '_income_details', true);
+            
+            $seller_income_metas    = !empty($seller_income_meta) ? $seller_income_meta : [];
+            
+            $seller_reward_c        = $smallstreet_reward_10_c*50/100;
+            
+            $smallstreet_reward_c   = $smallstreet_reward_10_c *40/100;
+            
+            $totals = $seller_reward_c+ $smallstreet_reward_c;
+            
+            $seller_income_metas[] = [
+                'order_id'      => $order,
+                'name'          => $buyer_name,
+                'membership'    => $membership_name,
+                'seller_reward_c_i_50' => $seller_reward_c,
+                'group_reward_c_g_40'  => 0,
+                'smallstreet_reward_c_10' => $smallstreet_reward_c,
+                'totals' =>$totals
+            ];
+            
+            update_user_meta($sponsor,'_income_details',$seller_income_metas);
+       }
+
+    }
+}
+
+
+/**
  * Save Commission to affilates and group leaders
  *
  * @param array $order_users
- * @param array $allmems
  * @param mixed $group_leader
  * @return void
  */
-function mega_save_commission_details($order_users ,$allmems , $group_leader){
+function mega_save_commission_details($order_users , $group = false , $group_leader = '' ){
 
     if(empty($order_users)) return;
 
@@ -541,15 +654,14 @@ function mega_save_commission_details($order_users ,$allmems , $group_leader){
         
         // check if order id exists in database
         if(get_post_type($o) != 'shop_order') continue;
-
-        // get name of the product
-        $product_name     = dongtrader_get_product($o, true);
+        
+        $affiliate_commission  = dongtrader_get_order_meta($o,'mega_cashback_d');
 
         // commission to smallstreet **Needs to reconsider and discusss this again***
         $site_comm        = dongtrader_get_order_meta($o,'mega_comm_c_ds');
 
         // Get sponsor id 
-        $sponsor_id = (int) dongtrader_get_order_meta($o,'mega_affid');
+        $sponsor_id       = (int) dongtrader_get_order_meta($o,'mega_affid');
 
         // commission amount that needs to be saved to group leader
         $group_comm       = dongtrader_get_order_meta($o,'mega_mr_c_dg');
@@ -560,9 +672,11 @@ function mega_save_commission_details($order_users ,$allmems , $group_leader){
         // group leader and sponsor check
         $check = $group_leader == $sponsor_id ? true : false;
 
-        // check if sponsor id is not 0 and the sponsor exists in wordpress database
-        if($sponsor_id !== 0 && dongtrader_check_user($sponsor_id,true) && !$check){
-            
+        $membership_name = dongtrader_get_order_meta($o,'_membership_name'); 
+
+        // data to update for sponsor
+        if($sponsor_id !== 0 && dongtrader_check_user($sponsor_id,true) && !$check && $group == false ){
+
             // get sponsor commission data
             $sponsor_commission_meta = get_user_meta($sponsor_id, '_commission_details', true);
             
@@ -570,27 +684,28 @@ function mega_save_commission_details($order_users ,$allmems , $group_leader){
             $sponsor_commission_metas = !empty($sponsor_commission_meta) ? $sponsor_commission_meta : [];
             
             // calculate total commission for this row
-            $total            =  get_numeric_price($individual_comm  + $site_comm);
+            $total            =  $individual_comm  + $site_comm + $affiliate_commission;
 
             // new array to be stored in sponsor meta
             $sponsor_commission_metas[] =[
                 'order_id'      => $o,
                 'name'          => dongtrader_check_user($u, false),
-                'product_title' => $product_name,
-                'seller_com'    => $individual_comm,
+                'product_title' => $membership_name,
+                'affiliate_com' => $affiliate_commission,
+                'individual_com'=> $individual_comm,
                 'group_com'     => 0,
                 'site_com'      => $site_comm,
                 'total'         => $total
             ];
 
             // Check if the sponsor exists in database and update to its meta
-            update_user_meta($sponsor_id,'_commission_details',$sponsor_commission_metas);
+             update_user_meta($sponsor_id,'_commission_details',$sponsor_commission_metas);
 
 
         }
 
-        // check if group leader exists and update commission to its meta
-        if(dongtrader_check_user($group_leader,true) && !$check){
+        // commission to update for group leader
+        if(dongtrader_check_user($group_leader,true) && !$check && $group){
 
             // get sponsor commission data
             $leader_commission_meta = get_user_meta($group_leader, '_commission_details', true);
@@ -599,14 +714,15 @@ function mega_save_commission_details($order_users ,$allmems , $group_leader){
             $leader_commission_metas = !empty($leader_commission_meta) ? $leader_commission_meta : [];
 
             // calculate total commission for this row
-            $total            =  get_numeric_price($site_comm  + $group_comm);
+            $total            =  $site_comm  + $group_comm;
 
             // new array to be stored in sponsor meta
             $leader_commission_metas[] =[
                 'order_id'      => $o,
                 'name'          => dongtrader_check_user($u, false),
-                'product_title' => $product_name,
-                'seller_com'    => 0,
+                'product_title' => $membership_name,
+                'affiliate_com' => 0,
+                'individual_com'=> 0,
                 'group_com'     => $group_comm,
                 'site_com'      => $site_comm,
                 'total'         => $total
@@ -616,8 +732,8 @@ function mega_save_commission_details($order_users ,$allmems , $group_leader){
             update_user_meta($group_leader,'_commission_details',$leader_commission_metas);
         }
 
-        if($check){
-
+        // if group leader and sponsor are same
+        if($check && $group){
             // get sponsor commission data
             $leader_sp_commission_meta = get_user_meta($group_leader, '_commission_details', true);
 
@@ -625,20 +741,21 @@ function mega_save_commission_details($order_users ,$allmems , $group_leader){
             $leader_sp_commission_metas = !empty($leader_sp_commission_meta) ? $leader_sp_commission_meta : [];
 
             // calculate total commission for this row
-            $total            =  get_numeric_price($site_comm  + $group_comm + $individual_comm);
+            $total            =  $site_comm  + $group_comm + $affiliate_commission + $individual_comm;
 
             // new array to be stored in sponsor meta
             $leader_sp_commission_metas[] =[
                 'order_id'      => $o,
                 'name'          => dongtrader_check_user($u, false),
-                'product_title' => $product_name,
-                'seller_com'    =>  $individual_comm,
+                'product_title' => $membership_name,
+                'affiliate_com' => $affiliate_commission,
+                'individual_com'=> $individual_comm,
                 'group_com'     => $group_comm,
                 'site_com'      => $site_comm,
                 'total'         => $total
             ];
 
-            update_user_meta($group_leader,'_commission_details',$leader_sp_commission_metas);
+             update_user_meta($group_leader,'_commission_details',$leader_sp_commission_metas);
         }
 
     }
@@ -651,72 +768,90 @@ function mega_save_commission_details($order_users ,$allmems , $group_leader){
  * @param [array] $allmems
  * @return void
  */
-function mega_save_treasury_details($orders_members , $allmems) {
-
+function mega_save_treasury_details($orders_members , $allmems = [] ) {
 
     // exit if the array is empty
     if(empty($orders_members)) return;
 
     foreach($orders_members as $order=>$user){
-
-        //check if order id exists in database
-        if(get_post_type($order) != 'shop_order') continue;
-
+        
+         //check if order id exists in database
+         if(get_post_type($order) != 'shop_order') continue;
+         
          //get previous seller trading details saved in user meta
-         $treasury_meta  = get_user_meta($user, '_treasury_details', true);
+         $treasury_meta     = get_user_meta($user, '_treasury_details', true);
 
          //assign empty array if $treasury_meta is empty 
-         $treasury_metas = !empty($treasury_meta) ? $treasury_meta : [];
+         $treasury_metas    = !empty($treasury_meta) ? $treasury_meta : [];
  
          //get title of the product
-         $product_name = dongtrader_get_product($order,true);
- 
-         //product id
-         $v_product_id = dongtrader_get_product($order);
+         $product_name      =  dongtrader_get_order_meta($order,'_membership_name');
  
          //get buyer or customer name
-         $buyer_name   = dongtrader_check_user($user , false);
- 
-         //get product price by id
-         $product_obj = wc_get_product( $v_product_id );
-  
-         //get product price
-         $product_price = intval($product_obj->get_price());
- 
-         //rebate amount from order meta distributeable to user whom has brought the product
-         $rebate       = dongtrader_get_order_meta($order, 'mega_cashback_v');
+         $buyer_name        = dongtrader_check_user($user , false);
+
+         //get order object to extract total
+         $order_obj         =  wc_get_order($order);
+
+         //Get order total
+         $order_total       = $order_obj->get_total();
  
          //rebate amount from order meta distributeable to user whom has brought the product
-         $process       = dongtrader_get_order_meta($order, 'mega_cashback_d');
+         $rebate            = dongtrader_get_order_meta($order, 'mega_cashback_v');
+ 
+         //rebate amount from order meta distributeable to user whom has brought the product
+         $process           = dongtrader_get_order_meta($order, 'mega_cashback_d');
  
          //constant cost from pmpro custom fields
-         $members_reward = dongtrader_get_order_meta($order, 'mega_members_r');
- 
-         // members reward
-         $distributed_total_amt = number_format($rebate + $process + $members_reward,2);
+         $members_reward    = dongtrader_get_order_meta($order, 'mega_members_r');
+         
+         //  Affliate or sponsor 
+         $sponsor           =  dongtrader_get_order_meta($order ,'mega_affid');
+         
+         //50% to seller
+         $member_reward_50_i = $members_reward* 50/100;
+         
+         //40% to group
+         $member_reward_40_g = $members_reward* 40/100;
+         
+         //10% as commission
+         $member_reward_10_c = $members_reward * 10/100;
+         
+        //to update on sponsor meta
+        if($sponsor!=0 && dongtrader_check_user($sponsor,true)){
+            
+            $treasury_metas[] = [
+                'order_id'      => $order,
+                'name'          => $buyer_name,
+                'product_title' => $product_name,
+                'm_r_50_i'      => $member_reward_50_i,
+                'm_r_40_g'      => 0,
+                'm_r_10_c'      => 0
+            ]; 
+        }
         
         //  Amount remaining after distribution 
-         $remaining_total_amt   = number_format($product_price - $distributed_total_amt,2);
- 
-         $treasury_metas[] = [
-             'order_id'      => $order,
-             'name'          => $buyer_name,
-             'product_title' => $product_name,
-             'total_amt'     => $product_price,
-             'distrb_amt'    => $distributed_total_amt,
-             'rem_amt'       => $remaining_total_amt,
-         ];
+        //  $remaining_total_amt   = $order_total - $distributed_total_amt;
+        // if($sponsor !== 0 && dongtrader_check_user($sponsor, true){
+        
+        // }
+        //  $treasury_metas[] = [
+        //      'order_id'      => $order,
+        //      'name'          => $buyer_name,
+        //      'product_title' => $product_name,
+        //      'total_amt'     => $order_total,
+        //      'distrb_amt'    => $distributed_total_amt,
+        //      'rem_amt'       => $remaining_total_amt,
+        //  ];
 
-         
-         foreach($allmems as $am) {
-            update_user_meta($am,'_treasury_details', $treasury_metas);
-         }
- 
+        //  update_user_meta($user,'_treasury_details',$treasury_metas);
+        //  if(!empty($allmems)){
+        //     foreach($allmems as $am) {
+        //         update_user_meta($am,'_treasury_details', $treasury_metas);
+        //      }
+        //  }
     }
 }
-
-
-
 /**
  * Function to save group details
  *
@@ -762,6 +897,7 @@ function mega_save_group_details($order_members , $group_leader,$group_id){
 
         $circle_name = $wpdb->get_var($wpdb->prepare($group_name_query, (int) $u));
 
+        // Save data to sponsor
         if($sponsor_id !== 0 && dongtrader_check_user($sponsor_id, true) && !$check ){
 
             // get previous group details saved in user meta
@@ -782,7 +918,7 @@ function mega_save_group_details($order_members , $group_leader,$group_id){
             update_user_meta($sponsor_id,'_group_details',$sponsor_group_metas);
 
         }
-
+        // send data to group leader
         if(dongtrader_check_user($group_leader , true) && !$check){
 
             // get previous group details saved in user meta
@@ -803,6 +939,7 @@ function mega_save_group_details($order_members , $group_leader,$group_id){
             update_user_meta($group_leader,'_group_details',$gl_group_metas);
         }
 
+        // if the sponsor and group leader are same
         if($check){
 
             // get previous group details saved in user meta
@@ -811,7 +948,7 @@ function mega_save_group_details($order_members , $group_leader,$group_id){
             // assign empty array if meta is empty 
             $gl_and_sp_group_metas = !empty($gl_and_sp_group_meta) ? $gl_and_sp_group_meta : [];
 
-
+            
             $gl_and_sp_group_metas[] = [
                 'order_id'              => $o,
                 'order_code'            => $order_code,
@@ -823,6 +960,26 @@ function mega_save_group_details($order_members , $group_leader,$group_id){
             update_user_meta($group_leader,'_group_details',$gl_and_sp_group_metas);
         }
     }
+}
+
+function mega_update_allocation_status($orders_user){
+
+      if(empty($orders_user)) return;
+
+      global $wpdb; 
+
+      $mega_mlm_sales = $wpdb->prefix . 'mega_mlm_purchases';
+
+      foreach($orders_user as $o=> $u){
+
+        if(get_post_type($o) != 'shop_order') continue;
+
+        $update = $wpdb->prepare("UPDATE $mega_mlm_sales SET allocation_status = %d WHERE order_id = %d", 1, (int) $o);
+
+        $wpdb->query($update);
+
+      }
+
 }
 
 /**
@@ -837,7 +994,6 @@ function mega_save_group_details($order_members , $group_leader,$group_id){
     $mega_mlm_sales = $wpdb->prefix . 'mega_mlm_purchases';
     $mega_mlm_users = $wpdb->prefix . 'mega_mlm_customers';
     $group_details_table = $wpdb->prefix .'mega_mlm_groups';
-
     $unallocated_orders = $wpdb->prepare("SELECT p.* FROM {$mega_mlm_sales} AS p
     INNER JOIN {$mega_mlm_users} AS c ON p.customer_id = c.user_id
     INNER JOIN {$group_details_table} AS g ON c.customer_group_id = g.group_id
@@ -854,27 +1010,6 @@ function mega_save_group_details($order_members , $group_leader,$group_id){
 
 
  }
-
-function dongtrader_get_product($order_id , $name=false){
-
-    $order          = wc_get_order($order_id);
-
-    $items          =  $order->get_items();
-
-    foreach ($items as $item) {
-
-        $product = $item->get_product();
-
-        $product_id[] =  $product->get_id();
-
-        if($name) $product_name[] = $product->get_name();
-
-    }
-
-    return $name ? $product_name[0] : $product_id[0];
-
-
-}
 
 function dongtrader_check_user($uid , $check_only = true ){
 
@@ -913,10 +1048,10 @@ function dongtrader_check_user($uid , $check_only = true ){
 function dongtrader_get_order_meta($orderid, $key)
 {
     //get order objects
-    $orderobj = new WC_Order($orderid);
+    $om = get_post_meta($orderid, $key , true);
 
     //get value of meta
-    return !empty($orderobj->get_meta($key)) ? $orderobj->get_meta($key) : 0;
+    return !empty($om) ? $om : 0;
 
 }
 
@@ -929,6 +1064,7 @@ function add_custom_tab_to_my_account()
 {
 
     $all_my_account_tabs = [
+
         [
             'name' => __('My Orders', 'cpm-dongtrader'),
             'slug' => 'detente-orders',
@@ -937,7 +1073,7 @@ function add_custom_tab_to_my_account()
         ],
 
         [
-            'name' => __('Treasury', 'cpm-dongtrader'),
+            'name' => __('My Treasury', 'cpm-dongtrader'),
             'slug' => 'detente-treasury',
             'position' => 2,
         ],
@@ -949,7 +1085,7 @@ function add_custom_tab_to_my_account()
         ],
 
         [
-            'name' => __('Commission', 'cpm-dongtrader'),
+            'name' => __('Seller Income', 'cpm-dongtrader'),
             'slug' => 'detente-commission',
             'position' => 4,
         ],

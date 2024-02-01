@@ -1,6 +1,8 @@
 <?php
 
-use const Automattic\Jetpack\Extensions\Story\IMAGE_BREAKPOINTS;
+add_filter( 'wp_mail_content_type', function( $content_type ) {
+	return 'text/html';
+} );
 
 /**
  * It returns the API credentials for the API name passed to it
@@ -105,6 +107,7 @@ function glassfrog_api_request($endpoint = '', $str = '', $method = "GET")
 
     /* Build Url for api request */
     $build_url = $gf_api_url . $endpoint;
+    
     /* Params For API requests */
     $options = [
         'body' => $method == "POST" ? $str : '',
@@ -115,7 +118,9 @@ function glassfrog_api_request($endpoint = '', $str = '', $method = "GET")
         ],
 
     ];
-
+    
+    // vdd($options);
+    
     /* A ternary operator to check get or post parameter and use functions accordingly*/
     $response_received = $method == 'POST' ? wp_remote_post($build_url, $options) : wp_remote_get($build_url, $options);
     /* Get the response code from the response received. */
@@ -124,7 +129,9 @@ function glassfrog_api_request($endpoint = '', $str = '', $method = "GET")
     $response_body = $response_status == '200' ? wp_remote_retrieve_body($response_received) : false;
     /* Checking if the response body is not empty and then decoding the response body. */
     $response_object = $response_body ? json_decode($response_body) : false;
+    
 
+    
     return $response_object;
 }
 
@@ -343,7 +350,9 @@ function dongtrader_meta_qr_generator()
             $get_url = get_permalink($variations);
             $html = '';
             $modfied_url = $get_url . '&varid=' . $variations;
-            $attr_color = get_post_meta($variations, 'attribute_pa_color', true);
+            $attr_color = get_post_meta($variations, 'attribute_pa_sector', true);
+
+            $resp['attr_color'] = $attr_color; 
             //echo $attr_color . '-color';
             $current__array = dongtrader_ajax_helper(dongtrader_variable_color_to_rgb_color($attr_color), $modfied_url);
             if ($current__array) {
@@ -417,161 +426,6 @@ function dongtrader_delete_qr_items_settingspage()
     wp_die();
 }
 
-/*Create database tables where we can save api response details*/
-function dongtrader_create_dbtable()
-{
-
-    global $wpdb;
-
-    $charset_collate = $wpdb->get_charset_collate();
-
-    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
-    /* create table to store custom order */
-    $order_table_name = $wpdb->prefix . 'dong_order_export_table';
-    if ($wpdb->get_var("SHOW TABLES LIKE '{$order_table_name}'") != $order_table_name) :
-        $export_sql = "CREATE TABLE $order_table_name (
-            id INT NOT NULL AUTO_INCREMENT ,
-            customer_email VARCHAR(255) NOT NULL ,
-            customer_first_name VARCHAR(255) NOT NULL ,
-            customer_last_name VARCHAR(255) NOT NULL ,
-            customer_phone VARCHAR(255) NOT NULL ,
-            customer_country VARCHAR(255) NOT NULL ,
-            customer_state VARCHAR(255) NOT NULL ,
-            customer_address VARCHAR(255) NOT NULL ,
-            customer_postcode VARCHAR(255) NOT NULL ,
-            customer_city VARCHAR(255) NOT NULL ,
-            product_id INT NOT NULL ,
-            product_varition_id INT NOT NULL ,
-            affilate_user_id INT NOT NULL ,
-            created_at VARCHAR(255) NOT NULL,
-            PRIMARY KEY (id)) $charset_collate;";
-        dbDelta($export_sql);
-    endif;
-
-    // // Create users glassfrog details table
-    // $user_details_table = $wpdb->prefix . 'glassfrog_user_data';
-    // if ($wpdb->get_var("SHOW TABLES LIKE '{$user_details_table}'") != $user_details_table):
-    //     $glassfrog_user_sql = "CREATE TABLE $user_details_table (
-    //         id INT NOT NULL AUTO_INCREMENT ,
-    //         user_id INT ,
-    //         gf_person_id VARCHAR(255) ,
-    //         circle_id	int(11),
-    //         gf_name VARCHAR(255) ,
-    //         in_glassfrog VARCHAR(255) NOT NULL ,
-    //         all_orders VARCHAR(255) NOT NULL ,
-    //         group_id INT,
-    //         upline_id INT,
-    //         PRIMARY KEY (id),
-    //         INDEX (user_id),
-    //         FOREIGN KEY (upline_id) REFERENCES {$user_details_table}(user_id)
-    //         ) $charset_collate;";
-    //     dbDelta($glassfrog_user_sql);
-    // endif;
-
-
-
-
-    $release_group_profit = $wpdb->prefix . 'release_groups_profit';
-    if ($wpdb->get_var("SHOW TABLES LIKE '{$release_group_profit}'") != $release_group_profit) {
-        $release_group_profit_query = "CREATE TABLE {$release_group_profit} (
-            id INT NOT NULL AUTO_INCREMENT,
-            release_date DATETIME,
-            release_amount INT NOT NULL,
-            release_note VARCHAR(255) NOT NULL,
-            group_id INT,
-            PRIMARY KEY (id)
-        ) $charset_collate;";
-        dbDelta($release_group_profit_query);
-    }
-
-    // Adding new database structure for mlm
-
-    // M.l.m users table
-    $mega_mlm_users =  $wpdb->prefix . 'mega_mlm_customers';
-
-    $group_details_table = $wpdb->prefix . 'mega_mlm_groups';
-
-    if ($wpdb->get_var("SHOW TABLES LIKE '{$mega_mlm_users}'") != $mega_mlm_users) {
-
-        $mega_mlm_users_query = "CREATE TABLE {$mega_mlm_users} (
-            id INT NOT NULL AUTO_INCREMENT,
-            user_id INT,
-            upline_id INT,
-            customer_group_id INT(11),
-            glassfrog_person_id BIGINT,
-            person_name VARCHAR(255),
-            circle_id INT(11),
-            created_date TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-            user_status INT(11) NOT NULL,
-            PRIMARY KEY (id),
-            UNIQUE(user_id),
-            INDEX(user_id),
-            FOREIGN KEY (customer_group_id) REFERENCES {$group_details_table}(group_id)
-        ) $charset_collate;";
-
-        dbDelta($mega_mlm_users_query);
-    }
-
-    //mlm tree data
-
-    if ($wpdb->get_var("SHOW TABLES LIKE '{$group_details_table}'") != $group_details_table) :
-        $group_details_sql = "CREATE TABLE $group_details_table (
-                group_id INT NOT NULL AUTO_INCREMENT,
-                group_members VARCHAR(255) NOT NULL,
-                circle_id INT NOT NULL,
-                circle_name VARCHAR(255) NOT NULL,
-                created_date DATETIME NOT NULL,
-                group_leader INT NOT NULL,
-                leader_since DATETIME NOT NULL,
-                leadership_expires DATETIME NOT NULL,
-                distribution_status TINYINT(2) NOT NULL,
-                total_group_profit VARCHAR(255),
-                PRIMARY KEY (group_id)
-            ) $charset_collate;";
-        dbDelta($group_details_sql);
-    endif;
-
-    //downline table
-    // $mega_mlm_downline =  $wpdb->prefix . 'mega_mlm_downline';
-
-    // if ($wpdb->get_var("SHOW TABLES LIKE '{$mega_mlm_downline}'") != $mega_mlm_downline) {
-
-    //     $mega_mlm_downline_query = "CREATE TABLE {$mega_mlm_downline} (
-    //         downline_id INT NOT NULL AUTO_INCREMENT,
-    //         user_id INT,
-    //         downline_user_id INT,
-    //         user_level INT, 
-    //         PRIMARY KEY (downline_id),
-    //         INDEX (user_id),
-    //         INDEX (downline_user_id),
-    //         FOREIGN KEY (user_id) REFERENCES {$mega_mlm_users}(user_id),
-    //         FOREIGN KEY (downline_user_id) REFERENCES {$mega_mlm_users}(user_id)
-    //     ) $charset_collate;";
-
-    //     dbDelta($mega_mlm_downline_query);
-    // }
-
-    $mega_mlm_sales = $wpdb->prefix . 'mega_mlm_purchases';
-    if ($wpdb->get_var("SHOW TABLES LIKE '{$mega_mlm_sales}'") != $mega_mlm_sales) {
-        $mega_mlm_sales_query = "CREATE TABLE {$mega_mlm_sales} (
-            sale_id INT NOT NULL AUTO_INCREMENT,
-            sponsor_id INT,
-            customer_id INT,
-            order_id INT,
-            product_id INT,
-            product_name varchar(255),
-            product_price INT,
-            allocation_status TINYINT(2) NOT NULL,
-            PRIMARY KEY (sale_id),
-            FOREIGN KEY (customer_id) REFERENCES {$mega_mlm_users}(user_id),
-            FOREIGN KEY (sponsor_id) REFERENCES {$mega_mlm_users}(user_id)
-        ) $charset_collate;";
-
-        dbDelta($mega_mlm_sales_query);
-    }
-}
-add_action('plugin_loaded', 'dongtrader_create_dbtable');
 
 function dongtrader_user_registration_hook($customer_id, $p_id, $oid)
 {
@@ -811,18 +665,67 @@ function dongtrader_get_product_color($role)
     return $role;
 }
 
-/* dong order export form */
-
-/**
- * It creates a form and inserts the data into the database.
- */
-function dongtraders_order_export_form()
+function dongtrader_convert_sector_to_slug($sector)
 {
-?>
-    <form action="" method="POST" class="order-export-form">
-        <!--   <div class="dong-notify-msg">
+    switch ($sector) {
+        case 'budget':
+            $role = 'orange';
+            break;
+        case 'planning':
+            $role = 'purple';
+            break;
+        case 'media':
+            $role = 'red';
+            break;
+        case 'membership':
+            $role = 'blue';
+            break;
+        case 'distribution':
+            $role = 'green';
+            break;
+        default:
+            $role = 'blue';
+    }
 
-        </div> -->
+    return $role;
+}
+
+/*Order Export Form NEw*/
+
+function dongtraders_order_export_form_new(){
+
+     $settings  = get_option('dongtraders_api_settings_fields');
+     $patron_pro_val = $settings['dong_patron_mem'];
+    
+     $mega_pro_val = $settings['dong_mega_mem'];
+     $sectors = get_terms( array(
+        'taxonomy'   => 'pa_sector',
+        'hide_empty' => true,
+     ));
+?>
+
+    <form action="" method="POST" class="order-export-form">
+    <?php 
+
+       $validate = true;
+        if(isset($_POST['customer-phone']) && phone_number_exists($_POST['customer-phone']) ){
+        $validate = false;
+             echo '<div class="error-box">This Phone number is<b>'.$_POST['customer-phone'].'</b> already used. Please use unique phone number and try again</div>';
+        }
+        
+        
+        if(isset($_POST['customer-email']) && mega_check_email($_POST['customer-email']) ){
+            echo '<div class="error-box">This email address <b>'.$_POST['customer-email'].'</b> is already used .Please use unique email and try again</div>';
+            // !mega_check_email( $_POST['customer-email'])
+            $validate = false;
+        } 
+        
+       if(isset($_POST['set-order_export']) && $validate == true){
+       
+            echo '<div class="success-box">Affiliate Order Data inserted Sucessfully</div>';
+       }
+
+    ?>
         <div class="form-group">
             <label for="">Customer Email</label>
             <div class="form-control-wrap">
@@ -885,72 +788,29 @@ function dongtraders_order_export_form()
         </div>
 
         <div class=" form-group">
-            <label for="">Select Product</label>
+            <label for="">Select Membership</label>
             <div class="form-control-wrap">
-                <select name="select-product" id="" class="form-control select-product" required="">
-                    <?php
-                    echo '<option value="">Select Product</option>';
-                    $args = array(
-                        'post_type' => 'product',
-                        'posts_per_page' => -1,
-                        'status' => 'published',
-                    );
-
-                    $loop = new WP_Query($args);
-                    //var_dump($loop);
-                    $product_ids = array();
-                    while ($loop->have_posts()) : $loop->the_post();
-                        $product = new WC_Product_Variable(get_the_ID());
-                        $terms = get_the_terms($product->get_id(), 'product_type');
-                        $product_type = (!empty($terms)) ? sanitize_title(current($terms)->name) : 'simple';
-
-                        echo '<option data-productType="' . $product_type . '" value="' . get_the_ID() . '">' . get_the_title() . '</option>';
-                        $product_ids[] = $product->get_id();
-                    endwhile;
-
-                    wp_reset_query();
-
-                    ?>
+                <select name="select-product" id="form-field-name" class="form-control select-product" required="required" aria-required="true">
+                    <option value="">Select Membership</option>
+                    <option value="megavoter">MEGAvoter</option>
+                    <option value="patron">Patron</option>
                 </select>
+
             </div>
         </div>
         <div class="form-group">
             <!--  <label for="">Select Variation Product</label> -->
             <div class="form-control-wrap">
-                <?php
-                foreach ($product_ids as $product_id) {
-                    $product = new WC_Product_Variable($product_id);
-                    $terms = get_the_terms($product_id, 'product_type');
-                    $product_type = (!empty($terms)) ? sanitize_title(current($terms)->name) : 'simple';
+                <?php if(!empty($sectors)) :?>
+                     <label for="">Select Sectors</label>
+                    <select name="membership-sectors" id="form-field-type" class="form-control variation-product" required="required" aria-required="true">
+                        <option value="">Select Sectors</option>
+                        <?php foreach ($sectors as $s) { ?>   
+                            <option value="<?php echo $s->slug?>"><?php echo $s->name; ?></option>
+                         <?php } ?>
+                    </select>
 
-                    if ($product_type == 'variable') {
-                        # code...
-                        $product = wc_get_product($product_id);
-                        $current_products = $product->get_children();
-                ?>
-                        <div id="varition-<?php echo $product_id; ?>" class="export_variation_product_hide">
-                            <label for="">Select Variation Product</label>
-                            <div class="form-control-wrap">
-                                <select name="variation-product[]" class="form-control variation-product">
-                                    <?php
-                                    echo '<option value="0">Choose Variation Product</option>';
-                                    foreach ($current_products as $current_product) {
-                                        $variation = wc_get_product($current_product);
-                                        $varition_name = $variation->get_name();
-                                        echo '<option value="' . $current_product . '">' . $varition_name . '</option>';
-                                    }
-
-                                    ?>
-                                </select>
-                            </div>
-                        </div>
-
-                <?php
-
-                    }
-                }
-
-                ?>
+                <?php endif; ?>
 
             </div>
         </div>
@@ -965,12 +825,8 @@ function dongtraders_order_export_form()
         </div>
     </form>
 
-    <?php
-    /* insert date to database table */
-    $current_page = home_url($_SERVER['REQUEST_URI']);
-    //echo $current_page;
-
-    if (isset($_POST['set-order_export'])) {
+<?php
+    if (isset($_POST['set-order_export']) && phone_number_exists($_POST['customer-phone']) !== true && mega_check_email( $_POST['customer-email']) !== true) {
         $customer_email = $_POST['customer-email'];
         $customer_first_name = $_POST['customer-first-name'];
         $customer_last_name = $_POST['customer-last-name'];
@@ -980,30 +836,15 @@ function dongtraders_order_export_form()
         $customer_address = $_POST['customer-address'];
         $customer_postcode = $_POST['customer-postcode'];
         $customer_city = $_POST['customer-city'];
-        $customer_product_id = $_POST['select-product'];
+        $customer_mem = wc_clean($_POST['select-product']);
+        $customer_sector = wc_clean($_POST['membership-sectors']);
+        $role           = wc_clean(dongtrader_get_product_color($customer_sector));
+        $variation = dongtrader_convert_sector_to_slug(strtolower($customer_sector));
+
         $customer_affilate_user_final = $_POST['affilate-user'];
 
         $created_date = date("Y-m-d");
-        $customer_varition_product_id = $_POST['variation-product'];
 
-        $get_final_vartion_id = (array_filter($customer_varition_product_id));
-
-        $v_id = '';
-        foreach ($get_final_vartion_id as $get_final_vartion_ids) {
-
-            $v_id .= $get_final_vartion_ids;
-            # code...
-        }
-        $varition_product_id_final = $v_id;
-        if (!empty($varition_product_id_final)) {
-
-            $final_v_id = $varition_product_id_final;
-        } else {
-            $final_v_id = 0;
-        }
-        /* echo $customer_product_id . '-Affiliate User<br>';
-        echo $final_v_id . '-Varition ID<br>';
-        print_r($_POST); */
 
         global $wpdb;
         $order_table_name = $wpdb->prefix . 'dong_order_export_table';
@@ -1020,12 +861,12 @@ function dongtraders_order_export_form()
                 customer_address,
                 customer_postcode,
                 customer_city,
-                product_id,
-                product_varition_id,
+                customer_membership,
+                customer_sector,
                 affilate_user_id,
                 created_at
                )
-               VALUES ( %s, %s, %s, %d, %s, %s, %s, %s, %s, %d, %d, %d, %s )",
+               VALUES ( %s, %s, %s, %d, %s, %s, %s, %s, %s, %s, %s, %d, %s )",
                 esc_attr($customer_email),
                 esc_attr($customer_first_name),
                 esc_attr($customer_last_name),
@@ -1035,20 +876,118 @@ function dongtraders_order_export_form()
                 esc_attr($customer_address),
                 esc_attr($customer_postcode),
                 esc_attr($customer_city),
-                esc_attr($customer_product_id),
-                esc_attr($final_v_id),
+                $customer_mem,
+                strtolower($role),
                 esc_attr($customer_affilate_user_final),
                 $created_date
 
             )
         );
         if ($order_insert) {
-            echo '<div class="success-box">Affiliate Order Data inserted Sucessfully</div>';
+        
+            $cart_items = '';
+
+            if(strtolower($customer_mem) == 'megavoter' ){
+
+                $mega_pro_val       = $settings['dong_mega_mem'];
+
+                $cart_items         = mega_add_variation_to_cart($mega_pro_val , $variation);
+
+            }elseif(strtolower($customer_mem) == 'patron' ) {
+
+                $patron_pro_val     = $settings['dong_patron_mem'];
+
+                $cart_items         = mega_add_variation_to_cart($patron_pro_val , $variation);
+
+            }
+            
+            if ( !email_exists($customer_email) && !empty($cart_items)) {
+                $random_password = wp_generate_password();
+              
+                $display_name = $customer_first_name . ' ' . $customer_last_name;
+               
+                $user_id = wc_create_new_customer($customer_email, $display_name, $random_password);
+
+                $affiliate_user_id = get_current_user_id();
+                // Step 4: Create the order
+                $order = wc_create_order();
+                $order->set_customer_id($user_id);
+                $order->update_meta_data('mega_affid', $affiliate_user_id);
+
+                foreach($cart_items as $pid){
+
+                    $pp = wp_get_post_parent_id($pid);
+
+                    if($pp == 0){
+
+                        $id = $pid;
+
+                    }else{
+
+                        $id = $pp;
+                    }
+
+                    $get_quantity_yam = get_post_meta($id, '_qty_args', true);
+
+                    if(is_array($get_quantity_yam) && !empty($get_quantity_yam)){
+                        $order->add_product(wc_get_product($id), $get_quantity_yam['qty_min']);
+                    }else{
+                        $order->add_product(wc_get_product($id), 1);
+                    }
+                }
+             
+                // Step 6: Add shipping
+                $shipping = new WC_Order_Item_Shipping();
+                $shipping->set_method_title('Free shipping');
+                $shipping->set_method_id('free_shipping:1'); // set an existing Shipping method ID
+                $shipping->set_total(0); // optional
+                $order->add_item($shipping);
+
+                // Step 7: Set billing and shipping addresses
+                $address = array(
+                    'first_name' => $customer_first_name,
+                    'last_name'  => $customer_last_name,
+                    'company'    => '',
+                    'email'      => $customer_email,
+                    'phone'      => $customer_phone,
+                    'address_1'  => $customer_address,
+                    'address_2'  => '',
+                    'city'       => $customer_city,
+                    'state'      => $customer_state,
+                    'postcode'   => $customer_postcode,
+                    'country'    => $customer_country
+                );
+                $order->set_address($address, 'billing');
+                $order->set_address($address, 'shipping');
+
+                // Step 8: Add payment method and set order status
+                $order->set_payment_method('preorder');
+                $order->set_status('wc-completed', 'Order is created From Importer');
+
+                // Step 9: Calculate and save the order
+                $order->calculate_totals();
+                $order->save();
+
+                // Step 11: Update the order status message
+                $order_id = $order->get_id();
+                if ($order_id) {
+                    $order_obj = wc_get_order($order_id);
+                    
+                    mega_set_membership_level($order_obj);//7
+                    mega_custom_ordermeta_update($order_obj);//8
+                    mega_update_mlm_database($order_obj);//9
+                    use_email_as_username($order_id);
+                   
+                }
+            }
+
+           
         } else {
-            echo '<div class="error-box">Order Data could not inserted ! Please Try again</div>';
+            echo '<div class="error-box">Order Data could not inserted.Please use unique phone number or email address and try again</div>';
         }
     }
 }
+
 
 /* dongtraders custom export order list */
 
@@ -1063,13 +1002,12 @@ function dongtraders_custom_order_created_list()
 
             <form action="" id="export-csv-order">
                 <span id="from">From</span>
-                <input id="start-month" name="start_month" type="date" size="2" required>
+                <input id="start-month" name="start_month" type="date" size="2" >
                 <span id="to">To</span>
-                <input id="end-month" name="end_month" type="date" size="2" required>
+                <input id="end-month" name="end_month" type="date" size="2">
                 <select name="affilate_id" id="affilate_id">
                     <?php
                     $get_all_users = get_users();
-                    //var_dump($get_all_users);
                     echo '<option value="">Select Affilate User</option>';
                     foreach ($get_all_users as $get_all_user) {
                         echo '<option value="' . $get_all_user->ID . '">' . $get_all_user->user_login . '</option>';
@@ -1082,7 +1020,7 @@ function dongtraders_custom_order_created_list()
         <table id="qr-all-list">
             <thead>
                 <tr>
-                    <th>id</th>
+                    <th>S.N.</th>
                     <th>Date</th>
                     <th>Email</th>
                     <th>First Name</th>
@@ -1108,11 +1046,12 @@ function dongtraders_custom_order_created_list()
                 //$get_url = home_url() . '/wp-admin/admin.php?page=dongtrader_api_settings';
                 /* $current_page = ''; */
                 if (!empty($get_order_results)) {
+                $i=1;
                     foreach ($get_order_results as $export_order) {
-
+                      
                         echo '
                      <tr>
-                    <td>' . $export_order->id . '</td>
+                    <td>' . $i. '</td>
                      <td>' . $export_order->created_at . '</td>
                    <td>' . $export_order->customer_email . '</td>
                    <td>' . $export_order->customer_first_name . '</td>
@@ -1134,6 +1073,7 @@ function dongtraders_custom_order_created_list()
                         </td>
                 </tr>
                 ';
+                $i++;
                     }
                 } else {
                     echo '<div class="error-box">No Records Found</div>';
@@ -1185,13 +1125,16 @@ if (!function_exists('dong_custom_order_exporter_csv_files')) {
             $get_custom_orders = $wpdb->get_results("SELECT * FROM $get_table_name WHERE created_at BETWEEN  '$get_start_date' AND '$get_end_date' ", ARRAY_A);
         }
 
+        if (DateTime::createFromFormat('Y-m-d', $get_start_date) == false && DateTime::createFromFormat('Y-m-d', $get_end_date) == false ) {
+            $get_custom_orders = $wpdb->get_results("SELECT * FROM $get_table_name ", ARRAY_A);
+          }
         if (!empty($get_custom_orders)) {
             $cpm_order_exporter_generate_csv_filename = 'dongtraders-custom-orders' . date('Ymd_His') . '-export.csv';
             header('Content-Type: application/csv');
             header('Content-Disposition: attachment; filename={$cpm_comment_exporter_generate_csv_filename}');
             $output = fopen('php://output', 'w');
 
-            fputcsv($output, ['csv_id', 'customer_email', 'billing_first_name', 'billing_last_name', 'billing_phone', 'billing_address_1', 'billing_postcode', 'billing_city', 'billing_state', 'billing_country', 'product_id', 'variation_id', 'affilate_user_id']);
+            fputcsv($output, ['csv_id', 'customer_email', 'billing_first_name', 'billing_last_name', 'billing_phone', 'billing_address_1', 'billing_postcode', 'billing_city', 'billing_state', 'billing_country', 'customer_membership', 'customer_sector', 'affilate_user_id']);
 
             foreach ($get_custom_orders as $get_custom_order) {
                 $export_id = $get_custom_order['id'];
@@ -1204,11 +1147,11 @@ if (!function_exists('dong_custom_order_exporter_csv_files')) {
                 $export_customer_state = $get_custom_order['customer_state'];
                 $export_customer_postcode = $get_custom_order['customer_postcode'];
                 $export_customer_city = $get_custom_order['customer_city'];
-                $export_product_id = $get_custom_order['product_id'];
-                $export_product_varition_id = $get_custom_order['product_varition_id'];
+                $export_membership = $get_custom_order['customer_membership'];
+                $export_sector = $get_custom_order['customer_sector'];
                 $export_affilate_user_id = $get_custom_order['affilate_user_id'];
 
-                fputcsv($output, [$export_id, $export_customer_email, $export_customer_first_name, $export_customer_last_name, $export_customer_phone, $export_customer_address, $export_customer_postcode, $export_customer_city, $export_customer_state, $export_customer_country, $export_product_id, $export_product_varition_id, $export_affilate_user_id]);
+                fputcsv($output, [$export_id, $export_customer_email, $export_customer_first_name, $export_customer_last_name, $export_customer_phone, $export_customer_address, $export_customer_postcode, $export_customer_city, $export_customer_state, $export_customer_country, $export_membership, $export_sector, $export_affilate_user_id]);
             }
             fclose($output);
         }
@@ -1234,11 +1177,11 @@ function dongtraders_show_user_affilate_order()
             <form action="" id="export-csv-order">
                 <div class=" export-date export-date-from">
                     <span id="from">From</span>
-                    <input id="start-month" name="start_month" type="date" size="2" required>
+                    <input id="start-month" name="start_month" type="date" size="2">
                 </div>
                 <div class="export-date export-date-to">
                     <span id="to">To</span>
-                    <input id="end-month" name="end_month" type="date" size="2" required>
+                    <input id="end-month" name="end_month" type="date" size="2">
                 </div>
 
                 <input id="end-month" name="affilate_id" type="hidden" size="2" value="<?php echo $user_ID; ?>">
@@ -1248,7 +1191,7 @@ function dongtraders_show_user_affilate_order()
         <table id="my-account-affilate-order">
             <thead>
                 <tr>
-                    <th>id</th>
+                    <th>S.N.</th>
                     <th>Date</th>
                     <th>Email</th>
                     <th>First Name</th>
@@ -1259,8 +1202,8 @@ function dongtraders_show_user_affilate_order()
                     <th>Address</th>
                     <th>City</th>
                     <th>Postcode</th>
-                    <th>Product Id</th>
-                    <th>Variation Id</th>
+                    <th>Membership</th>
+                    <th>Sector</th>
                     <th>Affilate User</th>
                     <th>Remove</th>
 
@@ -1273,11 +1216,12 @@ function dongtraders_show_user_affilate_order()
                 //$get_url = home_url() . '/wp-admin/admin.php?page=dongtrader_api_settings';
                 $current_page = home_url($_SERVER['REQUEST_URI']);
                 if (!empty($get_order_results)) {
+                $i=1;
                     foreach ($get_order_results as $export_order) {
 
                         echo '
                      <tr>
-                    <td>' . $export_order->id . '</td>
+                    <td>' . $i. '</td>
                      <td>' . $export_order->created_at . '</td>
                    <td>' . $export_order->customer_email . '</td>
                    <td>' . $export_order->customer_first_name . '</td>
@@ -1288,8 +1232,8 @@ function dongtraders_show_user_affilate_order()
                    <td>' . $export_order->customer_state . '</td>
                    <td>' . $export_order->customer_city . '</td>
                    <td>' . $export_order->customer_postcode . '</td>
-                   <td>' . $export_order->product_id . '</td>
-                   <td>' . $export_order->product_varition_id . '</td>
+                   <td>' . $export_order->customer_membership . '</td>
+                   <td>' . $export_order->customer_sector . '</td>
                    <td>' . $export_order->affilate_user_id . '</td>
                  <td>
                  <form action="" method="post">
@@ -1299,6 +1243,7 @@ function dongtraders_show_user_affilate_order()
                         </td>
                 </tr>
                 ';
+                $i++;
                     }
                 } else {
                     echo '<div class="error-box">No Records Found</div>';
@@ -1908,7 +1853,7 @@ function dongtrader_patron_form($atts)
         <div class="form-group">
             <p class="group-heading"><b>Patron Complete Credentials</b></p>
             <p>
-                Underlined links will require Patron applicants to submit these form fields with valid platform ID credentials or access. Individual accounts only.
+                Underlined links will require Patron applicants to submit these form fields with valid platform ID credentials or access. Individual accounts only.<b>MEGAvoters for organization and political fundraising as industry, size of 1.</b>
 
             </p>
             <p>
@@ -1998,6 +1943,7 @@ function dongtrader_patron_form($atts)
         </div>
 
     </form>
+    <?php  do_action('after_pcc_registration_form');?>
     <script>
         jQuery(document).ready(function($) {
             $(".toggle-password").click(function() {
@@ -2085,8 +2031,6 @@ function dongtrader_patron_form($atts)
     return ob_get_clean();
 }
 add_shortcode('patron_form', 'dongtrader_patron_form');
-
-
 
 
 add_action('wp_ajax_mega_credentials_save', 'mega_credentials_save');
@@ -2302,12 +2246,267 @@ function save_custom_user_profile_field($user_id)
         return false;
     }
     $metas =  get_user_meta($user_id, 'patron_details', true);
-    $array_keys = array_keys($metas);
-    if (empty($array_keys)) return;
-    foreach ($array_keys as $k) {
-        if (str_contains($k, 'password')) continue;
-        update_user_meta($user_id, $k, sanitize_textarea_field($_POST[$k]));
+
+    if(is_array($metas)){
+        $array_keys = array_keys($metas);
+        if (empty($array_keys)) return;
+        foreach ($array_keys as $k) {
+            if (str_contains($k, 'password')) continue;
+            update_user_meta($user_id, $k, sanitize_textarea_field($_POST[$k]));
+        }
     }
 }
 add_action('personal_options_update', 'save_custom_user_profile_field');
 add_action('edit_user_profile_update', 'save_custom_user_profile_field');
+
+function custom_proof_of_delivery_form() {
+
+$vals = get_option('dongtraders_api_settings_fields');
+$subs =  array($vals['monthly_subscription_product'] , $vals['annual_subscription_product']);
+
+
+    ob_start();
+    ?>
+<style>
+.delivery-form {
+    max-width: 350px;
+    margin: 0 auto;
+    background: rgba(255,255,255, 0.6);
+    padding: 20px 30px;
+}
+</style>
+    <div class="delivery-form">
+         <p><h3>Please read below before answering</h3></p>
+        <form method="POST" action="" id="deliveryproof">
+            <input type="hidden" name="delivery_form" value="true">
+            
+            <p><h4>Is this proof of delivery?</h4></p>
+            <label for="yes">Yes:</label>
+            <input type="radio" name="delivery_proof" value="yes" required>
+            <label for="no">No:</label>
+            <input type="radio" name="delivery_proof" value="no"  required>
+            
+            <p><h4>Have you taken the (4) Detente 2.0 surveys?</h4></p>
+            <label for="survey_yes">Yes:</label>
+            <input type="radio" name="survey_taken" value="yes" required>
+            <label for="survey_no">No:</label>
+            <input type="radio" name="survey_taken" value="no" required>
+            
+            <div class = 'buyer-seller' style="display:none">
+                <label for="buyer_seller">Buyer or Seller :</label>
+                <select name="buyer_seller" id="buyerseller">
+                    <option value="">Select</option>
+                    <option value="buyer">Buyer</option>
+                    <option value="seller">Seller</option>
+                </select>
+            </div>
+            <div class ='subscription-product' style="display:none">
+                <label for="subs-product">Select Subscription:</label>
+                <select name="subs-product" id="subs-product">
+                    <option value="">Select Subscription</option>
+                    <?php foreach($subs as $s) { ?>
+                         <option value="<?=$s?>"><?php echo  get_the_title($s); ?></option>
+                    <?php  } ?>
+                </select>
+            </div>
+            <div class="variation-products" style="display:none">
+                <label for="var-product">Select Sectors:</label>
+                <select name="vars-product" id="vars-product">
+                </select>
+            </div>
+            <br/>
+            <input id = "test-submit" type="submit" value="Submit">
+        </form>
+    </div>
+    <script>
+    jQuery(document).ready(function($) {
+        $('#deliveryproof').on('change' , function(e){
+            // e.preventDefault();
+            var dpval = $("input[name='delivery_proof']:checked").val();
+            var spval = $("input[name='survey_taken']:checked").val();
+            if(dpval=='yes' && spval=='yes'){
+                $('.buyer-seller').show();
+                $('.buyer-seller>select#buyerseller').prop('required', true);
+                var bsdropdownval = $('#buyerseller').val();
+                if (bsdropdownval === 'buyer' ) {
+                     $('.subscription-product').show();
+                     $('.subscription-product>select#subs-product').prop('required', true);
+
+
+                     
+                } else {
+                    $('.subscription-product').hide();
+                    $('.variation-products').hide();
+                    $('.subscription-product>select#subs-product').prop('required', false);
+                    $('.variation-products>select#vars-product').prop('required', false);
+                }
+            }else{
+                $('.buyer-seller').hide();
+                $('.buyer-seller>select#buyerseller').prop('required', false);
+
+                $('.subscription-product').hide();
+                $('.subscription-product>select#subs-product').prop('required', false);
+                $(".buyer-seller>select#buyerseller").prop('selectedIndex', 0);
+                $(".subscription-product>select#subs-product").prop('selectedIndex', 0);
+
+                $('.variation-products').hide();
+                $('.variation-products>select#vars-product').prop('required', false);
+                $('.variation-products>select#vars-product').prop('selectedIndex', 0);
+
+            }
+        });
+        $(document).on('change','#subs-product', function() {
+            var productid = $(this).find(":selected").val();
+            var selector = $('#vars-product');
+            var varselcontainer = $('.variation-products');
+            if(productid){
+                $('.variation-products>select#vars-product').prop('required', true);
+                $.ajax({
+                        url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                        type: 'POST',
+                        data: {
+                            action: 'mega_get_variations',
+                            proid: productid,
+                        },
+                        success: function(response) {
+                           selector.empty();
+                           varselcontainer.show();
+                           selector.append(response);
+                        },
+                });
+
+            }else{
+
+                $('.variation-products').hide();
+                $('.variation-products>select#vars-product').prop('required', false);
+            }
+
+                
+        });
+    
+    });
+    </script>
+
+    <?php
+    return ob_get_clean();
+}
+
+
+
+
+add_shortcode('delivery_form', 'custom_proof_of_delivery_form');
+
+add_action('init', 'process_custom_form');
+function process_custom_form() {
+    if(isset($_POST['delivery_form'])){
+
+        $options =  get_option('dongtraders_api_settings_fields');
+        $chase_page_id =  $options['chase_page_selector'] ;
+        $patron_page_id = $options['patron_page_selector'] ;
+        $delivery_proof = isset($_POST['delivery_proof']) ? sanitize_text_field($_POST['delivery_proof']) : false;
+        $survey_taken = isset($_POST['survey_taken']) ? sanitize_text_field($_POST['survey_taken']) : false;
+
+        $redirect_url = '';
+        if($delivery_proof != false && $survey_taken !=false){
+            
+            if ($delivery_proof === 'yes' && $survey_taken === 'yes') {
+               
+               if($_POST['buyer_seller'] == 'seller'){
+
+                 $redirect_url =  get_the_permalink($patron_page_id);
+
+               }elseif($_POST['buyer_seller'] == 'buyer'){
+
+
+                    $product_id =  isset($_POST['subs-product']) ? $_POST['subs-product'] : false;
+                    $variation_id = isset($_POST['vars-product']) ? $_POST['vars-product'] : false;
+
+                    if($variation_id){
+                        $get_url = get_permalink($variation_id);
+           
+                        $modfied_url = $get_url . '&varid=' . $variation_id;
+
+                        $redirect_url = $modfied_url;
+                    }else{
+
+                          $get_url = get_permalink($product_id);
+                          $modfied_url = $get_url . '&add=1';
+                          $redirect_url = $modfied_url;
+
+                    }
+                   
+                 
+            }else{
+                $redirect_url =  home_url();
+            }
+            }elseif($delivery_proof === 'no' && $survey_taken === 'no') {
+              
+                $redirect_url = get_the_permalink($chase_page_id);
+            }elseif($delivery_proof === 'yes' && $survey_taken === 'no'){
+            
+                $redirect_url =  get_the_permalink($chase_page_id);
+                
+            }elseif($delivery_proof === 'no' && $survey_taken === 'yes'){
+            
+                $redirect_url =  home_url();
+            }
+            wp_redirect($redirect_url);
+            exit();
+        } 
+    }
+
+}
+add_action('wp_ajax_mega_get_variations', 'mega_get_variations');
+add_action('wp_ajax_nopriv_mega_get_variations', 'mega_get_variations');
+function mega_get_variations(){
+
+    $postid =  sanitize_text_field($_POST['proid']);
+    $product = wc_get_product($postid);
+    $html = "<option value= ''>Select Sectors</option>";
+    if($product->is_type('variable')){
+        $current_products = $product->get_children();
+        foreach ($current_products as $current_product) {
+            $variation = wc_get_product($current_product);
+            $varition_name = $variation->get_name();
+            $html.= '<option value="' . $current_product . '">' . $varition_name . '</option>';
+        }
+    }
+   
+    echo $html;
+    wp_die();
+}
+
+
+function custom_login_form_toggle_content() {
+    // Add your custom content here
+    echo '<p>Welcome back! If you have an account, please login.</p>';
+}
+add_action('woocommerce-form-login-toggle', 'custom_login_form_toggle_content',999);
+
+
+function action_woocommerce_admin_order_item_headers( $order ) {
+    // Set the column name
+    $column_name = __( 'Packing Weight', 'woocommerce' );
+    
+    // Display the column name
+    echo '<th class="line_packing_weight sortable" data-sort="string-ins">' . $column_name . '</th>';
+}
+add_action( 'woocommerce_admin_order_item_headers', 'action_woocommerce_admin_order_item_headers', 10, 1 );
+
+
+// closing popup on button click
+
+add_action('wp_footer', function(){
+?>
+<script type="text/javascript">
+
+    jQuery(document).ready(function(){
+        jQuery(document).on("click","#close-popup",function() {
+            elementorProFrontend.modules.popup.closePopup( {}, event );
+        });
+    });
+
+
+</script>
+<?php
+});

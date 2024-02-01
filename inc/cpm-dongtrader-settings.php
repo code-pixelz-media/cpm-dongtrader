@@ -2,7 +2,18 @@
 if (!defined('ABSPATH')) exit;
 $dong_qr_array = get_option('dong_user_qr_values');
 
+
+$vals = get_option('dongtraders_api_settings_fields');
+
 global $wpdb;
+
+
+$products = $wpdb->get_results(
+	"SELECT ID, post_title, post_content
+	 FROM {$wpdb->posts}
+	 WHERE post_type = 'product' AND post_status = 'publish'"
+);
+
 
 $group_data_table = $wpdb->prefix . 'mega_mlm_groups';
 
@@ -48,7 +59,7 @@ $release_profits = $wpdb->prepare("SELECT * FROM $release_fund ORDER BY release_
 				<?php if (!empty($dong_qr_array)) : ?>
 					<li class="nav-tab" id="second"><a href="#qr-lists" class="dashicons-before dashicons-admin-generic"><?php _e('QR Lists', 'dongtraders'); ?></a></li>
 				<?php endif; ?>
-				<li class="nav-tab" id="third"><a href="#api-integration" class="dashicons-before dashicons-admin-generic"><?php _e('Integration API', 'dongtraders'); ?></a></li>
+				<li class="nav-tab" id="third"><a href="#api-integration" class="dashicons-before dashicons-admin-generic"><?php _e('Integration', 'dongtraders'); ?></a></li>
 
 				<li class="nav-tab" id="fourth"><a href="#advanced" class="dashicons-before dashicons-admin-settings"><?php _e('Orders', 'dongtraders'); ?></a></li>
 				<li class="nav-tab" id="fifth"><a href="#import-order" class="dashicons-before dashicons-admin-tools"><?php _e('Import Order', 'dongtraders'); ?></a></li>
@@ -112,10 +123,11 @@ $release_profits = $wpdb->prepare("SELECT * FROM $release_fund ORDER BY release_
 						
 
 						?>
-					
+
+			
 						<h3>Change Welcome Email Text</h3>
 						<div class="form-group">
-							<label for="">Change Welcome Email Text</label>
+							<label for="">Welcome Email </label>
 							<div class="form-control-wrap">
 								
 								<?php 
@@ -123,10 +135,11 @@ $release_profits = $wpdb->prepare("SELECT * FROM $release_fund ORDER BY release_
 									$custom_editor_id = "dongchange_welcome_email";
 									$custom_editor_name = "dongtraders_api_settings_fields[dong_change_welcome_text]";
 									$args = array(
-											'media_buttons' => true, // This setting removes the media button.
+											'media_buttons' => true, 
 											'textarea_name' => $custom_editor_name, // Set custom name.
 											'textarea_rows' => get_option('default_post_edit_rows', 10), //Determine the number of rows.
 											// 'quicktags' => true, // Remove view as HTML button.
+											// 'wpautop' => true,
 										);
 									wp_editor( $content, $custom_editor_id, $args );
 								?>
@@ -199,7 +212,120 @@ $release_profits = $wpdb->prepare("SELECT * FROM $release_fund ORDER BY release_
 								<input class="form-control" name="dongtraders_api_settings_fields[crowdsignal-api-url]" type="text" placeholder="Enter API URL" onfocus="this.placeholder=''" onblur="this.placeholder='Enter API URL'" value="<?php echo esc_html($dongtraders_api_setting_data['crowdsignal-api-url']); ?>">
 							</div>
 						</div>
+						<hr/>
+						<h3><?php _e('Monthly Subscription Product', 'cpm-dongtrader') ?></h3>
+						<div class="form-group">
+							<select name="dongtraders_api_settings_fields[monthly_subscription_product]" id="page_selector" class="form-control">
+							<?php
+							    echo '<option value="">Select Product </option>';
+							    foreach ($products as $p) {
+									
+									if($p->ID == $vals['monthly_subscription_product']){
+							            echo '<option  selected value="' . esc_attr($p->ID) . '">' . esc_html($p->post_title) . '</option>';
+									}else{
+										echo '<option value="' . esc_attr($p->ID) . '">' . esc_html($p->post_title) . '</option>';
+									}
+							    }
+							    ?>
+							</select>
+						</div>
+						<hr/>
+						<h3><?php _e('Annual Subscription Product', 'cpm-dongtrader') ?></h3>
+						<div class="form-group">
+						
+						<select name="dongtraders_api_settings_fields[annual_subscription_product]" id="page_selector" class="form-control"">
+							    <?php
+							     echo '<option value="">Select Product </option>';
+							    foreach ($products as $p) {
+									if($p->ID == $vals['annual_subscription_product']){
+							            echo '<option  selected value="' . esc_attr($p->ID) . '">' . esc_html($p->post_title) . '</option>';
+									}else{
+										echo '<option value="' . esc_attr($p->ID) . '">' . esc_html($p->post_title) . '</option>';
+									}
+							    }
+							    ?>
+						</select>
+						</div>
+						<hr/>
+						<h3><?php _e('Chase Page', 'cpm-dongtrader') ?></h3>
+						<div class="form-group">
+							<select name="dongtraders_api_settings_fields[chase_page_selector]" id="page_selector" class="form-control"">
+							    <?php
+							    $pages = get_pages();
+							    foreach ($pages as $page) {
+									if($page->ID == $vals['chase_page_selector']){
+							            echo '<option  selected value="' . esc_attr($page->ID) . '">' . esc_html($page->post_title) . '</option>';
+									}else{
+										echo '<option value="' . esc_attr($page->ID) . '">' . esc_html($page->post_title) . '</option>';
+									}
+							    }
+							    ?>
+							</select>
+						</div>
+						<hr/>
+						<h3><?php _e('Patron Page', 'cpm-dongtrader') ?></h3>
+						<div class="form-group">
+							<select name="dongtraders_api_settings_fields[patron_page_selector]" id="page_selector" class="form-control"">
+							    <?php
+							    $pages = get_pages();
+							    foreach ($pages as $page) {
+							    if($page->ID == $vals['patron_page_selector']){
+									echo '<option  selected value="' . esc_attr($page->ID) . '">' . esc_html($page->post_title) . '</option>';
+							    }else{
+									echo '<option value="' . esc_attr($page->ID) . '">' . esc_html($page->post_title) . '</option>';
+							    } 
+							 
+							    }
+							    ?>
+							</select>
+						</div>
+						<h3><?php _e('Bundled Products For Patron', 'cpm-dongtrader') ?></h3>
+						<div class="form-group">
+						    <select class="cpm-multiselect form-control" name="dongtraders_api_settings_fields[dong_patron_mem][]" multiple="multiple">
+						       
+						        <?php
+						        // Query WooCommerce products
+						        $args = array(
+						            'post_type' => 'product',
+						            'posts_per_page' => -1, // Show all products
+						        );
+						        $products = new WP_Query( $args );
 
+						        // Loop through products and populate the dropdown
+						        if ( $products->have_posts() ) :
+						            while ( $products->have_posts() ) : $products->the_post();
+						                $product_id = get_the_ID();
+						                $product_title = get_the_title();
+
+						                $check_patronsaved_productid = is_array($vals['dong_patron_mem']) && in_array($product_id , $vals['dong_patron_mem']) ? 'selected' : '';
+						        ?>
+						        <option <?php echo $check_patronsaved_productid; ?> value="<?php echo esc_attr( $product_id ); ?>"><?php echo esc_html( $product_title.'--'.$product_id ); ?></option>
+						        <?php endwhile; endif; wp_reset_postdata(); ?>
+						    </select>
+						</div>
+						<h3><?php _e('Bundled Products For Megavoters', 'cpm-dongtrader') ?></h3>
+						<div class="form-group">
+						    <select class="cpm-multiselect form-control" name="dongtraders_api_settings_fields[dong_mega_mem][]" multiple="multiple">
+						        
+						        <?php
+						        // Query WooCommerce products
+						        $args = array(
+						            'post_type' => 'product',
+						            'posts_per_page' => -1, // Show all products
+						        );
+						        $products = new WP_Query( $args );
+
+						        // Loop through products and populate the dropdown
+						        if ( $products->have_posts() ) :
+						            while ( $products->have_posts() ) : $products->the_post();
+						                $product_id = get_the_ID();
+						                $product_title = get_the_title();
+						                $check_mega_saved_productid = is_array($vals['dong_mega_mem']) && in_array($product_id , $vals['dong_mega_mem']) ? 'selected' : '';
+						        ?>
+						        <option <?php echo  $check_mega_saved_productid; ?> value="<?php echo esc_attr( $product_id ); ?>"><?php echo esc_html($product_title.'--'.$product_id); ?></option>
+						        <?php endwhile; endif; wp_reset_postdata(); ?>
+						    </select>
+						</div>
 						<div class="form-group settings-submit">
 							<input type="submit" class="cpm-btn submit save-settings-dash" name="submit" value="Save changes">
 						</div>
