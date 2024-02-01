@@ -141,3 +141,10 @@
     color: #000;
 }
 
+/* trading history css */
+.dong-trading-history-table thead th{
+text-align: center;
+}
+.dong-trading-history-table tbody h5{
+margin: 2px;
+}

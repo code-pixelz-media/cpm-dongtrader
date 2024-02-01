@@ -220,6 +220,8 @@ jQuery(document).ready(function ($) {
 
   function qr_generator(button) {
     button.on("click", function (e) {
+    
+  
       e.preventDefault();
       button.text("Generating...");
       var postId = $(this).attr("data-id");
@@ -275,6 +277,12 @@ jQuery(document).ready(function ($) {
     // $(this).text('Delete');
 
   });
+// $('.cpm-multiselect').select2();
+
+$(".cpm-multiselect").select2({
+    placeholder: "Select Products",
+    allowClear: false
+});
 
   //Scenario changed a bit for meta fields
 

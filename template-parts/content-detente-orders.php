@@ -16,11 +16,11 @@ extract($args);
             <thead>
                 <tr>
                     <th><?php esc_html_e('Order ID/Date', 'cpm-dongtrader'); ?>
-                    <th><?php esc_html_e('Product', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('7% Cashback', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('3% Process', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Individual Profit', 'cpm-dongtrader'); ?></th>
-                    <th><?php esc_html_e('Total', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Membership', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('7% Buyer', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('3% Seller', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Annual Refferals', 'cpm-dongtrader'); ?></th>
+                    <th><?php esc_html_e('Total 1099-Patr Form', 'cpm-dongtrader'); ?></th>
                 </tr>
             </thead>
                 <?php 
@@ -28,29 +28,29 @@ extract($args);
                 if(!empty($order_details)):
                         $paginated_orders = dongtrader_pagination_array($order_details,10,true);
                         $rebate_sum  = array_sum(array_column($order_details, 'rebate'));
-                        $process_sum = array_sum(array_column($order_details, 'process'));
-                        $profit_sum  = array_sum(array_column($order_details, 'seller_profit'));
+                        $rebate_d_sum = array_sum(array_column($order_details, 'rebate_d'));
+                        $annual_refferal_sum = 0;
                         $total_sum   = array_sum(array_column($order_details,'total'));
 
                         foreach($paginated_orders as $od) : 
                             if(get_post_type($od['order_id']) != 'shop_order') continue;
-                            $order = new WC_Order($od['order_id']);
+                            $order                = new WC_Order($od['order_id']);
                             $formatted_order_date = wc_format_datetime($order->get_date_created(), 'Y-m-d');
                             echo '<tr>';
-                            echo '<td>'.$od['order_id'].'/'.$formatted_order_date.'</td>';
-                            echo '<td>'.$od['product_title'].'</td>';
-                            echo '<td>'.$symbol.$od['rebate']*$vnd_rate.'</td>';
-                            echo '<td>'.$symbol.$od['process']*$vnd_rate.'</td>';
-                            echo '<td>'.$symbol.$od['seller_profit']*$vnd_rate.'</td>';
-                            echo '<td>'.$symbol.$od['total']*$vnd_rate.'</td>';
+                                echo '<td>'.$od['order_id'].'/'.$formatted_order_date.'</td>';
+                                echo '<td>'.$od['membership'].'</td>';
+                                echo '<td>'.$symbol.$od['rebate']*$vnd_rate.'</td>';
+                                echo '<td>'.$symbol.$od['rebate_d']*$vnd_rate.'</td>';
+                                echo '<td>'. $symbol. 0* $vnd_rate .'</td>';
+                                echo '<td>'.$symbol.$od['total']*$vnd_rate.'</td>';
                             echo '</tr>';
                         endforeach;
                         echo '<tfoot>';
                             echo '<tr>';
                             echo '<td colspan="2">All Totals</td>';
                             echo '<td>'.$symbol.$rebate_sum*$vnd_rate.'</td>';
-                            echo '<td>'.$symbol.$process_sum*$vnd_rate.'</td>';
-                            echo '<td>'.$symbol.$profit_sum*$vnd_rate.'</td>';
+                            echo '<td>'.$symbol.$rebate_d_sum*$vnd_rate.'</td>';
+                            echo '<td>'.$symbol.$annual_refferal_sum*$vnd_rate.'</td>';
                             echo '<td>'.$symbol.$total_sum*$vnd_rate.'</td>';
                             echo '</tr>';
                         echo '</tfoot>';

@@ -1,10 +1,8 @@
 <?php 
 $commission_details = get_user_meta(get_current_user_id(),'_commission_details',true);
 $cs                 = get_woocommerce_currency_symbol();
-
 ?>
-<h3><?php esc_html_e('Commission ', 'cpm-dongtrader'); ?></h3>
-<br class="clear" />
+<h3><?php esc_html_e('Seller Income ', 'cpm-dongtrader'); ?></h3>
 <div id="member-history-orders" class="widgets-holder-wrap">
     <table class="wp-list-table widefat striped fixed trading-history" width="100%" cellpadding="0" cellspacing="0" border="0">
         <thead>
@@ -39,10 +37,10 @@ $cs                 = get_woocommerce_currency_symbol();
                     echo '<tfoot>';
                         echo '<tr>';
                         echo "<td colspan='3'>All Totals</td>";
-                        echo "<td>$cs$seller_com_sum</td>";
-                        echo "<td>$cs$group_com_sum</td>";
-                        echo "<td>$cs$site_com_sum</td>";
-                        echo "<td>$cs$total_sum</td>";
+                        echo "<td>$cs.$seller_com_sum</td>";
+                        echo "<td>$cs.$group_com_sum</td>";
+                        echo "<td>$cs.$site_com_sum</td>";
+                        echo "<td>$cs.$total_sum</td>";
                         echo '</tr>';
                     echo '</tfoot>';
                 else:
